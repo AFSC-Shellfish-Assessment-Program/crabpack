@@ -1,5 +1,6 @@
 #' PURPOSE: assign maturity-sex categories based on stock-specific size definitions
 #' ARGUMENTS: crab_dat, stock
+#' #' NEEDS MAT_LOOKUP!
 #' @param crab_dat Species-specific CrabHaul file
 #' @param stock Character
 #'         "BBRKC", "PribRKC", "NSRKC", "NorthRKC", "PribBKC", "StMattBKC", "BKCNBS",
@@ -7,7 +8,7 @@
 #'         "Hybrid", "HybridNBS", "Hair", "HairNBS"
 #' @return Returns a data frame with catch data and a MAT_SEX column with stock-specific maturity designations
 #' @export
-#' NEEDS MAT_LOOKUP!
+
 
 get_maturity  <- function(crab_dat,
                           stock) {
