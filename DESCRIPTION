@@ -1,12 +1,26 @@
 Package: crabPack
-Title: What the Package Does (One Line, Title Case)
+Title: Calculate Bering Sea Crab CPUE, Abundance, and Biomass
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Shannon", "Hennessey" , "shannon.hennessey@noaa.gov", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6737-1362"))
+Description: This package contains functions to calculate standard NOAA AFSC SAP summer bottom trawl survey data products (CPUE, Abundance, and Biomass) for the Eastern Bering Sea Shelf (1975-present) and Northern Bering Sea Shelf (2010-present).
+License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
+Imports: 
+    RODBC,
+    getPass,
+    stats,
+    dplyr, 
+    data.table,
+    keyring,
+    lifecycle
+Depends: 
+    R (>= 4.0.0)
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
