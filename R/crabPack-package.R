@@ -2,6 +2,10 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @import RODBC
+#' @import getPass
+#' @import keyring
+#' @import lifecycle
 #' @import data.table
 #' @import tidyverse
 #' @importFrom dplyr mutate
