@@ -13,7 +13,7 @@ Imports:
     RODBC,
     getPass,
     stats,
-    dplyr, 
+    tidyverse,
     data.table,
     keyring,
     lifecycle
