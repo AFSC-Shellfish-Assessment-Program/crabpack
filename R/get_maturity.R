@@ -1,25 +1,22 @@
 #' PURPOSE: assign maturity-sex categories based on stock-specific size definitions
-#' ARGUMENTS: crab_dat, stock
 #' #' NEEDS MAT_LOOKUP!
-#' @param crab_dat Species-specific CrabHaul file
-#' @param stock Character
-#'         "BBRKC", "PribRKC", "NSRKC", "NorthRKC", "PribBKC", "StMattBKC", "BKCNBS",
-#'         "TannerE", "TannerW", "TannerWNBS", "Snow", "SnowNBS",
-#'         "Hybrid", "HybridNBS", "Hair", "HairNBS"
+#' @description
+#'
+#' @inheritParams calc_bioabund
+#'
 #' @return Returns a data frame with catch data and a MAT_SEX column with stock-specific maturity designations
+#'
 #' @export
 
 
-get_maturity  <- function(crab_dat,
-                          stock) {
+get_maturity  <- function(crab_data = NULL,
+                          species = NULL,
+                          region = c("EBS", "NBS")[1],
+                          district = NULL) {
 
-  # define stock groups "kingcrab", "chionoecetes", "hair"
-  stock_kingcrab <- c("BBRKC", "PribRKC", "NSRKC", "NorthRKC", "PribBKC", "StMattBKC", "BKCNBS")
-  stock_chionoecetes <- c("TannerE", "TannerW", "TannerWNBS", "Snow", "SnowNBS", "Hybrid", "HybridNBS")
-  stock_hair <- c("Hair", "HairNBS")
 
-  # define size as "LENGTH_1MM" or "WIDTH_1MM" based on stock
-  SIZE_DEF <- ifelse(stock %in% stock_chionoecetes, "WIDTH_1MM", "LENGTH_1MM")
+  ## **SOME SORT OF WARNING if wanting male, can't do morphometric, it's cutline only for this. But see Chionoecetes maturity tables?
+
 
   # assign mat/sex categories
   if(stock %in% c(stock_kingcrab, stock_chionoecetes)){
