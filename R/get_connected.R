@@ -39,20 +39,18 @@ get_connected <- function(db = "AKFIN",
 
     if (check_access & db == "AFSC") {
       cat("Checking that you have access to the tables queried in the crabPack package.\n") ## NEED TO UPDATE THIS WITH CORRECT TABLE NAMES!
-      tables_to_check <- data.frame(table_name = c("GAP_PRODUCTS.SURVEY_DESIGN",
-                                                   "GAP_PRODUCTS.AREA",
-                                                   "GAP_PRODUCTS.STRATUM_GROUPS",
-                                                   "GAP_PRODUCTS.TAXONOMIC_CLASSIFICATION",
+      tables_to_check <- data.frame(table_name = c("CRABBASE.SURVEY_DESIGN",
+                                                   "CRABBASE.AREA",
+                                                   "CRABBASE.STRATUM_GROUPS",
+                                                   "CRABBASE.TAXONOMIC_CLASSIFICATION",
 
-                                                   "RACEBASE.CATCH",
-                                                   "RACEBASE.HAUL",
-                                                   "RACEBASE.LENGTH",
-                                                   "RACEBASE.SPECIMEN",
+                                                   "CRABBASE.HAUL",
+                                                   "CRABBASE.SPECIMEN",
 
-                                                   "RACE_DATA.CRUISES",
-                                                   "RACE_DATA.SURVEYS",
-                                                   "RACE_DATA.SURVEY_DEFINITIONS",
-                                                   "RACE_DATA.VESSELS"),
+                                                   "CRABBASE.CRUISES",
+                                                   "CRABBASE.SURVEYS",
+                                                   "CRABBASE.SURVEY_DEFINITIONS",
+                                                   "CRABBASE.VESSELS"),
                                                    access = F)
 
       for (itable in 1:nrow(x = tables_to_check)) {
@@ -71,7 +69,7 @@ get_connected <- function(db = "AKFIN",
         stop("Cannot connect to these tables in Oracle:\n",
              paste0(tables_to_check$table_name[tables_to_check$access == F],
                     collapse = "\n"),
-             "\n\nPlease contact nmfs.afsc.gap.metadata@noaa.gov for access to these tables and then try connecting again.")
+             "\n\nPlease contact shannon.hennessey@noaa.gov for access to these tables and then try connecting again.")
       )
 
     } else(return(channel))
