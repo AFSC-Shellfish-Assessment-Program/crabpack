@@ -28,28 +28,28 @@ set_variables <- function(data_crab = NULL,
   # SEX: Define/filter if specified in function ----
   # First, always include initially to carry through for BBRKC resample filtering
   data_crab2 <- data_crab %>%
-                mutate(SEX_TEXT = case_when(SEX == 1 ~ "male",
-                                            SEX == 2 ~ "female"))
+                dplyr::mutate(.data$SEX_TEXT = case_when(.data$SEX == 1 ~ "male",
+                                                         .data$SEX == 2 ~ "female"))
 
   # Filter sex if only want one
   if(!is.null(sex)){
     if(!sex %in% c("all", TRUE))
       data_crab2 <- data_crab2 %>%
-                    dplyr::filter(SEX_TEXT %in% sex)
+                    dplyr::filter(.data$SEX_TEXT %in% sex)
   }
 
 
   # SIZE_MIN ----
   if(!is.null(size_min)){
     data_crab2 <- data_crab2 %>%
-                  dplyr::filter(SIZE_1MM >= size_min)
+                  dplyr::filter(.data$SIZE_1MM >= size_min)
 
   }
 
   # SIZE_MAX:  ----
   if(!is.null(size_max)){
     data_crab2 <- data_crab2 %>%
-                  dplyr::filter(SIZE_1MM <= size_max)
+                  dplyr::filter(.data$SIZE_1MM <= size_max)
   }
 
   ## CRAB CATEGORY??
@@ -73,18 +73,20 @@ set_variables <- function(data_crab = NULL,
   # SHELL CONDITION: Define/filter if specified in function ----
   if(!is.null(shell_condition)){
     data_crab2 <- data_crab2 %>%
-      mutate(SHELL_TEXT = case_when(SHELL_CONDITION %in% 0:1 ~ "soft molting",
-                                    SHELL_CONDITION == 2 ~ "new hardshell",
-                                    SHELL_CONDITION == 3 ~ "oldshell",
-                                    SHELL_CONDITION %in% 4:5 ~ "very oldshell"))
+      dplyr::mutate(.data$SHELL_TEXT = case_when(.data$SHELL_CONDITION %in% 0:1 ~ "soft molting",
+                                                 .data$SHELL_CONDITION == 2 ~ "new hardshell",
+                                                 .data$SHELL_CONDITION == 3 ~ "oldshell",
+                                                 .data$SHELL_CONDITION %in% 4:5 ~ "very oldshell"))
 
     # filter by specific category
     if(TRUE %in% (shell_condition %in% c(0:5))){
-      data_crab2 <- data_crab2 %>% dplyr::filter(SHELL_CONDITION %in% shell_condition)
+      data_crab2 <- data_crab2 %>%
+                    dplyr::filter(.data$SHELL_CONDITION %in% shell_condition)
     }
 
     if(TRUE %in% (shell_condition %in% c("soft molting", "new hardshell", "oldshell", "very oldshell"))){
-      data_crab2 <- data_crab2 %>% dplyr::filter(SHELL_TEXT %in% shell_condition)
+      data_crab2 <- data_crab2 %>%
+                    dplyr::filter(.data$SHELL_TEXT %in% shell_condition)
     }
 
     group_cols <- append(group_cols, "SHELL_TEXT")
@@ -95,21 +97,21 @@ set_variables <- function(data_crab = NULL,
   if(!is.null(egg_condition)){
     data_crab2 <- data_crab2 %>%
       dplyr::filter(SEX == 2) %>% #HAUL_TYPE != 17,
-      mutate(EGG_CONDITION_TEXT = case_when(EGG_CONDITION == 0 ~ "none",
-                                            EGG_CONDITION == 1 ~ "uneyed",
-                                            EGG_CONDITION == 2 ~ "eyed",
-                                            EGG_CONDITION == 3 ~ "dead",
-                                            EGG_CONDITION == 4 ~ "empty cases",
-                                            EGG_CONDITION == 5 ~ "hatching",
-                                            TRUE ~ "unknown"))
+      dplyr::mutate(.data$EGG_CONDITION_TEXT = case_when(.data$EGG_CONDITION == 0 ~ "none",
+                                                         .data$EGG_CONDITION == 1 ~ "uneyed",
+                                                         .data$EGG_CONDITION == 2 ~ "eyed",
+                                                         .data$EGG_CONDITION == 3 ~ "dead",
+                                                         .data$EGG_CONDITION == 4 ~ "empty cases",
+                                                         .data$EGG_CONDITION == 5 ~ "hatching",
+                                                         TRUE ~ "unknown"))
 
     if(TRUE %in% (egg_condition %in% c(0:5))){
-      data_crab2 <- data_crab2 %>% dplyr::filter(EGG_CONDITION %in% egg_condition)
+      data_crab2 <- data_crab2 %>% dplyr::filter(.data$EGG_CONDITION %in% egg_condition)
     }
 
     if(TRUE %in% (egg_condition %in% c("none", "uneyed", "eyed", "dead",
                                        "empty cases", "hatching", "unknown"))){
-      data_crab2 <- data_crab2 %>% dplyr::filter(EGG_CONDITION_TEXT %in% egg_condition)
+      data_crab2 <- data_crab2 %>% dplyr::filter(.data$EGG_CONDITION_TEXT %in% egg_condition)
     }
 
     group_cols <- append(group_cols, "EGG_CONDITION_TEXT")
@@ -119,23 +121,23 @@ set_variables <- function(data_crab = NULL,
   # CLUTCH SIZE: Define/filter if specified in function ----
   if(!is.null(clutch_size)){
     data_crab2 <- data_crab2 %>%
-      dplyr::filter(SEX == 2) %>% #HAUL_TYPE != 17,
-      mutate(CLUTCH_TEXT = case_when(CLUTCH_SIZE == 0 ~ "immature",
-                                     CLUTCH_SIZE == 1 ~ "mature barren",
-                                     CLUTCH_SIZE == 2 ~ "trace",
-                                     CLUTCH_SIZE == 3 ~ "quarter",
-                                     CLUTCH_SIZE == 4 ~ "half",
-                                     CLUTCH_SIZE == 5 ~ "three quarter",
-                                     CLUTCH_SIZE == 6 ~ "full",
-                                     ((CLUTCH_SIZE == 999) | is.na(CLUTCH_SIZE) == TRUE) ~ "unknown"))
+      dplyr::filter(.data$SEX == 2) %>% #HAUL_TYPE != 17,
+      dplyr::mutate(.data$CLUTCH_TEXT = case_when(.data$CLUTCH_SIZE == 0 ~ "immature",
+                                                  .data$CLUTCH_SIZE == 1 ~ "mature barren",
+                                                  .data$CLUTCH_SIZE == 2 ~ "trace",
+                                                  .data$CLUTCH_SIZE == 3 ~ "quarter",
+                                                  .data$CLUTCH_SIZE == 4 ~ "half",
+                                                  .data$CLUTCH_SIZE == 5 ~ "three quarter",
+                                                  .data$CLUTCH_SIZE == 6 ~ "full",
+                                                  ((.data$CLUTCH_SIZE == 999) | is.na(.data$CLUTCH_SIZE) == TRUE) ~ "unknown"))
 
     if(TRUE %in% (clutch_size %in% c(0:6))){
-      data_crab2 <- data_crab2 %>% dplyr::filter(CLUTCH_SIZE %in% clutch_size)
+      data_crab2 <- data_crab2 %>% dplyr::filter(.data$CLUTCH_SIZE %in% clutch_size)
     }
 
     if(TRUE %in% (clutch_size %in% c("immature", "mature barren", "trace", "quarter",
                                      "half", "three quarter", "full", "unknown"))){
-      data_crab2 <- data_crab2 %>% dplyr::filter(CLUTCH_TEXT %in% clutch_size)
+      data_crab2 <- data_crab2 %>% dplyr::filter(.data$CLUTCH_TEXT %in% clutch_size)
     }
 
     group_cols <- append(group_cols, "CLUTCH_TEXT")
@@ -144,7 +146,7 @@ set_variables <- function(data_crab = NULL,
 
   # 1MM BINS: Define/filter if specified in function ----
   if(!is.null(bin_1mm)){
-    data_crab2 <- data_crab2 %>% dplyr::mutate(BIN_1MM = floor(SIZE_1MM))
+    data_crab2 <- data_crab2 %>% dplyr::mutate(.data$BIN_1MM = floor(.data$SIZE_1MM))
     group_cols <- append(group_cols, "BIN_1MM")
   }
 
