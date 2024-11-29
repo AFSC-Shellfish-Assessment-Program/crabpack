@@ -34,10 +34,10 @@
 #'
 
 get_specimen_data <- function(species = NULL,
-                     region = c("EBS", "NBS")[1],
-                     district = NULL,
-                     years = NULL,
-                     channel = NULL){
+                              region = c("EBS", "NBS")[1],
+                              district = NULL,
+                              years = NULL,
+                              channel = NULL){
 
 
   if (is.null(x = channel)){
@@ -67,39 +67,63 @@ get_specimen_data <- function(species = NULL,
 
 
   ## pull specimen and haul tables
-  ## Pull relevant lookups/stratum tables
+  data_haul <- CRABBASE.HAUL
+ # ** --> REMOVE HT 17 right off the bat if not RKC?
+  # # Remove HT 17 if not RKC
+  # if(species != "RKC"){
+  #   stock_stations <- stock_stations %>%
+  #     filter(!HAUL_TYPE == 17)
+  # }
 
+
+  data_specimen <- CRABBASE.SPECIMEN
+
+  ## Pull relevant lookups/stratum tables
+  district_stratum_lookup <- CRABBASE.DISTRICT_STRATUM
+  stratum_year_design <- CRABBASE.STRATUM_YEAR
+  stratum_stations_lookup <- CRABBASE.STRATUM_STATIONS
+  stratum_nstations <- CRABBASE.STRATUM_NSTATIONS #??
 
 ## THIS WILL ALREADY BE DONE
   ## LOOK @ JON's SQL sccripts for making CrabHaul files to help with species-specific filtering??
-  # ## Filter to species of interest, remove clutch 999 crabs
-  # data_crab <- data_specimen %>%
-  #              # join species names
-  #              left_join(., district_stratum_lookup %>%
-  #                          select(SPECIES_CODE, SPECIES_NAME) %>%
-  #                          distinct()) %>%
+  # ## Filter to species of interest,     remove clutch 999 crabs
+  data_crab <- data_specimen %>%
+               # join species names
+               left_join(., district_stratum_lookup %>%
+                            select(SPECIES_CODE, SPECIES) %>%
+                            distinct()) #%>%
   #              # make NA clutch into 999 for filtering
   #              mutate(CLUTCH_SIZE = ifelse(SEX == 2 & is.na(CLUTCH_SIZE), 999, CLUTCH_SIZE)) %>%
   #              dplyr::filter(# filter females with clutch code 999 or NA
   #                !(SEX == 2 & CLUTCH_SIZE %in% c(999)),
   #                # filter to species
-  #                SPECIES_NAME == species) %>%
+  #                SPECIES == species) %>%
   #              # reassign clutch size 7 -> 6
   #              dplyr::mutate(CLUTCH_SIZE = ifelse(CLUTCH_SIZE == 7, 6, CLUTCH_SIZE))
 
 
   ## Define districts, stock stations, stratum areas -------------------------
   # Pull strata by stock specified. If no stock/district specified, default EBS for the species
-  if(missing(district)){
+  #filter to region
+  if(is.null(region)){
+
+
+  }
+
+  #filter to district --> get the strata you need
+  if(is.null(district)){
     strata <- district_stratum_lookup %>%
-              dplyr::filter(SPECIES_NAME == species,
-                            !DISTRICT_CODE %in% c("NBS", "NS")) %>%
+              dplyr::filter(SPECIES == species,
+                            REGION_CODE == "EBS",
+                            DISTRICT_CODE == "ALL") %>%
               pull(STRATUM_CODE)
   } else{
     strata <- district_stratum_lookup %>%
-              dplyr::filter(SPECIES_NAME == species) %>%
+              dplyr::filter(SPECIES == species,
+                            DISTRICT_CODE == district) %>% ## make this %in% to accommodate multiple districts?? leave for now
               pull(STRATUM_CODE)
   }
+
 
 
   # Pull stock stations from strata tables using stock districts and haul info; assign stratum and area
@@ -109,17 +133,18 @@ get_specimen_data <- function(species = NULL,
                               select(-YEAR_BLOCK_ID) %>%
                               distinct())
 
+  ## ** I DON'T KNOW IF THIS PORTION CAN BE DONE IN SQL.....
   # Add stratum name to each station for the species
   stock_stations <- data_haul %>%
                     dplyr::filter(SURVEY_YEAR %in% years) %>%
                     rename(STATION_ID = GIS_STATION) %>%
                     # add correct stratum names to stations based on design_ID for the given year
                     left_join(., stratum_stations_lookup %>%
-                                dplyr::filter(SPECIES_NAME == species,
+                                dplyr::filter(SPECIES == species,
                                               STRATUM_CODE %in% strata) %>%
                                 select(-c('SPECIES_CODE', 'STOCK', 'DISTRICT_NAME', 'STRATUM_NAME'))) %>%
                     left_join(., stratum_nstations %>%
-                                dplyr::filter(SPECIES_NAME == species,
+                                dplyr::filter(SPECIES == species,
                                               STRATUM_CODE %in% strata) %>%
                                 # get relevant years for each area
                                 left_join(., stratum_year_design, relationship = "many-to-many") %>%
@@ -130,6 +155,8 @@ get_specimen_data <- function(species = NULL,
                            LONGITUDE = MID_LONGITUDE)
 
   # Remove HT 17 if not RKC
+  ## -- maybe do above --> join haul and specimen, subset to species of interest, then move to R for stratum stuff....
+  ## or filter species at least, can join to haul later?
   if(species != "RKC"){
     stock_stations <- stock_stations %>%
                       filter(!HAUL_TYPE == 17)
