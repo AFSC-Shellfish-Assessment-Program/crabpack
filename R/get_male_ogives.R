@@ -1,4 +1,5 @@
-
+#' Pull time series of estimated proportion mature by 10mm bin for Chionoecetes males
+#'
 #' @description .... time series of Tanner Crab and Snow Crab male ogives...proportion mature
 #'              Also yearly parameter estimates....
 #'
@@ -11,7 +12,7 @@
 #'               of model parameter estimates for each year.
 #' @inheritParams get_specimen_data
 #'
-#' @return
+#' @return TBD
 #'
 #' @export
 #'

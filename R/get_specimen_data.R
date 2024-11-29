@@ -20,8 +20,9 @@
 # district <- "EBS" # if(missing), district default EBS?
 # years <- 2024
 
-
-#' @description
+#' Pull AFSC Shellfish Assessment Program Bering Sea survey data
+#'
+#' @description TBD
 #'
 #' @inheritParams calc_bioabund
 #' @param channel connection to Oracle created via crabPack::get_connected() or RODBC::odbcConnect().
@@ -89,9 +90,9 @@ get_specimen_data <- function(species = NULL,
   # ## Filter to species of interest,     remove clutch 999 crabs
   data_crab <- data_specimen %>%
                # join species names
-               left_join(., district_stratum_lookup %>%
-                            select(SPECIES_CODE, SPECIES) %>%
-                            distinct()) #%>%
+               dplyr::left_join(., district_stratum_lookup %>%
+                                dplyr::select(.data$SPECIES_CODE, .data$SPECIES) %>%
+                                dplyr::distinct()) #%>%
   #              # make NA clutch into 999 for filtering
   #              mutate(CLUTCH_SIZE = ifelse(SEX == 2 & is.na(CLUTCH_SIZE), 999, CLUTCH_SIZE)) %>%
   #              dplyr::filter(# filter females with clutch code 999 or NA
@@ -113,15 +114,15 @@ get_specimen_data <- function(species = NULL,
   #filter to district --> get the strata you need
   if(is.null(district)){
     strata <- district_stratum_lookup %>%
-              dplyr::filter(SPECIES == species,
-                            REGION_CODE == "EBS",
-                            DISTRICT_CODE == "ALL") %>%
-              pull(STRATUM_CODE)
+              dplyr::filter(.data$SPECIES == species,
+                            .data$REGION_CODE == "EBS",
+                            .data$DISTRICT_CODE == "ALL") %>%
+              dplyr::pull(.data$STRATUM_CODE)
   } else{
     strata <- district_stratum_lookup %>%
-              dplyr::filter(SPECIES == species,
-                            DISTRICT_CODE == district) %>% ## make this %in% to accommodate multiple districts?? leave for now
-              pull(STRATUM_CODE)
+              dplyr::filter(.data$SPECIES == species,
+                            .data$DISTRICT_CODE == district) %>% ## make this %in% to accommodate multiple districts?? leave for now
+              dplyr::pull(.data$STRATUM_CODE)
   }
 
 
@@ -129,68 +130,70 @@ get_specimen_data <- function(species = NULL,
   # Pull stock stations from strata tables using stock districts and haul info; assign stratum and area
   # Assign DESIGN_ID to data based off year
   data_haul <- data_haul %>%
-               left_join(., stratum_year_design %>%
-                              select(-YEAR_BLOCK_ID) %>%
-                              distinct())
+               dplyr::left_join(., stratum_year_design %>%
+                              dplyr::select(-.data$YEAR_BLOCK_ID) %>%
+                              dplyr::distinct())
 
   ## ** I DON'T KNOW IF THIS PORTION CAN BE DONE IN SQL.....
   # Add stratum name to each station for the species
   stock_stations <- data_haul %>%
-                    dplyr::filter(SURVEY_YEAR %in% years) %>%
-                    rename(STATION_ID = GIS_STATION) %>%
+                    dplyr::filter(.data$SURVEY_YEAR %in% years) %>%
+                    dplyr::rename(STATION_ID = .data$GIS_STATION) %>%
                     # add correct stratum names to stations based on design_ID for the given year
-                    left_join(., stratum_stations_lookup %>%
-                                dplyr::filter(SPECIES == species,
-                                              STRATUM_CODE %in% strata) %>%
-                                select(-c('SPECIES_CODE', 'STOCK', 'DISTRICT_NAME', 'STRATUM_NAME'))) %>%
-                    left_join(., stratum_nstations %>%
-                                dplyr::filter(SPECIES == species,
-                                              STRATUM_CODE %in% strata) %>%
-                                # get relevant years for each area
-                                left_join(., stratum_year_design, relationship = "many-to-many") %>%
-                                dplyr::select(STRATUM_CODE, TOTAL_AREA, SURVEY_YEAR)) %>%
-                    select(HAULJOIN, SURVEY_YEAR, STATION_ID, HAUL_TYPE, AREA_SWEPT, MID_LATITUDE,
-                           MID_LONGITUDE, DISTRICT_CODE, STRATUM_CODE, TOTAL_AREA) %>%
-                    rename(LATITUDE = MID_LATITUDE,
-                           LONGITUDE = MID_LONGITUDE)
+                    dplyr::left_join(., stratum_stations_lookup %>%
+                                     dplyr::filter(.data$SPECIES == species,
+                                                   .data$STRATUM_CODE %in% strata) %>%
+                                     dplyr::select(-c('SPECIES_CODE', 'STOCK', 'DISTRICT_NAME', 'STRATUM_NAME'))) %>%
+                    dplyr::left_join(., stratum_nstations %>%
+                                     dplyr::filter(.data$SPECIES == species,
+                                                   .data$STRATUM_CODE %in% strata) %>%
+                                     # get relevant years for each area
+                                     dplyr::left_join(., stratum_year_design, relationship = "many-to-many") %>%
+                                     dplyr::select(.data$STRATUM_CODE, .data$TOTAL_AREA, .data$SURVEY_YEAR)) %>%
+                    dplyr::select(.data$HAULJOIN, .data$SURVEY_YEAR, .data$STATION_ID, .data$HAUL_TYPE,
+                                  .data$AREA_SWEPT, .data$MID_LATITUDE, .data$MID_LONGITUDE, .data$DISTRICT_CODE,
+                                  .data$STRATUM_CODE, .data$TOTAL_AREA) %>%
+                    dplyr::rename(LATITUDE = .data$MID_LATITUDE,
+                                  LONGITUDE = .data$MID_LONGITUDE)
 
   # Remove HT 17 if not RKC
   ## -- maybe do above --> join haul and specimen, subset to species of interest, then move to R for stratum stuff....
   ## or filter species at least, can join to haul later?
   if(species != "RKC"){
     stock_stations <- stock_stations %>%
-                      filter(!HAUL_TYPE == 17)
+                      dplyr::filter(!.data$HAUL_TYPE == 17)
   }
 
 
   ## Join to haul data -------------------------------------------------------
   # Add specimen data to relevant hauls for the selected districts/strata
   data_crab2 <- stock_stations %>%
-                left_join(., data_crab)
+                dplyr::left_join(., data_crab)
 
   # If district is "Northern Unstratified" or "BKC Unstratified", add TOTAL_AREA
   # based on the number of positive catch stations in a given year
   if(TRUE %in% (c("NORTH", "UNSTRAT") %in% strata)){
     n_pos_catch <- data_crab2 %>%
-                   filter(!is.na(SEX),
-                          STRATUM_CODE %in% c("NORTH", "UNSTRAT")) %>%
-                   select(HAULJOIN, SURVEY_YEAR, STATION_ID, HAUL_TYPE, DISTRICT_CODE, STRATUM_CODE) %>%
-                   distinct() %>%
-                   group_by(SURVEY_YEAR, STRATUM_CODE) %>%
+                   dplyr::filter(!is.na(.data$SEX),
+                                 .data$STRATUM_CODE %in% c("NORTH", "UNSTRAT")) %>%
+                   dplyr::select(.data$HAULJOIN, .data$SURVEY_YEAR, .data$STATION_ID,
+                                 .data$HAUL_TYPE, .data$DISTRICT_CODE, .data$STRATUM_CODE) %>%
+                   dplyr::distinct() %>%
+                   dplyr::group_by(.data$SURVEY_YEAR, .data$STRATUM_CODE) %>%
                    # ID number positive-catch stations for each year
-                   summarise(N_POS_STATION = n(),
-                             # multiply n_stations by 401 to get TOTAL_AREA
-                             TOTAL_AREA_POS = N_POS_STATION*401) %>%
-                   select(-N_POS_STATION)
+                   dplyr::summarise(N_POS_STATION = dplyr::n(),
+                                    # multiply n_stations by 401 to get TOTAL_AREA
+                                    TOTAL_AREA_POS = .data$N_POS_STATION*401) %>%
+                   dplyr::select(-.data$N_POS_STATION)
 
     # Add positive catch station stratum area to haul and specimen info
     data_crab2 <- data_crab2 %>%
-                  group_by(SURVEY_YEAR, STRATUM_CODE) %>%
-                  left_join(., n_pos_catch) %>%
-                  mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM_CODE),
-                                             TOTAL_AREA_POS, TOTAL_AREA)) %>%
-                  select(-TOTAL_AREA_POS) %>%
-                  ungroup
+                  dplyr::group_by(.data$SURVEY_YEAR, .data$STRATUM_CODE) %>%
+                  dplyr::left_join(., n_pos_catch) %>%
+                  dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% .data$STRATUM_CODE),
+                                                    .data$TOTAL_AREA_POS, .data$TOTAL_AREA)) %>%
+                  dplyr::select(-.data$TOTAL_AREA_POS) %>%
+                  dplyr::ungroup()
   }
   ## end goal is the correct stratum name and total area joined to haul and specimen data --> one df
   ## -- works for EBS RKC so far

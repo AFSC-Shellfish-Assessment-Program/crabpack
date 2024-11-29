@@ -13,7 +13,7 @@
 #'
 #' @export
 
-calc_cpue <- function(data_crab = NULL,
+calc_cpue <- function(crab_data = NULL,
                       species = NULL,
                       region = c("EBS", "NBS")[1],
                       district = c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")[1],
@@ -33,7 +33,7 @@ calc_cpue <- function(data_crab = NULL,
 
   # CALL set_variables() FUNCTION
   ## set inputs from calc_cpue....
-  data_crab_cpue <- data_crab
+  crab_data_cpue <- crab_data
   species_cpue <- species ## I think we need this to then assign crab category in the set_vars() function
   sex_cpue <- sex
   size_min_cpue <- size_min
@@ -45,9 +45,9 @@ calc_cpue <- function(data_crab = NULL,
   clutch_size_cpue <- clutch_size
   bin_1mm_cpue <- bin_1mm
 
-  vars <- set_variables(data_crab = data_crab_cpue,
+  vars <- set_variables(crab_data = crab_data_cpue,
                         species = species_cpue,
-                        sex = seex_cpue,
+                        sex = sex_cpue,
                         size_min = size_min_cpue,
                         size_max = size_max_cpue,
                         crab_category = crab_category_cpue,

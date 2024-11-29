@@ -41,12 +41,12 @@
 #'                        Optional, specifying this parameter will provide estimates
 #'                        for each of the selected shell conditions; "all" will provide
 #'                        estimates for each available shell condition category.
-#' @param egg_condition: character string. One or many of c("none", "uneyed", "eyed",
+#' @param egg_condition character string. One or many of c("none", "uneyed", "eyed",
 #'                       "dead", "empty cases", "hatching", "all"). Optional, specifying
 #'                       this parameter will provide estimates for each of the selected
 #'                       egg conditions; "all" will provide estimates for each available
 #'                       egg condition category.
-#' @param clutch_size: character string. One or many of c("immature", "mature barren",
+#' @param clutch_size character string. One or many of c("immature", "mature barren",
 #'                     "trace", "quarter", "half", "three quarter", "full"). Optional,
 #'                     specifying this parameter will provide estimates for each of the
 #'                     selected clutch sizes; "all" will provide estimates for each
@@ -69,7 +69,7 @@
 #'
 #' @export
 
-calc_bioabund <- function(data_crab = NULL,
+calc_bioabund <- function(crab_data = NULL,
                           species = NULL,
                           region = c("EBS", "NBS")[1],
                           district = c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT",
@@ -92,14 +92,14 @@ calc_bioabund <- function(data_crab = NULL,
 
   #*SOMETHING IN HERE to make sure species designated is same as the species you pulled data for??**
 
-
+  data_crab2 <- crab_data
 
   # Define districts, stock stations, stratum areas -------
   # pull districts by stock specified
   ## FILTER DISTRICT? SHOULD ALREADY BE SPECIFIED NOW....but maybe provide option if want to call full species data then do one district at a time...
-  dist <- dist_stock_lookup %>%
-    dplyr::filter(STOCK == stock) %>%
-    pull(DISTRICT) ## need to change this to stratum, and stock --> district? Tying to keep naming consistent....
+  # dist <- dist_stock_lookup %>%
+  #   dplyr::filter(.data$STOCK == district) %>%
+  #   dplyr::pull(.data$DISTRICT) ## need to change this to stratum, and stock --> district? Tying to keep naming consistent....
 
   # ## WHY CAN'T WE JUST ADD group_by SURVEY_YEAR??
   # for(i in 1:length(years)){
@@ -108,9 +108,9 @@ calc_bioabund <- function(data_crab = NULL,
   # Specify retow stations for BBRKC, pull by year
   ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
   retow_stations <- data_crab2 %>%
-    dplyr::filter(HAUL_TYPE == 17) %>%
-    dplyr::select(STATION_ID) %>%
-    pull()
+                    dplyr::filter(.data$HAUL_TYPE == 17) %>%
+                    dplyr::select(.data$STATION_ID) %>%
+                    dplyr::pull()
 
 
 
@@ -119,19 +119,20 @@ calc_bioabund <- function(data_crab = NULL,
   # set_variables()
 
 
+  ## NEED: STOCK_STATIONS --> get_specimen_data -- can we re-define it from data_crab2? I think so....
 
   #Calculate CPUE by GIS STATION, year, and maturity, shell condition, etc. ----
   cpue <- data_crab2 %>%
-          dplyr::filter(STATION_ID %in% stock_stations$STATION_ID) %>%
-          mutate(COUNT = SAMPLING_FACTOR, # here's where I could do n_crab vs. total_counts....
-                 CPUE = SAMPLING_FACTOR/AREA_SWEPT,
-                 CPUE_MT = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) / AREA_SWEPT / 1000 / 1000,
-                 CPUE_LBS = CPUE_MT*2204.6) %>%
-          group_by(across(all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>% # don't actually need the 'group_by()' if using base R, that's mostly just to keep those cols in the 'summarise'
-          dplyr::summarise(COUNT = sum(COUNT),
-                           CPUE = sum(CPUE),
-                           CPUE_MT = sum(CPUE_MT),
-                           CPUE_LBS = sum(CPUE_LBS))
+          dplyr::filter(.data$STATION_ID %in% stock_stations$STATION_ID) %>%
+          dplyr::mutate(COUNT = .data$SAMPLING_FACTOR, # here's where I could do n_crab vs. total_counts....
+                        CPUE = .data$SAMPLING_FACTOR/.data$AREA_SWEPT,
+                        CPUE_MT = (.data$SAMPLING_FACTOR * .data$CALCULATED_WEIGHT_1MM) / .data$AREA_SWEPT / 1000 / 1000,
+                        CPUE_LBS = .data$CPUE_MT*2204.6) %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>% # don't actually need the 'group_by()' if using base R, that's mostly just to keep those cols in the 'summarise'
+          dplyr::summarise(COUNT = sum(.data$COUNT),
+                           CPUE = sum(.data$CPUE),
+                           CPUE_MT = sum(.data$CPUE_MT),
+                           CPUE_LBS = sum(.data$CPUE_LBS))
 
 
   # Expand_grid definitions ----
@@ -145,32 +146,32 @@ calc_bioabund <- function(data_crab = NULL,
   }
 
 
-  #Conditionally specifying maturity/sex combos for each stock
-  if(is.null(mat_sex)){
-    mat_sex_combos <- NA
-  }
-  if(!is.null(mat_sex)){
-    if(TRUE %in% (mat_sex %in% c("all", TRUE))){
-      if(stock %in% stock_lookup$STOCK[stock_lookup$SPECIES %in% c("rkc", "bkc", "hybrid")]){
-        mat_sex_combos <- c("Mature Male", "Immature Male",
-                            "Mature Female", "Immature Female",
-                            "Legal Male", "Pre-recruit Male")
-      }
-
-      if(stock %in% stock_lookup$STOCK[stock_lookup$SPECIES %in% c("bairdi", "opilio")]){
-        mat_sex_combos <- c("Mature Male", "Immature Male",
-                            "Mature Female", "Immature Female",
-                            "Legal Male", "Industry Preferred")
-      }
-
-      if(stock %in% stock_lookup$STOCK[stock_lookup$SPECIES == "ei"]){
-        mat_sex_combos <- c("Sublegal Male", "Legal Male", "Female")
-      }
-    }
-    if(TRUE %in% (!mat_sex %in% c("all", TRUE))){
-      mat_sex_combos <- mat_sex
-    }
-  }
+  # #Conditionally specifying maturity/sex combos for each stock
+  # if(is.null(mat_sex)){
+  #   mat_sex_combos <- NA
+  # }
+  # if(!is.null(mat_sex)){
+  #   if(TRUE %in% (mat_sex %in% c("all", TRUE))){
+  #     if(stock %in% stock_lookup$STOCK[stock_lookup$SPECIES %in% c("rkc", "bkc", "hybrid")]){
+  #       mat_sex_combos <- c("Mature Male", "Immature Male",
+  #                           "Mature Female", "Immature Female",
+  #                           "Legal Male", "Pre-recruit Male")
+  #     }
+  #
+  #     if(stock %in% stock_lookup$STOCK[stock_lookup$SPECIES %in% c("bairdi", "opilio")]){
+  #       mat_sex_combos <- c("Mature Male", "Immature Male",
+  #                           "Mature Female", "Immature Female",
+  #                           "Legal Male", "Industry Preferred")
+  #     }
+  #
+  #     if(stock %in% stock_lookup$STOCK[stock_lookup$SPECIES == "ei"]){
+  #       mat_sex_combos <- c("Sublegal Male", "Legal Male", "Female")
+  #     }
+  #   }
+  #   if(TRUE %in% (!mat_sex %in% c("all", TRUE))){
+  #     mat_sex_combos <- mat_sex
+  #   }
+  # }
 
 
   #Conditionally specifying shell conditions
@@ -183,7 +184,7 @@ calc_bioabund <- function(data_crab = NULL,
     }
     if(TRUE %in% (!shell_condition %in% c("all"))){
       if(is.numeric(shell_condition)){
-        shell_combos <- shell_condition_lookup$SHELL_TEXT[shell_condition_lookup$SHELL_CONDITION %in% shell_condition]
+        # shell_combos <- shell_condition_lookup$SHELL_TEXT[shell_condition_lookup$SHELL_CONDITION %in% shell_condition]
       } else{
         shell_combos <- shell_condition
       }
@@ -202,7 +203,7 @@ calc_bioabund <- function(data_crab = NULL,
     }
     if(TRUE %in% (!egg_condition %in% c("all", NULL))){
       if(is.numeric(egg_condition)){
-        egg_combos <- egg_condition_lookup$EGG_CONDITION_TEXT[egg_condition_lookup$EGG_CONDITION %in% egg_condition]
+        # egg_combos <- egg_condition_lookup$EGG_CONDITION_TEXT[egg_condition_lookup$EGG_CONDITION %in% egg_condition]
       } else{
         egg_combos <- egg_condition
       }
@@ -221,7 +222,7 @@ calc_bioabund <- function(data_crab = NULL,
     }
     if(TRUE %in% (!clutch_size %in% c("all", NULL))){
       if(is.numeric(clutch_size)){
-        clutch_combos <- clutch_size_lookup$CLUTCH_TEXT[clutch_size_lookup$CLUTCH_SIZE %in% clutch_size]
+        # clutch_combos <- clutch_size_lookup$CLUTCH_TEXT[clutch_size_lookup$CLUTCH_SIZE %in% clutch_size]
       } else{
         clutch_combos <- clutch_size
       }
@@ -278,39 +279,39 @@ calc_bioabund <- function(data_crab = NULL,
     #   # else {
     #   # if cpue != 0 and no max size bin, set max to whatever max in data is
       station_haul_cpue <- cpue %>%
-        right_join(expand_grid(SEX_TEXT = sex_combos,
-                               MAT_SEX = mat_sex_combos,
-                               SHELL_TEXT = shell_combos,
-                               EGG_CONDITION_TEXT = egg_combos,
-                               CLUTCH_TEXT = clutch_combos,
-                               BIN_1MM = 1:size_max,
-                               HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
-                               stock_stations %>%
-                                 # dplyr::rename(GIS_STATION = STATION_ID) %>%
-                                 select(STATION_ID, STRATUM_CODE, TOTAL_AREA) %>%
-                                 add_column(SURVEY_YEAR = years))) %>%
-        replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
-        dplyr::select(all_of(c("SURVEY_YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
-                               "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM", "TOTAL_AREA")))
+        dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
+                                             # MAT_SEX = mat_sex_combos,
+                                             SHELL_TEXT = shell_combos,
+                                             EGG_CONDITION_TEXT = egg_combos,
+                                             CLUTCH_TEXT = clutch_combos,
+                                             BIN_1MM = 1:size_max,
+                                             HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
+                                             stock_stations %>%
+                                               # dplyr::rename(GIS_STATION = STATION_ID) %>%
+                                               dplyr::select(.data$STATION_ID, .data$STRATUM_CODE, .data$TOTAL_AREA) %>%
+                                               tibble::add_column(SURVEY_YEAR = years))) %>%
+        tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
+        dplyr::select(dplyr::all_of(c("SURVEY_YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
+                                      "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM", "TOTAL_AREA")))
     # # }
     # }
   } else{
     # if no 1mm bin, don't include that in the expand_grid
     station_haul_cpue <- cpue %>%
-      right_join(expand_grid(SEX_TEXT = sex_combos,
-                             MAT_SEX = mat_sex_combos, # 816
+      dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
+                             # MAT_SEX = mat_sex_combos, # 816
                              SHELL_TEXT = shell_combos,
                              EGG_CONDITION_TEXT = egg_combos,
                              CLUTCH_TEXT = clutch_combos,
                              HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
                              stock_stations %>%
                                # dplyr::rename(GIS_STATION = STATION_ID) %>%
-                               select(STATION_ID, STRATUM_CODE, TOTAL_AREA) %>%
-                               add_column(SURVEY_YEAR = years) %>%
-                               distinct())) %>%
-      replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
-      dplyr::select(all_of(c("SURVEY_YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
-                             "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM_CODE", "TOTAL_AREA")))
+                               dplyr::select(.data$STATION_ID, .data$STRATUM_CODE, .data$TOTAL_AREA) %>%
+                               tibble::add_column(SURVEY_YEAR = years) %>%
+                               dplyr::distinct())) %>%
+      tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
+      dplyr::select(dplyr::all_of(c("SURVEY_YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
+                                    "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM_CODE", "TOTAL_AREA")))
   }
 
 
@@ -320,11 +321,11 @@ calc_bioabund <- function(data_crab = NULL,
   }
 
   # REMOVE NONSENSICAL MATSEX/SEX COMBOS REMNANT FROM EXPAND_GRID......
-  if(!is.null(mat_sex)){
+  if(!is.null(crab_category)){
     station_haul_cpue <- station_haul_cpue %>%
-      filter(!((MAT_SEX %in% c("Mature Male", "Immature Male", "Legal Male", "Sublegal Male",
-                               "Pre-recruit Male", "Industry Preferred") & SEX_TEXT == "female") |
-                 (MAT_SEX %in% c("Mature Female", "Immature Female", "Female") & SEX_TEXT == "male")))
+      filter(!((.data$MAT_SEX %in% c("Mature Male", "Immature Male", "Legal Male", "Sublegal Male",
+                               "Pre-recruit Male", "Industry Preferred") & .data$SEX_TEXT == "female") |
+                 (.data$MAT_SEX %in% c("Mature Female", "Immature Female", "Female") & .data$SEX_TEXT == "male")))
   }
 
 
@@ -332,9 +333,9 @@ calc_bioabund <- function(data_crab = NULL,
   #Filtering out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
   if(stock == "BBRKC"){
     station_haul_cpue <- station_haul_cpue %>%
-                         dplyr::filter(!(SURVEY_YEAR == 2000 &
-                                         STATION_ID == "E-11" &
-                                         SEX_TEXT == "male"))
+                         dplyr::filter(!(.data$SURVEY_YEAR == 2000 &
+                                         .data$STATION_ID == "E-11" &
+                                         .data$SEX_TEXT == "male"))
   } else{
     station_haul_cpue <- station_haul_cpue
   }
@@ -345,44 +346,44 @@ calc_bioabund <- function(data_crab = NULL,
     if(replace_retow == TRUE){
       # replace female BBRKC with female data from station with HT 17
       station_haul_cpue <- station_haul_cpue %>%
-        group_by(SURVEY_YEAR, STATION_ID, SEX_TEXT) %>%
-        nest() %>%
+        dplyr::group_by(.data$SURVEY_YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
+        tidyr::nest() %>%
         #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
         ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
-        mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
-          if(17 %in% data$HAUL_TYPE & stock == "BBRKC" & SEX_TEXT == "female" & STATION_ID %in% retow_stations)
-          {data %>% dplyr::filter(HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(HAUL_TYPE != 17)}
+        dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
+          if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
+          {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
           return(x)
         })) %>%
-        unnest(cols = c(data)) %>%
-        group_by(across(all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
-        dplyr::summarise(COUNT = sum(COUNT),
-                         CPUE = sum(CPUE),
-                         CPUE_MT = sum(CPUE_MT),
-                         CPUE_LBS = sum(CPUE_LBS))
+        tidyr::unnest(cols = c(.data$data)) %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+        dplyr::summarise(COUNT = sum(.data$COUNT),
+                         CPUE = sum(.data$CPUE),
+                         CPUE_MT = sum(.data$CPUE_MT),
+                         CPUE_LBS = sum(.data$CPUE_LBS))
     }
 
     if(replace_retow == FALSE){
       # remove all HT 17 data and re-summarise to ignore SEX
       station_haul_cpue <- station_haul_cpue %>%
-        dplyr::filter(HAUL_TYPE != 17) %>%
-        group_by(across(all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
-        dplyr::summarise(COUNT = sum(COUNT),
-                         CPUE = sum(CPUE),
-                         CPUE_MT = sum(CPUE_MT),
-                         CPUE_LBS = sum(CPUE_LBS)) #%>%
+        dplyr::filter(.data$HAUL_TYPE != 17) %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+        dplyr::summarise(COUNT = sum(.data$COUNT),
+                         CPUE = sum(.data$CPUE),
+                         CPUE_MT = sum(.data$CPUE_MT),
+                         CPUE_LBS = sum(.data$CPUE_LBS)) #%>%
     }
   }
 
   if(is.null(replace_retow)){
     # remove all HT 17 data and re-summarise to ignore SEX
     station_haul_cpue <- station_haul_cpue %>%
-      dplyr::filter(HAUL_TYPE != 17) %>%
-      group_by(across(all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
-      dplyr::summarise(COUNT = sum(COUNT),
-                       CPUE = sum(CPUE),
-                       CPUE_MT = sum(CPUE_MT),
-                       CPUE_LBS = sum(CPUE_LBS)) #%>%
+      dplyr::filter(.data$HAUL_TYPE != 17) %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+      dplyr::summarise(COUNT = sum(.data$COUNT),
+                       CPUE = sum(.data$CPUE),
+                       CPUE_MT = sum(.data$CPUE_MT),
+                       CPUE_LBS = sum(.data$CPUE_LBS)) #%>%
   }
 
 
@@ -399,11 +400,12 @@ calc_bioabund <- function(data_crab = NULL,
     if(output == "cpue"){
 
       cpue_out <- station_haul_cpue %>%
-        left_join(., stock_stations) %>%
+        dplyr::left_join(., stock_stations) %>%
                     # rename(GIS_STATION = STATION_ID)) %>%
-        ungroup() %>%
-        dplyr::select(all_of(c('SURVEY_YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE', groups_out, 'STRATUM_CODE', 'TOTAL_AREA',
-                               "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS")))
+        dplyr::ungroup() %>%
+        dplyr::select(dplyr::all_of(c('SURVEY_YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
+                                      groups_out, 'STRATUM_CODE', 'TOTAL_AREA',
+                                      "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS")))
       return(list(cpue_out))
     }
   }
@@ -416,7 +418,7 @@ calc_bioabund <- function(data_crab = NULL,
 
   # CALL CALC_CPUE FUNCTION (everything above this is actually that function....) ------
   ## set inputs from calc_bioabund....
-  data_crab_bioabund <- data_crab
+  crab_data_bioabund <- crab_data
   species_bioabund <- species
   region_bioabund <- region
   district_bioabund <- district
@@ -434,7 +436,7 @@ calc_bioabund <- function(data_crab = NULL,
   replace_retow_bioabund <- replace_retow
 
   # call calc_cpue()
-  station_haul_cpue <- calc_cpue(data_crab = data_crab_bioabund,
+  station_haul_cpue <- calc_cpue(crab_data = crab_data_bioabund,
                                  species = species_bioabund,
                                  region = region_bioabund,
                                  district = district_bioabund,
@@ -447,7 +449,7 @@ calc_bioabund <- function(data_crab = NULL,
                                  shell_condition = shell_condition_bioabund,
                                  egg_condition = egg_condition_bioabund,
                                  clutch_size = clutch_size_bioabund,
-                                 bin_1mm = bin_1mm_bioabund1,
+                                 bin_1mm = bin_1mm_bioabund,
                                  replace_retow = replace_retow_bioabund,
                                  output = c("bioabund"))
 
@@ -455,50 +457,50 @@ calc_bioabund <- function(data_crab = NULL,
   ## Calculate abundance and biomass -------------
   #Sum across haul, scale abundance, biomass, and variance to strata, then sum across strata and calc CIs
   bio_abund_df <- station_haul_cpue %>%
-                  group_by(across(all_of(c('SURVEY_YEAR', 'STATION_ID', 'STRATUM_CODE', groups_out, 'TOTAL_AREA')))) %>%
-                  dplyr::summarise(COUNT = sum(COUNT), CPUE = sum(CPUE), CPUE_KG = sum(CPUE_KG)) %>%
+                  dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'STATION_ID', 'STRATUM_CODE', groups_out, 'TOTAL_AREA')))) %>%
+                  dplyr::summarise(COUNT = sum(.data$COUNT), CPUE = sum(.data$CPUE), CPUE_KG = sum(.data$CPUE_KG)) %>%
                   #Scale to abundance by strata
-                  group_by(across(all_of(c('SURVEY_YEAR', 'STRATUM_CODE', groups_out)))) %>%
-                  dplyr::reframe(AREA = TOTAL_AREA,
-                                 MEAN_CPUE = mean(CPUE),
-                                 N_CPUE = n(),
-                                 VAR_CPUE = (stats::var(CPUE)*(AREA^2))/N_CPUE,
-                                 MEAN_CPUE_MT = mean(CPUE_MT),
-                                 N_CPUE_MT = n(),
-                                 VAR_CPUE_MT = (stats::var(CPUE_MT)*(AREA^2))/N_CPUE_MT,
-                                 MEAN_CPUE_LBS = mean(CPUE_LBS),
-                                 N_CPUE_LBS = n(),
-                                 VAR_CPUE_LBS = (stats::var(CPUE_LBS)*(AREA^2))/N_CPUE_LBS,
-                                 ABUNDANCE = (MEAN_CPUE * AREA),
-                                 BIOMASS_MT = (MEAN_CPUE_MT * AREA),
-                                 BIOMASS_LBS = (MEAN_CPUE_LBS * AREA),
-                                 N_STATIONS = length(unique(STATION_ID))) %>%
-                  distinct() %>%
+                  dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'STRATUM_CODE', groups_out)))) %>%
+                  dplyr::reframe(AREA = .data$TOTAL_AREA,
+                                 MEAN_CPUE = mean(.data$CPUE),
+                                 N_CPUE = dplyr::n(),
+                                 VAR_CPUE = (stats::var(.data$CPUE)*(.data$AREA^2))/.data$N_CPUE,
+                                 MEAN_CPUE_MT = mean(.data$CPUE_MT),
+                                 N_CPUE_MT = dplyr::n(),
+                                 VAR_CPUE_MT = (stats::var(.data$CPUE_MT)*(.data$AREA^2))/.data$N_CPUE_MT,
+                                 MEAN_CPUE_LBS = mean(.data$CPUE_LBS),
+                                 N_CPUE_LBS = dplyr::n(),
+                                 VAR_CPUE_LBS = (stats::var(.data$CPUE_LBS)*(.data$AREA^2))/.data$N_CPUE_LBS,
+                                 ABUNDANCE = (.data$MEAN_CPUE * .data$AREA),
+                                 BIOMASS_MT = (.data$MEAN_CPUE_MT * .data$AREA),
+                                 BIOMASS_LBS = (.data$MEAN_CPUE_LBS * .data$AREA),
+                                 N_STATIONS = length(unique(.data$STATION_ID))) %>%
+                  dplyr::distinct() %>%
                   #Sum across strata
-                  group_by(across(all_of(c('SURVEY_YEAR', groups_out)))) %>%
-                  dplyr::reframe(#AREA = sum(AREA),
-                                 MEAN_CPUE = sum(MEAN_CPUE),
-                                 SD_CPUE = sqrt(sum(VAR_CPUE)),
-                                 N_CPUE = sum(N_CPUE),
-                                 MEAN_CPUE_MT = sum(MEAN_CPUE_MT),
-                                 SD_CPUE_MT = sqrt(sum(VAR_CPUE_MT)),
-                                 N_CPUE_MT = sum(N_CPUE_MT),
-                                 MEAN_CPUE_LBS = sum(MEAN_CPUE_LBS),
-                                 SD_CPUE_LBS = sqrt(sum(VAR_CPUE_LBS)),
-                                 N_CPUE_LBS = sum(N_CPUE_LBS),
-                                 ABUNDANCE = sum(ABUNDANCE),
-                                 ABUNDANCE_CV = (SD_CPUE/ABUNDANCE),
-                                 ABUNDANCE_CI = 1.96*(SD_CPUE),
-                                 BIOMASS_MT = sum(BIOMASS_MT),
-                                 BIOMASS_MT_CV = (SD_CPUE_MT/BIOMASS_MT),
-                                 BIOMASS_MT_CI = (1.96*SD_CPUE_MT),
-                                 BIOMASS_LBS = sum(BIOMASS_LBS),
-                                 BIOMASS_LBS_CV = (SD_CPUE_LBS/BIOMASS_LBS),
-                                 BIOMASS_LBS_CI = 1.96*(SD_CPUE_LBS),
-                                 N_STATIONS = sum(N_STATIONS)) %>%
-                  dplyr::mutate(N_STATIONS = ifelse((SURVEY_YEAR == 2000
-                                                     & stock == "BBRKC"), 135, N_STATIONS)) %>%
-                  ungroup()# %>%
+                  dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', groups_out)))) %>%
+                  dplyr::reframe(#AREA = sum(.data$AREA),
+                                 MEAN_CPUE = sum(.data$MEAN_CPUE),
+                                 SD_CPUE = sqrt(sum(.data$VAR_CPUE)),
+                                 N_CPUE = sum(.data$N_CPUE),
+                                 MEAN_CPUE_MT = sum(.data$MEAN_CPUE_MT),
+                                 SD_CPUE_MT = sqrt(sum(.data$VAR_CPUE_MT)),
+                                 N_CPUE_MT = sum(.data$N_CPUE_MT),
+                                 MEAN_CPUE_LBS = sum(.data$MEAN_CPUE_LBS),
+                                 SD_CPUE_LBS = sqrt(sum(.data$VAR_CPUE_LBS)),
+                                 N_CPUE_LBS = sum(.data$N_CPUE_LBS),
+                                 ABUNDANCE = sum(.data$ABUNDANCE),
+                                 ABUNDANCE_CV = (.data$SD_CPUE/.data$ABUNDANCE),
+                                 ABUNDANCE_CI = 1.96*(.data$SD_CPUE),
+                                 BIOMASS_MT = sum(.data$BIOMASS_MT),
+                                 BIOMASS_MT_CV = (.data$SD_CPUE_MT/.data$BIOMASS_MT),
+                                 BIOMASS_MT_CI = (1.96*.data$SD_CPUE_MT),
+                                 BIOMASS_LBS = sum(.data$BIOMASS_LBS),
+                                 BIOMASS_LBS_CV = (.data$SD_CPUE_LBS/.data$BIOMASS_LBS),
+                                 BIOMASS_LBS_CI = 1.96*(.data$SD_CPUE_LBS),
+                                 N_STATIONS = sum(.data$N_STATIONS)) %>%
+                  dplyr::mutate(N_STATIONS = ifelse((.data$SURVEY_YEAR == 2000
+                                                     & district == "BB"), 135, .data$N_STATIONS)) %>%
+                  dplyr::ungroup()# %>%
                 # complete.cases()
 
                 ## format output better!!
