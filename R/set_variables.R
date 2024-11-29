@@ -58,7 +58,7 @@ set_variables <- function(data_crab = NULL,
   #   # assign maturity
   #   ## maybe a note her if want "mature male" for chionoecetes (for example),
   #   ## say "we can't actually know maturity, giving "large male"/"small male" instead...
-  #   data_crab2 <- get_maturity(crab_dat = data_crab2, stock = stock) %>%
+  #   data_crab2 <- get_crab_category(crab_dat = data_crab2, stock = stock) %>%
   #     filter(!is.na(MAT_SEX))
   #
   #   # filter by specific category
