@@ -14,10 +14,15 @@ Imports:
     getPass,
     stats,
     tidyverse,
+    tibble,
+    tidyr,
     dplyr,
     data.table,
     keyring,
-    lifecycle
+    lifecycle,
+    magrittr,
+    purrr,
+    rlang
 Depends: 
     R (>= 4.0.0)
 LazyData: true
