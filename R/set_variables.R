@@ -9,6 +9,7 @@
 #' @export set_variables
 
 set_variables <- function(data_crab = NULL,
+                          species = NULL,
                           sex = NULL,
                           size_min = NULL,
                           size_max = NULL,
@@ -31,22 +32,29 @@ set_variables <- function(data_crab = NULL,
                                             SEX == 2 ~ "female"))
 
   # Filter sex if only want one
-  if(!missing(sex)){
+  if(!is.null(sex)){
     if(!sex %in% c("all", TRUE))
       data_crab2 <- data_crab2 %>%
-        dplyr::filter(SEX_TEXT %in% sex)
+                    dplyr::filter(SEX_TEXT %in% sex)
   }
 
 
   # SIZE_MIN ----
+  if(!is.null(size_min)){
+    data_crab2 <- data_crab2 %>%
+                  dplyr::filter(SIZE_1MM >= size_min)
 
+  }
 
   # SIZE_MAX:  ----
-
+  if(!is.null(size_max)){
+    data_crab2 <- data_crab2 %>%
+                  dplyr::filter(SIZE_1MM <= size_max)
+  }
 
   ## CRAB CATEGORY??
   # ###MATURITY: Define/filter if specified in function ----
-  # if(!missing(mat_sex)){
+  # if(!is.null(mat_sex)){
   #   # assign maturity
   #   ## maybe a note her if want "mature male" for chionoecetes (for example),
   #   ## say "we can't actually know maturity, giving "large male"/"small male" instead...
@@ -63,7 +71,7 @@ set_variables <- function(data_crab = NULL,
 
 
   # SHELL CONDITION: Define/filter if specified in function ----
-  if(!missing(shell_condition)){
+  if(!is.null(shell_condition)){
     data_crab2 <- data_crab2 %>%
       mutate(SHELL_TEXT = case_when(SHELL_CONDITION %in% 0:1 ~ "soft molting",
                                     SHELL_CONDITION == 2 ~ "new hardshell",
@@ -84,7 +92,7 @@ set_variables <- function(data_crab = NULL,
 
 
   # EGG CONDITION: Define/filter if specified in function ----
-  if(!missing(egg_condition)){
+  if(!is.null(egg_condition)){
     data_crab2 <- data_crab2 %>%
       dplyr::filter(SEX == 2) %>% #HAUL_TYPE != 17,
       mutate(EGG_CONDITION_TEXT = case_when(EGG_CONDITION == 0 ~ "none",
@@ -109,7 +117,7 @@ set_variables <- function(data_crab = NULL,
 
 
   # CLUTCH SIZE: Define/filter if specified in function ----
-  if(!missing(clutch_size)){
+  if(!is.null(clutch_size)){
     data_crab2 <- data_crab2 %>%
       dplyr::filter(SEX == 2) %>% #HAUL_TYPE != 17,
       mutate(CLUTCH_TEXT = case_when(CLUTCH_SIZE == 0 ~ "immature",
@@ -125,7 +133,7 @@ set_variables <- function(data_crab = NULL,
       data_crab2 <- data_crab2 %>% dplyr::filter(CLUTCH_SIZE %in% clutch_size)
     }
 
-    if(TRUE %in% (clutch_size %in% c("immature", "mature Barren", "trace", "quarter",
+    if(TRUE %in% (clutch_size %in% c("immature", "mature barren", "trace", "quarter",
                                      "half", "three quarter", "full", "unknown"))){
       data_crab2 <- data_crab2 %>% dplyr::filter(CLUTCH_TEXT %in% clutch_size)
     }
@@ -135,20 +143,13 @@ set_variables <- function(data_crab = NULL,
 
 
   # 1MM BINS: Define/filter if specified in function ----
-  if(!missing(size_bin)){
-    data_crab2 <- data_crab2 %>% dplyr::mutate(SIZE_BIN = floor(SIZE_1MM))
-
+  if(!is.null(bin_1mm)){
+    data_crab2 <- data_crab2 %>% dplyr::mutate(BIN_1MM = floor(SIZE_1MM))
     group_cols <- append(group_cols, "BIN_1MM")
   }
 
 
-  # ###SIZE RANGE: Filter if specified in function ----
-  # if(!missing(size_range)){
-  #   data_crab2 <- data_crab2 %>%
-  #     dplyr::filter(SIZE_1MM >= min(size_range) &
-  #                   SIZE_1MM <= max(size_range))
-  # }
 
-  return(list(data_crab2, group_cols))
+  return(list(data_crab2, group_cols)) #, size_max)) #size_max if null is defined in calc_cpue now...
 
 }
