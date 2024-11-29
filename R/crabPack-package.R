@@ -8,10 +8,12 @@
 #' @import lifecycle
 #' @import data.table
 #' @import tidyverse
-#' @importFrom dplyr mutate
-#' @importFrom dplyr case_when
-#' @importFrom dplyr filter
+#' @import tibble
+#' @import tidyr
+#' @import dplyr
 #' @importFrom stats aggregate
-#' @importFrom stats weighted.mean
+#' @importFrom purrr map2
+#' @importFrom rlang .data
+#'
 ## usethis namespace: end
 NULL
