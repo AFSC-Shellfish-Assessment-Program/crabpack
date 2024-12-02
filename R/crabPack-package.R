@@ -6,7 +6,6 @@
 #' @import getPass
 #' @import keyring
 #' @import lifecycle
-#' @import data.table
 #' @import tidyverse
 #' @import tibble
 #' @import tidyr
@@ -14,6 +13,7 @@
 #' @importFrom stats aggregate
 #' @importFrom purrr map2
 #' @importFrom rlang .data
+#' @importFrom data.table data.table
 #'
 ## usethis namespace: end
 NULL
