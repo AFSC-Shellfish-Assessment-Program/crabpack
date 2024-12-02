@@ -105,6 +105,10 @@ calc_bioabund <- function(crab_data = NULL,
   # for(i in 1:length(years)){
   # }
 
+  # Specify stock stations
+  stock_stations <- data_crab2$stock_stations
+
+
   # Specify retow stations for BBRKC, pull by year
   ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
   retow_stations <- data_crab2 %>%
@@ -331,7 +335,7 @@ calc_bioabund <- function(crab_data = NULL,
 
   ## MAKE THIS AN NA???? NEED TO INCORPORATE CHANGE EVEN IF NOT MAT_SEX....
   #Filtering out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
-  if(stock == "BBRKC"){
+  if(species == "RKC" & district == "BBR"){
     station_haul_cpue <- station_haul_cpue %>%
                          dplyr::filter(!(.data$SURVEY_YEAR == 2000 &
                                          .data$STATION_ID == "E-11" &
@@ -342,49 +346,85 @@ calc_bioabund <- function(crab_data = NULL,
 
 
   # Replace retow BBRKC ------------------------
-  if(!is.null(replace_retow)){
-    if(replace_retow == TRUE){
+  # if(!is.null(replace_retow)){
+  #   if(replace_retow == TRUE){
+  #     # replace female BBRKC with female data from station with HT 17
+  #     station_haul_cpue <- station_haul_cpue %>%
+  #       dplyr::group_by(.data$SURVEY_YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
+  #       tidyr::nest() %>%
+  #       #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
+  #       ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
+  #       dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
+  #         if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
+  #         {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
+  #         return(x)
+  #       })) %>%
+  #       tidyr::unnest(cols = c(.data$data)) %>%
+  #       dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+  #       dplyr::summarise(COUNT = sum(.data$COUNT),
+  #                        CPUE = sum(.data$CPUE),
+  #                        CPUE_MT = sum(.data$CPUE_MT),
+  #                        CPUE_LBS = sum(.data$CPUE_LBS))
+  #   }
+  #
+  #   if(replace_retow == FALSE){
+  #     # remove all HT 17 data and re-summarise to ignore SEX
+  #     station_haul_cpue <- station_haul_cpue %>%
+  #       dplyr::filter(.data$HAUL_TYPE != 17) %>%
+  #       dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+  #       dplyr::summarise(COUNT = sum(.data$COUNT),
+  #                        CPUE = sum(.data$CPUE),
+  #                        CPUE_MT = sum(.data$CPUE_MT),
+  #                        CPUE_LBS = sum(.data$CPUE_LBS)) #%>%
+  #   }
+  # }
+
+  if(species == "RKC" & replace_retow != FALSE){
       # replace female BBRKC with female data from station with HT 17
       station_haul_cpue <- station_haul_cpue %>%
-        dplyr::group_by(.data$SURVEY_YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
-        tidyr::nest() %>%
-        #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
-        ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
-        dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
-          if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
-          {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
-          return(x)
-        })) %>%
-        tidyr::unnest(cols = c(.data$data)) %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
-        dplyr::summarise(COUNT = sum(.data$COUNT),
-                         CPUE = sum(.data$CPUE),
-                         CPUE_MT = sum(.data$CPUE_MT),
-                         CPUE_LBS = sum(.data$CPUE_LBS))
-    }
-
-    if(replace_retow == FALSE){
-      # remove all HT 17 data and re-summarise to ignore SEX
-      station_haul_cpue <- station_haul_cpue %>%
-        dplyr::filter(.data$HAUL_TYPE != 17) %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
-        dplyr::summarise(COUNT = sum(.data$COUNT),
-                         CPUE = sum(.data$CPUE),
-                         CPUE_MT = sum(.data$CPUE_MT),
-                         CPUE_LBS = sum(.data$CPUE_LBS)) #%>%
-    }
-  }
-
-  if(is.null(replace_retow)){
+                           dplyr::group_by(.data$SURVEY_YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
+                           tidyr::nest() %>%
+                           #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
+                           ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
+                           dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
+                             if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
+                             {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
+                             return(x)
+                           })) %>%
+                           tidyr::unnest(cols = c(.data$data)) %>%
+                           dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+                           dplyr::summarise(COUNT = sum(.data$COUNT),
+                                            CPUE = sum(.data$CPUE),
+                                            CPUE_MT = sum(.data$CPUE_MT),
+                                            CPUE_LBS = sum(.data$CPUE_LBS))
+    } else{
     # remove all HT 17 data and re-summarise to ignore SEX
     station_haul_cpue <- station_haul_cpue %>%
-      dplyr::filter(.data$HAUL_TYPE != 17) %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
-      dplyr::summarise(COUNT = sum(.data$COUNT),
-                       CPUE = sum(.data$CPUE),
-                       CPUE_MT = sum(.data$CPUE_MT),
-                       CPUE_LBS = sum(.data$CPUE_LBS)) #%>%
-  }
+                         dplyr::filter(.data$HAUL_TYPE != 17) %>%
+                         dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+                         dplyr::summarise(COUNT = sum(.data$COUNT),
+                                          CPUE = sum(.data$CPUE),
+                                          CPUE_MT = sum(.data$CPUE_MT),
+                                          CPUE_LBS = sum(.data$CPUE_LBS))
+    } # else{
+      #   # replace female BBRKC with female data from station with HT 17
+      #   station_haul_cpue <- station_haul_cpue %>%
+      #                        dplyr::group_by(.data$SURVEY_YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
+      #                        tidyr::nest() %>%
+      #                        #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
+      #                        ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
+      #                        dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
+      #                          if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
+      #                          {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
+      #                          return(x)
+      #                        })) %>%
+      #                        tidyr::unnest(cols = c(.data$data)) %>%
+      #                        dplyr::group_by(dplyr::across(dplyr::all_of(c('SURVEY_YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM_CODE', 'TOTAL_AREA')))) %>%
+      #                        dplyr::summarise(COUNT = sum(.data$COUNT),
+      #                                         CPUE = sum(.data$CPUE),
+      #                                         CPUE_MT = sum(.data$CPUE_MT),
+      #                                         CPUE_LBS = sum(.data$CPUE_LBS))
+      # }
 
 
   # OUTPUTS -----------
@@ -400,7 +440,7 @@ calc_bioabund <- function(crab_data = NULL,
     if(output == "cpue"){
 
       cpue_out <- station_haul_cpue %>%
-        dplyr::left_join(., stock_stations) %>%
+        dplyr::left_join(.data$., stock_stations) %>%
                     # rename(GIS_STATION = STATION_ID)) %>%
         dplyr::ungroup() %>%
         dplyr::select(dplyr::all_of(c('SURVEY_YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
