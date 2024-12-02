@@ -233,7 +233,7 @@ get_specimen_data <- function(species = NULL,
   # Pull stock stations from strata tables using stock districts and haul info; assign stratum and area
   # Assign DESIGN_ID to data based off year
   data_haul <- data_haul %>%
-               dplyr::left_join(., stratum_year_design %>%
+               dplyr::left_join(.data$., stratum_year_design %>%
                                      dplyr::select(-.data$YEAR_BLOCK_ID) %>%
                                      dplyr::distinct())
 
@@ -243,11 +243,11 @@ get_specimen_data <- function(species = NULL,
                     dplyr::filter(.data$SURVEY_YEAR %in% years) %>%
                     dplyr::rename(STATION_ID = .data$GIS_STATION) %>%
                     # add correct stratum names to stations based on design_ID for the given year
-                    dplyr::left_join(., stratum_stations_df %>%
+                    dplyr::left_join(.data$., stratum_stations_df %>%
                                            dplyr::filter(#.data$SPECIES == species,
                                                          .data$STRATUM %in% strata) %>%
                                            dplyr::select(-c('SPECIES_CODE', 'DISTRICT_NAME', 'STRATUM_NAME'))) %>%
-                    dplyr::left_join(., stratum_area_df %>%
+                    dplyr::left_join(.data$., stratum_area_df %>%
                                            dplyr::filter(#.data$SPECIES == species,
                                                          .data$STRATUM %in% strata) %>%
                                            # get relevant years for each area
@@ -271,7 +271,7 @@ get_specimen_data <- function(species = NULL,
   ## Join to haul data -------------------------------------------------------
   # Add specimen data to relevant hauls for the selected districts/strata
   data_crab2 <- stock_stations %>%
-                dplyr::left_join(., data_crab)
+                dplyr::left_join(.data$., specimen_df)
 
   # If district is "Northern Unstratified" or "BKC Unstratified", add TOTAL_AREA
   # based on the number of positive catch stations in a given year
@@ -292,7 +292,7 @@ get_specimen_data <- function(species = NULL,
     # Add positive catch station stratum area to haul and specimen info
     data_crab2 <- data_crab2 %>%
                   dplyr::group_by(.data$SURVEY_YEAR, .data$STRATUM) %>%
-                  dplyr::left_join(., n_pos_catch) %>%
+                  dplyr::left_join(.data$., n_pos_catch) %>%
                   dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% .data$STRATUM),
                                                     .data$TOTAL_AREA_POS, .data$TOTAL_AREA)) %>%
                   dplyr::select(-.data$TOTAL_AREA_POS) %>%
@@ -344,7 +344,7 @@ get_specimen_data <- function(species = NULL,
   # specify all the tables here!! essentially this is 'crab_data', and can unpack the relevant lookups from this list
   return(do.call(what = list,
                  args = list(specimen = data_crab2, # specimen data, with haul and stratum info joined
-                             sizegroup = sizegroup_df, # table with size groupings per district/species
+                             sizegroups = sizegroups_df, # table with size groupings per district/species
                              stock_stations = stock_stations, ## this could maybe replace the lookups below?
                              # and/or could recreate by subsetting the haul/stratum info from the joined specimen data??
                              district_stratum = district_stratum_df, # table with stratum definitions for each district
