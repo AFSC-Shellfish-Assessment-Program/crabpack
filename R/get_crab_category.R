@@ -10,12 +10,12 @@
 #' @export get_crab_category
 
 
-get_crab_category  <- function(crab_data = NULL,
-                               species = NULL,
-                               region = c("EBS", "NBS")[1],
-                               district = NULL,
-                               crab_category = NULL,
-                               female_maturity = c("morphological", "cutline")[1]) {
+get_crab_category <- function(crab_data = NULL,
+                              species = NULL,
+                              region = c("EBS", "NBS")[1],
+                              district = NULL,
+                              crab_category = NULL,
+                              female_maturity = c("morphological", "cutline")[1]) {
 
 
   ## **SOME SORT OF WARNING if wanting male, can't do morphometric, it's cutline only for this. But see Chionoecetes maturity tables?
@@ -23,9 +23,11 @@ get_crab_category  <- function(crab_data = NULL,
   ## Hair --> no female maturity...cutline at least -- I guess could do morphometric? And legal/sublegal == mature/immature?
 
   ## THIS NEEDS TO GET LOADED FROM ORACLE
-  sizegroups <- read.csv("sizegroup_district.csv") %>%
-                dplyr::filter(.data$SPECIES == species,
-                              .data$REGION == region)
+  # --> unpack it from crab_data object list!!
+  # already filtered to species and region in the SQL call
+  sizegroups <- crab_data$sizegroups #%>% #read.csv("sizegroup_district.csv") %>%
+                # dplyr::filter(.data$SPECIES == species,
+                #               .data$REGION == region)
 
   ## NEED TO MATCH DISTRICT.....
 
@@ -67,20 +69,20 @@ get_crab_category  <- function(crab_data = NULL,
   # assign mat/sex categories
   if(species %in% c("RKC", "BKC")){
     #mature/immature males and females
-    mature <- crab_dat %>%
+    mature <- crab_data %>%
       dplyr::filter(.data$SEX %in% 1:2) %>%
       dplyr::mutate(MAT_SEX = case_when((.data$SEX == 1 & .data$SIZE >= mat_lookup$cutline[mat_lookup$stock == district]) ~ "mature_male",
                                  (.data$SEX == 1 & .data$SIZE < mat_lookup$cutline[mat_lookup$stock == district]) ~ "immature_male",
                                  (.data$SEX == 2 & .data$CLUTCH_SIZE >= 1) ~ "mature_female",
                                  (.data$SEX == 2 & .data$CLUTCH_SIZE == 0) ~ "immature_female"))
     #legal males
-    leg <- crab_dat %>%
+    leg <- crab_data %>%
       dplyr::filter(.data$SEX == 1) %>%
       dplyr::mutate(MAT_SEX = case_when((.data$SIZE >= mat_lookup$legal[mat_lookup$stock == district]) ~ "legal_male"))
 
     if(species %in% c("SNOW", "TANNER", "HYBRID")){
       #industry-preferred males
-      ind_pref <- crab_dat %>%
+      ind_pref <- crab_data %>%
         dplyr::filter(.data$SEX == 1) %>%
         dplyr::mutate(MAT_SEX = case_when((.data$SIZE >= mat_lookup$preferred[mat_lookup$stock == district]) ~ "preferred"))
 
@@ -92,7 +94,7 @@ get_crab_category  <- function(crab_data = NULL,
 
   if(species %in% c("HAIR")){
     #legal/sublegal males, and females
-    crab_dat2 <- crab_dat %>%
+    crab_dat2 <- crab_data %>%
       dplyr::filter(.data$SEX %in% 1:2) %>%
       dplyr::mutate(MAT_SEX = case_when((.data$SEX == 1 & .data$SIZE >= mat_lookup$legal[mat_lookup$stock == district]) ~ "legal_male",
                                         (.data$SEX == 1 & .data$SIZE < mat_lookup$legal[mat_lookup$stock == district]) ~ "sublegal_male",
