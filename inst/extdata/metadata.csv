@@ -81,3 +81,13 @@
 "METADATA_SENTENCE_NAME","Name of table metadata sentence."
 "METADATA_SENTENCE_TYPE","Type of sentence to have in table metadata."
 "METADATA_UNITS","Units of the column."
+"LATITUDE","The latitude (decimal degrees) at the midpoint of the haul for a given station."
+"LONGITUDE","The longitude (decimal degrees) at the midpoint of the haul for a given station."
+"SEX_TEXT",NA
+"CLUTCH_TEXT",NA
+"SHELL_TEXT",NA
+"EGG_CONDITION_TEXT",NA
+"COUNT",NA
+"BIOMASS_LBS","Estimated crab biomass in pounds."
+"BIOMASS_LBS_CI","Estimated crab biomass (pounds) 95% confidence interval."
+"BIOMASS_LBS_CV","Estimated crab biomass (pounds) coefficient of variation."

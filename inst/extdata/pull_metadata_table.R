@@ -12,7 +12,7 @@ library(devtools)
 
 
 # Connect to Oracle and pull CRABBASE.METADATA_COLUMN
-sql_channel <- get_connected(check_access = FALSE)
+sql_channel <- get_connected(check_access = FALSE, db = "AFSC")
 
 metadata_column <- RODBC::sqlQuery(channel = sql_channel,
                                    query = "SELECT METADATA_COLNAME, METADATA_COLNAME_DESC
