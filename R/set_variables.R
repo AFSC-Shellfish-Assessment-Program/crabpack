@@ -230,13 +230,35 @@ set_variables <- function(crab_data = NULL,
   expand_combos <- append(expand_combos, list(clutch_combos = clutch_combos))
 
 
-  ## 1MM BINS ----
-  # might not really need this....could just retain SIZE_1MM into group_cols
+  ## 1MM BINS ------------------------------------------------------------------
+  if(is.null(bin_1mm)){
+    bin_combos <- NA
+  }
+
   if(!is.null(bin_1mm)){
-    # data_crab <- data_crab %>%
-    #               dplyr::mutate(BIN_1MM = floor(.data$SIZE_1MM))
+    # set maximum size for 1mm bins to maximum size in data if no other maximum size is specified
+    if(is.null(size_max)){
+      bin_max <- max(specimen_dat$SIZE_1MM, na.rm = T)
+    } else{
+      bin_max <- size_max
+    }
+
+    # set minimum size for 1mm bins to 1mm if no other minimum size is specified
+    if(is.null(size_min)){
+      bin_min <- 1
+    } else{
+      bin_min <- size_min
+    }
+
+    # assign range of bin sizes to expand over
+    bin_combos <- bin_min:bin_max
+
+    # append group columns
     group_cols <- append(group_cols, "SIZE_1MM")
   }
+
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(bin_combos = bin_combos))
 
 
   return(list(specimen_data = data_crab,
