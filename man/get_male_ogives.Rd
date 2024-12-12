@@ -7,24 +7,18 @@
 get_male_ogives(
   species = NULL,
   region = c("EBS", "NBS")[1],
-  district = c("ALL", "E166", "W166")[1],
-  output = c("estimates", "parameters")[1],
+  district = NULL,
   channel = NULL
 )
 }
 \arguments{
-\item{species}{character string. One of c("Tanner Crab", "Snow Crab").
-c("TANNER", "SNOW").}
+\item{species}{character string. One of c("TANNER", "SNOW").}
 
 \item{region}{character string describing the region of interest. One of
 c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
 
 \item{district}{character string. One of c("ALL", "E166", "W166"). Defaults to
 "ALL", "E166" and "W166" are to be used for Tanner Crab only.}
-
-\item{output}{character string. One of c("estimates", "parameters"). Defaults
-to "estimates" to provide ___. Specify "parameters" for a table
-of model parameter estimates for each year.}
 
 \item{channel}{connection to Oracle created via crabPack::get_connected() or RODBC::odbcConnect().
 'channel = "local"' is to be used for internal development purposes only.}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_variables.R
 \name{set_variables}
 \alias{set_variables}
-\title{Set optional variables and subset data}
+\title{Set optional variables used in \code{calc_cpue} and \code{calc_bioabund} and subset data}
 \usage{
 set_variables(
   crab_data = NULL,
@@ -21,9 +21,7 @@ set_variables(
 \arguments{
 \item{crab_data}{object created from \code{crabPack::get_data()}.}
 
-\item{species}{character string. One of c("Red King Crab", "Blue King Crab",
-"Tanner Crab", "Snow Crab", "Hybrid Tanner Crab", "Horsehair Crab").
-c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
+\item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
 
 \item{sex}{character string. One or both of c("male", "female"). Optional,
 "male" or "female" only will provide estimates for the selected sex,
@@ -48,22 +46,22 @@ Defaults to "morphological" maturity for female crab. Morphological
 maturity designation for male crab are not available at this time.}
 
 \item{shell_condition}{character string. One or many of c("soft molting",
-"new hardshell", "oldshell", "very oldshell", "all").
+"new hardshell", "oldshell", "very oldshell", "all_categories").
 Optional, specifying this parameter will provide estimates
-for each of the selected shell conditions; "all" will provide
-estimates for each available shell condition category.}
+for each of the selected shell conditions; "all_categories" will
+provide estimates for each available shell condition category.}
 
 \item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
-"dead", "empty cases", "hatching", "all"). Optional, specifying
-this parameter will provide estimates for each of the selected
-egg conditions; "all" will provide estimates for each available
-egg condition category.}
+"dead", "empty cases", "hatching", "all_categories"). Optional,
+specifying this parameter will provide estimates for each of the
+selected egg conditions; "all_categories" will provide estimates
+for each available egg condition category.}
 
 \item{clutch_size}{character string. One or many of c("immature", "mature barren",
-"trace", "quarter", "half", "three quarter", "full"). Optional,
-specifying this parameter will provide estimates for each of the
-selected clutch sizes; "all" will provide estimates for each
-available clutch size category.}
+"trace", "quarter", "half", "three quarter", "full", "all_categories").
+Optional, specifying this parameter will provide estimates for each of
+the selected clutch sizes; "all_categories" will provide estimates for
+each available clutch size category.}
 
 \item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
 within the size range specified in 'size_min' and/or 'size_max',

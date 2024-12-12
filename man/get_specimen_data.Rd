@@ -13,9 +13,7 @@ get_specimen_data(
 )
 }
 \arguments{
-\item{species}{character string. One of c("Red King Crab", "Blue King Crab",
-"Tanner Crab", "Snow Crab", "Hybrid Tanner Crab", "Horsehair Crab").
-c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
+\item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
 
 \item{region}{character string describing the region of interest. One of
 c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
