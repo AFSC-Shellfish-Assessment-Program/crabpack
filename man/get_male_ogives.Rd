@@ -20,7 +20,7 @@ c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
 \item{district}{character string. One of c("ALL", "E166", "W166"). Defaults to
 "ALL", "E166" and "W166" are to be used for Tanner Crab only.}
 
-\item{channel}{connection to Oracle created via crabPack::get_connected() or RODBC::odbcConnect().
+\item{channel}{connection to Oracle created via crabpack::get_connected() or RODBC::odbcConnect().
 'channel = "local"' is to be used for internal development purposes only.}
 }
 \value{

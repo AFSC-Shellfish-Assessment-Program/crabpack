@@ -24,7 +24,7 @@ Defaults to "ALL" districts within the selected region if not specified.}
 
 \item{years}{numeric or integer vector of years.}
 
-\item{channel}{connection to Oracle created via crabPack::get_connected() or RODBC::odbcConnect().
+\item{channel}{connection to Oracle created via crabpack::get_connected() or RODBC::odbcConnect().
 'channel = "local"' is to be used for internal development purposes only.}
 }
 \value{

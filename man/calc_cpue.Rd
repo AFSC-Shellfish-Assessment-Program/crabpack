@@ -25,7 +25,7 @@ calc_cpue(
 )
 }
 \arguments{
-\item{crab_data}{object created from \code{crabPack::get_data()}.}
+\item{crab_data}{object created from \code{crabpack::get_data()}.}
 
 \item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
 
