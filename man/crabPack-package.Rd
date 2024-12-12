@@ -6,10 +6,10 @@
 \alias{crabPack-package}
 \title{crabPack: Calculate Bering Sea Crab CPUE, Abundance, and Biomass}
 \description{
-This package contains functions to calculate standard NOAA AFSC SAP summer bottom trawl survey data products (CPUE, Abundance, and Biomass) for the Eastern Bering Sea Shelf (1975-present) and Northern Bering Sea Shelf (2010-present).
+This package contains functions to calculate standard NOAA AFSC Shellfish Assessment Program summer bottom trawl survey data products (CPUE, Abundance, and Biomass) for the Eastern Bering Sea Shelf (1975-present) and Northern Bering Sea Shelf (2010-present).
 }
 \author{
-\strong{Maintainer}: Shannon Hennessey \email{shannon.hennessey@noaa.gov} (\href{https://orcid.org/0000-0002-6737-1362}{ORCID})
+\strong{Maintainer}: Shannon Hennessey \email{shannon.hennessey@noaa.gov}
 
 }
 \keyword{internal}
