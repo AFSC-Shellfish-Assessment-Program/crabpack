@@ -109,48 +109,48 @@ calc_bioabund <- function(crab_data = NULL,
   #Sum across haul, scale abundance, biomass, and variance to strata, then sum across strata and calc CIs
   bio_abund_df <- station_cpue %>%
                   dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'STRATUM', groups_out, 'TOTAL_AREA')))) %>%
-                  dplyr::summarise(COUNT = sum(.data$COUNT), CPUE = sum(.data$CPUE), CPUE_KG = sum(.data$CPUE_KG)) %>%
+                  dplyr::summarise(COUNT = sum(COUNT), CPUE = sum(CPUE), CPUE_KG = sum(CPUE_KG)) %>%
                   #Scale to abundance by strata
                   dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STRATUM', groups_out)))) %>%
-                  dplyr::reframe(AREA = .data$TOTAL_AREA,
-                                 MEAN_CPUE = mean(.data$CPUE),
+                  dplyr::reframe(AREA = TOTAL_AREA,
+                                 MEAN_CPUE = mean(CPUE),
                                  N_CPUE = dplyr::n(),
-                                 VAR_CPUE = (stats::var(.data$CPUE)*(.data$AREA^2))/.data$N_CPUE,
-                                 MEAN_CPUE_MT = mean(.data$CPUE_MT),
+                                 VAR_CPUE = (stats::var(CPUE)*(AREA^2))/N_CPUE,
+                                 MEAN_CPUE_MT = mean(CPUE_MT),
                                  N_CPUE_MT = dplyr::n(),
-                                 VAR_CPUE_MT = (stats::var(.data$CPUE_MT)*(.data$AREA^2))/.data$N_CPUE_MT,
-                                 MEAN_CPUE_LBS = mean(.data$CPUE_LBS),
+                                 VAR_CPUE_MT = (stats::var(CPUE_MT)*(AREA^2))/N_CPUE_MT,
+                                 MEAN_CPUE_LBS = mean(CPUE_LBS),
                                  N_CPUE_LBS = dplyr::n(),
-                                 VAR_CPUE_LBS = (stats::var(.data$CPUE_LBS)*(.data$AREA^2))/.data$N_CPUE_LBS,
-                                 ABUNDANCE = (.data$MEAN_CPUE * .data$AREA),
-                                 BIOMASS_MT = (.data$MEAN_CPUE_MT * .data$AREA),
-                                 BIOMASS_LBS = (.data$MEAN_CPUE_LBS * .data$AREA),
-                                 N_STATIONS = length(unique(.data$STATION_ID))) %>%
+                                 VAR_CPUE_LBS = (stats::var(CPUE_LBS)*(AREA^2))/N_CPUE_LBS,
+                                 ABUNDANCE = (MEAN_CPUE * AREA),
+                                 BIOMASS_MT = (MEAN_CPUE_MT * AREA),
+                                 BIOMASS_LBS = (MEAN_CPUE_LBS * AREA),
+                                 N_STATIONS = length(unique(STATION_ID))) %>%
                   dplyr::distinct() %>%
                   # Sum across strata
                   dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', groups_out)))) %>%
-                  dplyr::reframe(#AREA = sum(.data$AREA),
-                                 MEAN_CPUE = sum(.data$MEAN_CPUE),
-                                 SD_CPUE = sqrt(sum(.data$VAR_CPUE)),
-                                 N_CPUE = sum(.data$N_CPUE),
-                                 MEAN_CPUE_MT = sum(.data$MEAN_CPUE_MT),
-                                 SD_CPUE_MT = sqrt(sum(.data$VAR_CPUE_MT)),
-                                 N_CPUE_MT = sum(.data$N_CPUE_MT),
-                                 MEAN_CPUE_LBS = sum(.data$MEAN_CPUE_LBS),
-                                 SD_CPUE_LBS = sqrt(sum(.data$VAR_CPUE_LBS)),
-                                 N_CPUE_LBS = sum(.data$N_CPUE_LBS),
-                                 ABUNDANCE = sum(.data$ABUNDANCE),
-                                 ABUNDANCE_CV = (.data$SD_CPUE/.data$ABUNDANCE),
-                                 ABUNDANCE_CI = 1.96*(.data$SD_CPUE),
-                                 BIOMASS_MT = sum(.data$BIOMASS_MT),
-                                 BIOMASS_MT_CV = (.data$SD_CPUE_MT/.data$BIOMASS_MT),
-                                 BIOMASS_MT_CI = (1.96*.data$SD_CPUE_MT),
-                                 BIOMASS_LBS = sum(.data$BIOMASS_LBS),
-                                 BIOMASS_LBS_CV = (.data$SD_CPUE_LBS/.data$BIOMASS_LBS),
-                                 BIOMASS_LBS_CI = 1.96*(.data$SD_CPUE_LBS),
-                                 N_STATIONS = sum(.data$N_STATIONS)) %>%
-                  dplyr::mutate(N_STATIONS = ifelse((.data$YEAR == 2000
-                                                     & district == "BB"), 135, .data$N_STATIONS)) %>%
+                  dplyr::reframe(#AREA = sum(AREA),
+                                 MEAN_CPUE = sum(MEAN_CPUE),
+                                 SD_CPUE = sqrt(sum(VAR_CPUE)),
+                                 N_CPUE = sum(N_CPUE),
+                                 MEAN_CPUE_MT = sum(MEAN_CPUE_MT),
+                                 SD_CPUE_MT = sqrt(sum(VAR_CPUE_MT)),
+                                 N_CPUE_MT = sum(N_CPUE_MT),
+                                 MEAN_CPUE_LBS = sum(MEAN_CPUE_LBS),
+                                 SD_CPUE_LBS = sqrt(sum(VAR_CPUE_LBS)),
+                                 N_CPUE_LBS = sum(N_CPUE_LBS),
+                                 ABUNDANCE = sum(ABUNDANCE),
+                                 ABUNDANCE_CV = (SD_CPUE/ABUNDANCE),
+                                 ABUNDANCE_CI = 1.96*(SD_CPUE),
+                                 BIOMASS_MT = sum(BIOMASS_MT),
+                                 BIOMASS_MT_CV = (SD_CPUE_MT/BIOMASS_MT),
+                                 BIOMASS_MT_CI = (1.96*SD_CPUE_MT),
+                                 BIOMASS_LBS = sum(BIOMASS_LBS),
+                                 BIOMASS_LBS_CV = (SD_CPUE_LBS/BIOMASS_LBS),
+                                 BIOMASS_LBS_CI = 1.96*(SD_CPUE_LBS),
+                                 N_STATIONS = sum(N_STATIONS)) %>%
+                  dplyr::mutate(N_STATIONS = ifelse((YEAR == 2000
+                                                     & district == "BB"), 135, N_STATIONS)) %>%
                   dplyr::ungroup()# %>%
                 # complete.cases()
 

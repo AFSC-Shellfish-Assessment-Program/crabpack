@@ -61,7 +61,7 @@ calc_cpue <- function(crab_data = NULL,
 
   # Filter region, district, years
   specimen_dat <- specimen_dat %>%
-                  dplyr::filter(.data$REGION %in% region)
+                  dplyr::filter(REGION %in% region)
 
 
   # Specify stock stations
@@ -73,23 +73,23 @@ calc_cpue <- function(crab_data = NULL,
   # Specify retow stations for BBRKC, pull by year
   ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
   retow_stations <- stock_stations %>%
-                    dplyr::filter(.data$HAUL_TYPE == 17) %>%
-                    dplyr::select(.data$STATION_ID) %>%
+                    dplyr::filter(HAUL_TYPE == 17) %>%
+                    dplyr::select(STATION_ID) %>%
                     dplyr::pull()
 
 
   ## Calculate CPUE by STATION, YEAR, and other biometrics ---------------------
   cpue <- specimen_dat %>%
-          dplyr::filter(.data$STATION_ID %in% stock_stations$STATION_ID) %>%
-          dplyr::mutate(COUNT = .data$SAMPLING_FACTOR, # here's where I could do n_crab vs. total_counts....
-                        CPUE = .data$SAMPLING_FACTOR/.data$AREA_SWEPT,
-                        CPUE_MT = (.data$SAMPLING_FACTOR * .data$CALCULATED_WEIGHT_1MM) / .data$AREA_SWEPT / 1000 / 1000,
-                        CPUE_LBS = .data$CPUE_MT*2204.6) %>%
+          dplyr::filter(STATION_ID %in% stock_stations$STATION_ID) %>%
+          dplyr::mutate(COUNT = SAMPLING_FACTOR, # here's where I could do n_crab vs. total_counts....
+                        CPUE = SAMPLING_FACTOR/AREA_SWEPT,
+                        CPUE_MT = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) / AREA_SWEPT / 1000 / 1000,
+                        CPUE_LBS = CPUE_MT*2204.6) %>%
           dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>% # don't actually need the 'group_by()' if using base R, that's mostly just to keep those cols in the 'summarise'
-          dplyr::summarise(COUNT = sum(.data$COUNT),
-                           CPUE = sum(.data$CPUE),
-                           CPUE_MT = sum(.data$CPUE_MT),
-                           CPUE_LBS = sum(.data$CPUE_LBS))
+          dplyr::summarise(COUNT = sum(COUNT),
+                           CPUE = sum(CPUE),
+                           CPUE_MT = sum(CPUE_MT),
+                           CPUE_LBS = sum(CPUE_LBS))
 
 
   # Join to zero catch stations, summarize -------------------------------------
@@ -154,7 +154,7 @@ calc_cpue <- function(crab_data = NULL,
                                                          SIZE_1MM = bin_combos,
                                                          HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
                                                          stock_stations %>%
-                                                           dplyr::select(.data$STATION_ID, .data$STRATUM, .data$TOTAL_AREA) %>%
+                                                           dplyr::select(STATION_ID, STRATUM, TOTAL_AREA) %>%
                                                            tibble::add_column(YEAR = years))) %>%
                     tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
                     dplyr::select(dplyr::all_of(c("YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
@@ -171,7 +171,7 @@ calc_cpue <- function(crab_data = NULL,
   #                                          CLUTCH_TEXT = clutch_combos,
   #                                          HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
   #                                          stock_stations %>%
-  #                                            dplyr::select(.data$STATION_ID, .data$STRATUM, .data$TOTAL_AREA) %>%
+  #                                            dplyr::select(STATION_ID, STRATUM, TOTAL_AREA) %>%
   #                                            tibble::add_column(YEAR = years) %>%
   #                                            dplyr::distinct())) %>%
   #     tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
@@ -190,9 +190,9 @@ calc_cpue <- function(crab_data = NULL,
   # will probably have to remove those too
   if(!is.null(crab_category)){
     station_cpue <- station_cpue %>%
-      filter(!((.data$CATEGORY %in% c("mature_male", "immature_male", "legal_male",
-                                      "sublegal_male", "preferred_male") & .data$SEX_TEXT == "female") |
-                 (.data$CATEGORY %in% c("mature_female", "immature_female", "female") & .data$SEX_TEXT == "male")))
+      filter(!((CATEGORY %in% c("mature_male", "immature_male", "legal_male",
+                                      "sublegal_male", "preferred_male") & SEX_TEXT == "female") |
+                 (CATEGORY %in% c("mature_female", "immature_female", "female") & SEX_TEXT == "male")))
   }
 
 
@@ -200,9 +200,9 @@ calc_cpue <- function(crab_data = NULL,
   #Filtering out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
   if(species == "RKC" & district == "BB"){
     station_cpue <- station_cpue %>%
-      dplyr::filter(!(.data$YEAR == 2000 &
-                        .data$STATION_ID == "E-11" &
-                        .data$SEX_TEXT == "male"))
+      dplyr::filter(!(YEAR == 2000 &
+                        STATION_ID == "E-11" &
+                        SEX_TEXT == "male"))
   } else{
     station_cpue <- station_cpue
   }
@@ -212,48 +212,48 @@ calc_cpue <- function(crab_data = NULL,
   if(species == "RKC" & replace_retow != FALSE){
     # replace female BBRKC with female data from station with HT 17
     station_cpue <- station_cpue %>%
-                    dplyr::group_by(.data$YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
+                    dplyr::group_by(YEAR, STATION_ID, SEX_TEXT) %>%
                     tidyr::nest() %>%
                     # Females: replacing original stations with resampled stations in retow yrs for BBRKC females
                     ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
-                    dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
-                      if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
-                      {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
+                    dplyr::mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
+                      if(17 %in% data$HAUL_TYPE & district == "BB" & SEX_TEXT == "female" & STATION_ID %in% retow_stations)
+                      {data %>% dplyr::filter(HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(HAUL_TYPE != 17)}
                       return(x)
                     })) %>%
-                    tidyr::unnest(cols = c(.data$data)) %>%
+                    tidyr::unnest(cols = c(data)) %>%
                     dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM', 'TOTAL_AREA')))) %>%
-                    dplyr::summarise(COUNT = sum(.data$COUNT),
-                                     CPUE = sum(.data$CPUE),
-                                     CPUE_MT = sum(.data$CPUE_MT),
-                                     CPUE_LBS = sum(.data$CPUE_LBS))
+                    dplyr::summarise(COUNT = sum(COUNT),
+                                     CPUE = sum(CPUE),
+                                     CPUE_MT = sum(CPUE_MT),
+                                     CPUE_LBS = sum(CPUE_LBS))
   } else{
     # remove all HT 17 data and re-summarise to ignore SEX
     station_cpue <- station_cpue %>%
-                    dplyr::filter(.data$HAUL_TYPE != 17) %>%
+                    dplyr::filter(HAUL_TYPE != 17) %>%
                     dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM', 'TOTAL_AREA')))) %>%
-                    dplyr::summarise(COUNT = sum(.data$COUNT),
-                                     CPUE = sum(.data$CPUE),
-                                     CPUE_MT = sum(.data$CPUE_MT),
-                                     CPUE_LBS = sum(.data$CPUE_LBS))
+                    dplyr::summarise(COUNT = sum(COUNT),
+                                     CPUE = sum(CPUE),
+                                     CPUE_MT = sum(CPUE_MT),
+                                     CPUE_LBS = sum(CPUE_LBS))
   } # else{
   #   # replace female BBRKC with female data from station with HT 17
   #   station_haul_cpue <- station_haul_cpue %>%
-  #                        dplyr::group_by(.data$YEAR, .data$STATION_ID, .data$SEX_TEXT) %>%
+  #                        dplyr::group_by(YEAR, STATION_ID, SEX_TEXT) %>%
   #                        tidyr::nest() %>%
   #                        #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
   #                        ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
-  #                        dplyr::mutate(data = purrr::map2(.data$data, .data$SEX_TEXT, function(data, sex) {
-  #                          if(17 %in% data$HAUL_TYPE & district == "BB" & .data$SEX_TEXT == "female" & .data$STATION_ID %in% retow_stations)
-  #                          {data %>% dplyr::filter(.data$HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(.data$HAUL_TYPE != 17)}
+  #                        dplyr::mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
+  #                          if(17 %in% data$HAUL_TYPE & district == "BB" & SEX_TEXT == "female" & STATION_ID %in% retow_stations)
+  #                          {data %>% dplyr::filter(HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(HAUL_TYPE != 17)}
   #                          return(x)
   #                        })) %>%
-  #                        tidyr::unnest(cols = c(.data$data)) %>%
+  #                        tidyr::unnest(cols = c(data)) %>%
   #                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM', 'TOTAL_AREA')))) %>%
-  #                        dplyr::summarise(COUNT = sum(.data$COUNT),
-  #                                         CPUE = sum(.data$CPUE),
-  #                                         CPUE_MT = sum(.data$CPUE_MT),
-  #                                         CPUE_LBS = sum(.data$CPUE_LBS))
+  #                        dplyr::summarise(COUNT = sum(COUNT),
+  #                                         CPUE = sum(CPUE),
+  #                                         CPUE_MT = sum(CPUE_MT),
+  #                                         CPUE_LBS = sum(CPUE_LBS))
   # }
 
   ## CPUE output ---------------------------------------------------------------
@@ -262,7 +262,7 @@ calc_cpue <- function(crab_data = NULL,
     if(output == "cpue"){
 
       cpue_out <- station_cpue %>%
-                  dplyr::left_join(.data$., stock_stations) %>%
+                  dplyr::left_join(., stock_stations) %>%
                   dplyr::ungroup() %>%
                   dplyr::mutate(SPECIES = species) %>%
                   dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
@@ -287,7 +287,7 @@ calc_cpue <- function(crab_data = NULL,
   # If 'output' isn't specified, default output is 'cpue'
   if(is.null(output)){
     cpue_out <- station_cpue %>%
-      dplyr::left_join(.data$., stock_stations) %>%
+      dplyr::left_join(., stock_stations) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(SPECIES = species) %>%
       dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE',

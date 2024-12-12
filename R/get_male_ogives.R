@@ -90,7 +90,7 @@ get_male_ogives <- function(species = NULL,
   # further filter by district if specified
   if(!is.null(district)){
     ogives_df <- ogives_df %>%
-                 dplyr::filter(.data$DISTRICT %in% district)
+                 dplyr::filter(DISTRICT %in% district)
   }
 
 
@@ -114,7 +114,7 @@ get_male_ogives <- function(species = NULL,
   # further filter by district if specified
   if(!is.null(district)){
     params_df <- params_df %>%
-                 dplyr::filter(.data$DISTRICT %in% district)
+                 dplyr::filter(DISTRICT %in% district)
   }
 
 

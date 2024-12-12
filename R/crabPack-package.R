@@ -15,6 +15,7 @@
 #' @importFrom rlang .data
 #' @importFrom data.table data.table
 #' @importFrom gapindex stitch_entries
+#' @importFrom utils data
 #'
 ## usethis namespace: end
 NULL
