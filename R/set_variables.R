@@ -1,4 +1,4 @@
-#' Set optional variables and subset data
+#' Set optional variables used in `calc_cpue` and `calc_bioabund` and subset data
 #'
 #' @description A utility function to...
 #'
@@ -20,143 +20,226 @@ set_variables <- function(crab_data = NULL,
                           clutch_size = NULL,
                           bin_1mm = NULL){
 
-  ## Add biometrics definitions and filtering ----
-  # define set of columns to 'group_by()' based on whether or not there is "shellcond", "size", or other modifiers defined in the function
+
+  ## Error messages:
+  # - NOT MORE THAN 1 SPECIES AT A TIME!
+  # - clutch size, egg condition only for females (right now), default subsets
+  # - crab category/species combos...eg. mature male for chionoecetes (warning, set to lg_male)
+  # - general check inputs to see if allowed options
+  # - can't call 'all_categories' and another category -- redundant: egg condition, shell condition, clutch size, category
+  ## **SOME SORT OF WARNING if wanting male, can't do morphometric, it's cutline only for this. But see Chionoecetes maturity tables?
+  ## Hair --> no female maturity...cutline at least -- I guess could do morphometric? And legal/sublegal == mature/immature? (but not recommended)
+  # female maturity - if not specified, warning that using morphological default, error if length > 1
+
+
+  # Define set of columns to 'group_by()' and define 'expand_grid()' combinations
+  # based on whether or not there are optional specimen modifiers defined in function
   group_cols <- c()
+  expand_combos <- list()
 
 
-  # SEX: Define/filter if specified in function ----
-  # First, always include initially to carry through for BBRKC resample filtering
-  data_crab2 <- crab_data %>%
-                dplyr::mutate(SEX_TEXT = case_when(.data$SEX == 1 ~ "male",
-                                                   .data$SEX == 2 ~ "female"))
+  ## SEX -----------------------------------------------------------------------
+  # Always include initially to carry through for BBRKC resample filtering
+  data_crab <- crab_data %>%
+               dplyr::mutate(SEX_TEXT = case_when(.data$SEX == 1 ~ "male",
+                                                  .data$SEX == 2 ~ "female"))
+  sex_combos <- c("male", "female")
 
-  # Filter sex if only want one
+  # filter sex if only want one
   if(!is.null(sex)){
-    if(!sex %in% c("all", TRUE))
-      data_crab2 <- data_crab2 %>%
-                    dplyr::filter(.data$SEX_TEXT %in% sex)
+    if(!sex %in% c("all_categories", TRUE)){
+      data_crab <- data_crab %>%
+                   dplyr::filter(.data$SEX_TEXT %in% sex)
+      sex_combos <- unique(data_crab$SEX_TEXT)
+    }
   }
 
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(sex_combos = sex_combos))
 
-  # SIZE_MIN ----
+
+  ## SIZE_MIN ------------------------------------------------------------------
   if(!is.null(size_min)){
-    data_crab2 <- data_crab2 %>%
+    # filter minimum size
+    data_crab <- data_crab %>%
                   dplyr::filter(.data$SIZE_1MM >= size_min)
 
   }
 
-  # SIZE_MAX:  ----
+
+  ## SIZE_MAX ------------------------------------------------------------------
   if(!is.null(size_max)){
-    data_crab2 <- data_crab2 %>%
+    # filter maximum size
+    data_crab <- data_crab %>%
                   dplyr::filter(.data$SIZE_1MM <= size_max)
   }
 
-  ## CRAB CATEGORY??
-  # ###MATURITY: Define/filter if specified in function ----
-  # if(!is.null(mat_sex)){
-  #   # assign maturity
-  #   ## maybe a note her if want "mature male" for chionoecetes (for example),
-  #   ## say "we can't actually know maturity, giving "large male"/"small male" instead...
-  #   data_crab2 <- get_crab_category(crab_dat = data_crab2, stock = stock) %>%
-  #     filter(!is.na(MAT_SEX))
-  #
-  #   # filter by specific category
-  #   if(!mat_sex %in% c("all", TRUE)){
-  #     data_crab2 <- data_crab2 %>% dplyr::filter(.data$MAT_SEX %in% mat_sex)
-  #   }
-  #
-  #   group_cols <- append(group_cols, "MAT_SEX")
-  # }
+
+  ## CRAB CATEGORY -------------------------------------------------------------
+  if(is.null(crab_category)){
+    category_combos <- NA
+  }
+
+  if(!is.null(crab_category)){
+    # assign crab CATEGORY
+    data_crab <- get_crab_category(crab_dat = data_crab,
+                                   species = species,
+                                   region = region,
+                                   district = district,
+                                   crab_category = crab_category,
+                                   female_maturity = female_maturity) %>%
+                 filter(!is.na(CATEGORY)) # maybe don't need line?
+
+    # assign expand_combos
+    if(species %in% c("RKC", "BKC")){
+      category_combos <- c("immature_female", "mature_female",
+                           "immature_male", "mature_male", "legal_male")
+    }
+
+    if(species %in% c("TANNER", "SNOW", "HYBRID")){
+      category_combos <- c("immature_female", "mature_female",
+                           "small_male", "large_male",
+                           "legal_male", "preferred_male")
+    }
+
+    if(species == "HAIR"){
+      if(female_maturity == "cutline"){
+        category_combos <- c("female", "sublegal_male", "legal_male")
+      } else{
+        category_combos <- c("immature_female", "mature_female",
+                             "sublegal_male", "legal_male")
+      }
+    }
+
+    # filter categories
+    if(TRUE %in% (!crab_category %in% c("all_categories"))){
+      data_crab <- data_crab %>% dplyr::filter(.data$CATEGORY %in% crab_category)
+      category_combos <- crab_category
+    }
+
+    # append group columns
+    group_cols <- append(group_cols, "CATEGORY")
+  }
+
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(category_combos = category_combos))
 
 
-  # SHELL CONDITION: Define/filter if specified in function ----
+  ## SHELL CONDITION -----------------------------------------------------------
+  if(is.null(shell_condition)){
+    shell_combos <- NA
+  }
+
   if(!is.null(shell_condition)){
-    data_crab2 <- data_crab2 %>%
-      dplyr::mutate(SHELL_TEXT = case_when(.data$SHELL_CONDITION %in% 0:1 ~ "soft molting",
-                                                 .data$SHELL_CONDITION == 2 ~ "new hardshell",
-                                                 .data$SHELL_CONDITION == 3 ~ "oldshell",
-                                                 .data$SHELL_CONDITION %in% 4:5 ~ "very oldshell"))
+    # assign SHELL_TEXT
+    data_crab <- data_crab %>%
+                 dplyr::mutate(SHELL_TEXT = case_when(.data$SHELL_CONDITION %in% 0:1 ~ "soft molting",
+                                                      .data$SHELL_CONDITION == 2 ~ "new hardshell",
+                                                      .data$SHELL_CONDITION == 3 ~ "oldshell",
+                                                      .data$SHELL_CONDITION %in% 4:5 ~ "very oldshell"))
 
-    # filter by specific category
-    if(TRUE %in% (shell_condition %in% c(0:5))){
-      data_crab2 <- data_crab2 %>%
-                    dplyr::filter(.data$SHELL_CONDITION %in% shell_condition)
+    if(TRUE %in% (shell_condition == "all_categories")){
+      shell_combos <- c("soft molting", "new hardshell", "oldshell", "very oldshell")
     }
 
+    # filter categories
     if(TRUE %in% (shell_condition %in% c("soft molting", "new hardshell", "oldshell", "very oldshell"))){
-      data_crab2 <- data_crab2 %>%
+      data_crab <- data_crab %>%
                     dplyr::filter(.data$SHELL_TEXT %in% shell_condition)
+      shell_combos <- shell_condition
     }
 
+    # append group columns
     group_cols <- append(group_cols, "SHELL_TEXT")
   }
 
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(shell_combos = shell_combos))
 
-  # EGG CONDITION: Define/filter if specified in function ----
+
+  ## EGG CONDITION -------------------------------------------------------------
+  if(is.null(egg_condition)){
+    egg_combos <- NA
+  }
+
   if(!is.null(egg_condition)){
-    data_crab2 <- data_crab2 %>%
-      dplyr::filter(.data$SEX == 2) %>% #HAUL_TYPE != 17,
-      dplyr::mutate(EGG_CONDITION_TEXT = case_when(.data$EGG_CONDITION == 0 ~ "none",
-                                                   .data$EGG_CONDITION == 1 ~ "uneyed",
-                                                   .data$EGG_CONDITION == 2 ~ "eyed",
-                                                   .data$EGG_CONDITION == 3 ~ "dead",
-                                                   .data$EGG_CONDITION == 4 ~ "empty cases",
-                                                   .data$EGG_CONDITION == 5 ~ "hatching",
-                                                   TRUE ~ "unknown"))
+    # assign EGG_CONDITION_TEXT
+    data_crab <- data_crab %>%
+                 dplyr::filter(.data$SEX == 2) %>%
+                 dplyr::mutate(EGG_CONDITION_TEXT = case_when(.data$EGG_CONDITION == 0 ~ "none",
+                                                              .data$EGG_CONDITION == 1 ~ "uneyed",
+                                                              .data$EGG_CONDITION == 2 ~ "eyed",
+                                                              .data$EGG_CONDITION == 3 ~ "dead",
+                                                              .data$EGG_CONDITION == 4 ~ "empty cases",
+                                                              .data$EGG_CONDITION == 5 ~ "hatching"))
 
-    if(TRUE %in% (egg_condition %in% c(0:5))){
-      data_crab2 <- data_crab2 %>%
-                    dplyr::filter(.data$EGG_CONDITION %in% egg_condition)
+    if(TRUE %in% (egg_condition == "all_categories")){
+      egg_combos <- c("none", "uneyed", "eyed", "dead", "empty cases", "hatching")
     }
 
-    if(TRUE %in% (egg_condition %in% c("none", "uneyed", "eyed", "dead",
-                                       "empty cases", "hatching", "unknown"))){
-      data_crab2 <- data_crab2 %>%
+    # filter categories
+    if(TRUE %in% (egg_condition %in% c("none", "uneyed", "eyed", "dead", "empty cases", "hatching"))){
+      data_crab <- data_crab %>%
                     dplyr::filter(.data$EGG_CONDITION_TEXT %in% egg_condition)
+      egg_combos <- egg_condition
     }
 
+    # append group columns
     group_cols <- append(group_cols, "EGG_CONDITION_TEXT")
   }
 
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(egg_combos = egg_combos))
 
-  # CLUTCH SIZE: Define/filter if specified in function ----
+
+  ## CLUTCH SIZE ---------------------------------------------------------------
+  if(is.null(clutch_size)){
+    clutch_combos <- NA
+  }
+
   if(!is.null(clutch_size)){
-    data_crab2 <- data_crab2 %>%
-                  dplyr::filter(.data$SEX == 2) %>% #HAUL_TYPE != 17,
+    # assign CLUTCH_TEXT
+    data_crab <- data_crab %>%
+                  dplyr::filter(.data$SEX == 2) %>%
                   dplyr::mutate(CLUTCH_TEXT = case_when(.data$CLUTCH_SIZE == 0 ~ "immature",
                                                         .data$CLUTCH_SIZE == 1 ~ "mature barren",
                                                         .data$CLUTCH_SIZE == 2 ~ "trace",
                                                         .data$CLUTCH_SIZE == 3 ~ "quarter",
                                                         .data$CLUTCH_SIZE == 4 ~ "half",
                                                         .data$CLUTCH_SIZE == 5 ~ "three quarter",
-                                                        .data$CLUTCH_SIZE == 6 ~ "full",
-                                                        ((.data$CLUTCH_SIZE == 999) | is.na(.data$CLUTCH_SIZE) == TRUE) ~ "unknown"))
+                                                        .data$CLUTCH_SIZE == 6 ~ "full"))
 
-    if(TRUE %in% (clutch_size %in% c(0:6))){
-      data_crab2 <- data_crab2 %>%
-                    dplyr::filter(.data$CLUTCH_SIZE %in% clutch_size)
+    if(TRUE %in% (clutch_size == "all_categories")){
+      clutch_combos <- c("immature", "mature barren", "trace", "quarter",
+                         "half", "three quarter", "full")
     }
 
+    # filter categories
     if(TRUE %in% (clutch_size %in% c("immature", "mature barren", "trace", "quarter",
-                                     "half", "three quarter", "full", "unknown"))){
-      data_crab2 <- data_crab2 %>%
-                    dplyr::filter(.data$CLUTCH_TEXT %in% clutch_size)
+                                     "half", "three quarter", "full"))){
+      data_crab <- data_crab %>%
+                   dplyr::filter(.data$CLUTCH_TEXT %in% clutch_size)
+      clutch_combos <- clutch_size
     }
 
+    # append group columns
     group_cols <- append(group_cols, "CLUTCH_TEXT")
   }
 
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(clutch_combos = clutch_combos))
 
-  # 1MM BINS: Define/filter if specified in function ----
+
+  ## 1MM BINS ----
+  # might not really need this....could just retain SIZE_1MM into group_cols
   if(!is.null(bin_1mm)){
-    data_crab2 <- data_crab2 %>%
-                  dplyr::mutate(BIN_1MM = floor(.data$SIZE_1MM))
-    group_cols <- append(group_cols, "BIN_1MM")
+    # data_crab <- data_crab %>%
+    #               dplyr::mutate(BIN_1MM = floor(.data$SIZE_1MM))
+    group_cols <- append(group_cols, "SIZE_1MM")
   }
 
 
-
-  return(list(data_crab2, group_cols)) #, size_max)) #size_max if null is defined in calc_cpue now...
-
+  return(list(specimen_data = data_crab,
+              group_cols = group_cols,
+              expand_combos = expand_combos)) #, size_max)) #size_max if null is defined in calc_cpue now...
 }
