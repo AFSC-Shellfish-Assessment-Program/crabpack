@@ -15,12 +15,12 @@ get_connected <- function(db = "AKFIN",
                           check_access = TRUE) {
 
   # check if database name is stored in keyring, if not request user/pwd
-  if(!(db %in% keyring::key_list()[,1])) {
+  if(!(db %in% keyring::key_list()[,1])){
     username <- getPass::getPass(msg = paste("Enter your", db,
                                              "Oracle Database Username: "))
     password <- getPass::getPass(msg = paste("Enter your", db,
                                              "Oracle Database Password: "))
-  } else {
+  } else{
     username <- keyring::key_list(db)$username
     password <-  keyring::key_get(db, keyring::key_list(db)$username)
   }
@@ -29,43 +29,40 @@ get_connected <- function(db = "AKFIN",
                                                  uid = paste(username),
                                                  pwd = paste(password),
                                                  believeNRows = FALSE))
-  if (channel == -1) {
+  if(channel == -1){
     stop("Unable to connect. Username or password may be incorrect. Please re-enter.\n\n")
     return(invisible())
   }
 
-  if (class(channel) == "RODBC") {
+  if(class(channel) == "RODBC"){
     cat("Successfully connected to Oracle.\n")
 
-    if (check_access & db == "AFSC") {
+    if(check_access & db == "AFSC"){
       cat("Checking that you have access to the tables queried in the crabPack package.\n") ## NEED TO UPDATE THIS WITH CORRECT TABLE NAMES!
-      tables_to_check <- data.frame(table_name = c("CRABBASE.SURVEY_DESIGN",
-                                                   "CRABBASE.AREA",
-                                                   "CRABBASE.STRATUM_GROUPS",
-                                                   "CRABBASE.TAXONOMIC_CLASSIFICATION",
-
-                                                   "CRABBASE.HAUL",
+      tables_to_check <- data.frame(table_name = c("CRABBASE.HAUL",
                                                    "CRABBASE.SPECIMEN",
-
-                                                   "CRABBASE.CRUISES",
-                                                   "CRABBASE.SURVEYS",
-                                                   "CRABBASE.SURVEY_DEFINITIONS",
-                                                   "CRABBASE.VESSELS"),
+                                                   "CRABBASE.SIZEGROUPS",
+                                                   "CRABBASE.DISTRICT_STRATUM",
+                                                   "CRABBASE.STRATUM_STATIONS",
+                                                   "CRABBASE.STRATUM_AREA",
+                                                   "CRABBASE.STRATUM_DESIGN",
+                                                   "CRABBASE.CHIONOECETES_MAT_RATIO",
+                                                   "CRABBASE.CHIONOECETES_OGIVE_PARAMS"),
                                                    access = F)
 
-      for (itable in 1:nrow(x = tables_to_check)) {
+      for(itable in 1:nrow(x = tables_to_check)){
         table_check <- tryCatch(expr = RODBC::sqlFetch(channel = channel,
                                 sqtable = tables_to_check$table_name[itable],
                                 max = 5),
                        error = function(cond) data.frame())
-        if (nrow(x = table_check) == 5)
+        if(nrow(x = table_check) == 5)
           tables_to_check$access[itable] <- TRUE
       }
 
-      if (all(tables_to_check$access == T)) {
+      if(all(tables_to_check$access == T)){
         cat("Confirming connection to all Oracle tables associated with the crabPack package.\n")
         return(channel)
-      } else (
+      } else(
         stop("Cannot connect to these tables in Oracle:\n",
              paste0(tables_to_check$table_name[tables_to_check$access == F],
                     collapse = "\n"),
