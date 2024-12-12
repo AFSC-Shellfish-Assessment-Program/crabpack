@@ -14,6 +14,7 @@
 #' @importFrom purrr map2
 #' @importFrom rlang .data
 #' @importFrom data.table data.table
+#' @importFrom gapindex stitch_entries
 #'
 ## usethis namespace: end
 NULL
