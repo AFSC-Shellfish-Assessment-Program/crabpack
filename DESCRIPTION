@@ -22,7 +22,8 @@ Imports:
     lifecycle,
     magrittr,
     purrr,
-    rlang
+    rlang,
+    gapindex
 Depends: 
     R (>= 4.0.0)
 LazyData: true
