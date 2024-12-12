@@ -31,34 +31,33 @@ calc_cpue <- function(crab_data = NULL,
                       output = c("cpue", "bioabund")[1]){
 
 
-  # CALL set_variables() FUNCTION
-  ## set inputs from calc_cpue....
-  crab_data_cpue <- crab_data
-  species_cpue <- species ## I think we need this to then assign crab category in the set_vars() function
-  sex_cpue <- sex
-  size_min_cpue <- size_min
-  size_max_cpue <- size_max
-  crab_category_cpue <- crab_category
-  female_maturity_cpue <- female_maturity
-  shell_condition_cpue <- shell_condition
-  egg_condition_cpue <- egg_condition
-  clutch_size_cpue <- clutch_size
-  bin_1mm_cpue <- bin_1mm
+  # # CALL set_variables() FUNCTION
+  # ## set inputs from calc_cpue....
+  # crab_data_cpue <- crab_data
+  # species_cpue <- species ## I think we need this to then assign crab category in the set_vars() function
+  # sex_cpue <- sex
+  # size_min_cpue <- size_min
+  # size_max_cpue <- size_max
+  # crab_category_cpue <- crab_category
+  # female_maturity_cpue <- female_maturity
+  # shell_condition_cpue <- shell_condition
+  # egg_condition_cpue <- egg_condition
+  # clutch_size_cpue <- clutch_size
+  # bin_1mm_cpue <- bin_1mm
 
-  vars <- set_variables(crab_data = crab_data_cpue,
-                        species = species_cpue,
-                        sex = sex_cpue,
-                        size_min = size_min_cpue,
-                        size_max = size_max_cpue,
-                        crab_category = crab_category_cpue,
-                        female_maturity = female_maturity_cpue,
-                        shell_condition = shell_condition_cpue,
-                        egg_condition = egg_condition_cpue,
-                        clutch_size = clutch_size_cpue,
-                        bin_1mm = bin_1mm_cpue)
+  vars <- set_variables(crab_data = crab_data,
+                        species = species,
+                        sex = sex,
+                        size_min = size_min,
+                        size_max = size_max,
+                        crab_category = crab_category,
+                        female_maturity = female_maturity,
+                        shell_condition = shell_condition,
+                        egg_condition = egg_condition,
+                        clutch_size = clutch_size,
+                        bin_1mm = bin_1mm)
 
-  # might need to unlist these??
-  data_crab2 <- vars$data_crab2
+  specimen_dat <- vars$crab_data
   group_cols <- vars$group_cols
 
 
