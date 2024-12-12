@@ -7,10 +7,10 @@
 #' @return Returns a data frame with crab specimen data and a CATEGORY column with
 #'         stock-specific maturity designations
 #'
-#' @export get_crab_category
+#' @export set_crab_category
 
 
-get_crab_category <- function(crab_data = NULL,
+set_crab_category <- function(crab_data = NULL,
                               species = NULL,
                               region = c("EBS", "NBS")[1],
                               district = NULL,

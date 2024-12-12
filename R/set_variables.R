@@ -82,7 +82,7 @@ set_variables <- function(crab_data = NULL,
 
   if(!is.null(crab_category)){
     # assign crab CATEGORY
-    data_crab <- get_crab_category(crab_data = data_crab,
+    data_crab <- set_crab_category(crab_data = data_crab,
                                    species = species,
                                    region = region,
                                    district = district,
