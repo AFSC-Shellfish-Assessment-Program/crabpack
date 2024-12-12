@@ -25,7 +25,7 @@
 #' @description TBD
 #'
 #' @inheritParams calc_bioabund
-#' @param channel connection to Oracle created via crabPack::get_connected() or RODBC::odbcConnect().
+#' @param channel connection to Oracle created via crabpack::get_connected() or RODBC::odbcConnect().
 #'                'channel = "local"' is to be used for internal development purposes only.
 #'
 #' @return a named list containing survey, cruise, haul, catch, size, specimen,
@@ -43,7 +43,7 @@ get_specimen_data <- function(species = NULL,
 
   ## Set up channel if channel = NULL
   if(is.null(x = channel)){
-    channel <- crabPack::get_connected()
+    channel <- crabpack::get_connected()
   }
 
 

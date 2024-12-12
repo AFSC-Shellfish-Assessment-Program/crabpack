@@ -4,7 +4,7 @@
 #' Also support users who use the Rpackage `keyring` to store usernames and passwords.
 #'
 #' @param db string. A registered data source name, in this case "AKFIN" by default. This argument is passed to the `dsn` argument in `RODBC::odbcConnect()`
-#' @param check_access boolean. If TRUE (by default), checks whether you have the specific tables in AKFIN used in the crabPack package. Outputs an error if the user does not have access to these tables with a message of the point of contact information for access.
+#' @param check_access boolean. If TRUE (by default), checks whether you have the specific tables in AKFIN used in the crabpack package. Outputs an error if the user does not have access to these tables with a message of the point of contact information for access.
 #'
 #' @return channel of class "RODBC". See `?RODBC::odbcConnect()` for more detail
 #'
@@ -38,7 +38,7 @@ get_connected <- function(db = "AKFIN",
     cat("Successfully connected to Oracle.\n")
 
     if(check_access & db == "AFSC"){
-      cat("Checking that you have access to the tables queried in the crabPack package.\n") ## NEED TO UPDATE THIS WITH CORRECT TABLE NAMES!
+      cat("Checking that you have access to the tables queried in the crabpack package.\n") ## NEED TO UPDATE THIS WITH CORRECT TABLE NAMES!
       tables_to_check <- data.frame(table_name = c("CRABBASE.HAUL",
                                                    "CRABBASE.SPECIMEN",
                                                    "CRABBASE.SIZEGROUPS",
@@ -60,7 +60,7 @@ get_connected <- function(db = "AKFIN",
       }
 
       if(all(tables_to_check$access == T)){
-        cat("Confirming connection to all Oracle tables associated with the crabPack package.\n")
+        cat("Confirming connection to all Oracle tables associated with the crabpack package.\n")
         return(channel)
       } else(
         stop("Cannot connect to these tables in Oracle:\n",

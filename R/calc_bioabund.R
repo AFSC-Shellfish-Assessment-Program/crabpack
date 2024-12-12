@@ -5,7 +5,7 @@
 #'              Optional arguments also allow these indices to be calculated for subsets of
 #'              crab by biometric categories such as size, sex, maturity, and shell condition.
 #'
-#' @param crab_data object created from `crabPack::get_data()`.
+#' @param crab_data object created from `crabpack::get_data()`.
 #' @param species character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").
 #' @param region character string describing the region of interest. One of
 #'               c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.

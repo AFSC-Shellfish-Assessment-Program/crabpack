@@ -20,7 +20,7 @@ get_male_ogives <- function(species = NULL,
 
   ## Set up channel if channel = NULL
   if(is.null(x = channel)){
-    channel <- crabPack::get_connected()
+    channel <- crabpack::get_connected()
   }
 
 
