@@ -16,6 +16,7 @@
 #'                      maturity (default `female_maturity = "morphometric"`). Set
 #'                      `female_maturity = "cutline"` if you want to define female maturity
 #'                      based on ADF&G size cutlines.
+#' @inheritParams calc_bioabund
 #'
 #' @return A data frame with crab specimen data and an additional "CATEGORY" column
 #'         with stock-specific maturity designations.

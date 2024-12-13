@@ -14,6 +14,16 @@ set_crab_category(
 )
 }
 \arguments{
+\item{crab_data}{Object created from \code{crabpack::get_data()}.}
+
+\item{species}{Character string. One of \code{c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")}.}
+
+\item{region}{Character string describing the region of interest. One of
+\verb{c("EBS", "NBS"}). Defaults to \code{"EBS"} for Eastern Bering Sea.}
+
+\item{district}{Character string. One or many of \code{c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")}.
+Defaults to \code{"ALL"} districts within the selected region if not specified.}
+
 \item{crab_category}{Character string. One or many of
 \code{c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")}.
 Optional, specifying this parameter will provide estimates
@@ -23,6 +33,11 @@ If using a female category, maturity will be based on morphometric
 maturity (default \code{female_maturity = "morphometric"}). Set
 \code{female_maturity = "cutline"} if you want to define female maturity
 based on ADF&G size cutlines.}
+
+\item{female_maturity}{Character string. One of \code{c("morphometric", "cutline")}.
+Defaults to \code{"morphometric"} maturity for female crab. Morphometric
+maturity biomass and abundance estimates are not available for
+male crab at this time.}
 }
 \value{
 A data frame with crab specimen data and an additional "CATEGORY" column

@@ -160,7 +160,8 @@ calc_cpue <- function(crab_data = NULL,
                                                          HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
                                                          stock_stations %>%
                                                            dplyr::select(STATION_ID, STRATUM, TOTAL_AREA) %>%
-                                                           tibble::add_column(YEAR = years))) %>%
+                                                           # tibble::add_column(YEAR = years) %>%
+                                                           mutate(YEAR = years))) %>%
                     tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
                     dplyr::select(dplyr::all_of(c("YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
                                                   "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM", "TOTAL_AREA")))
