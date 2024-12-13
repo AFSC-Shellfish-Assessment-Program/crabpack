@@ -34,6 +34,7 @@ devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 
 <!--
 ## Collaborators
+**AKCNOWLEDGE Em/GAP CONTRIBUTION!!**
 The gapindex R package is a product of two AFSC-RACE-GAP working groups 
 regarding GAP data processes and index computation. Many thanks to those who 
 participated in those working groups:
