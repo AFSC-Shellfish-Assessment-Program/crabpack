@@ -4,9 +4,13 @@
 #'
 #' @inheritParams calc_bioabund
 #'
-#' @return ....
+#' @return a named list of subsetted specimen data by biometrics of interest
+#'         as well as variables to be carried forward for CPUE, abundance, and
+#'         biomass calculations across the selected biometrics.
 #'
-#' @export set_variables
+#' @export
+#'
+
 
 set_variables <- function(crab_data = NULL,
                           species = NULL,
@@ -231,11 +235,11 @@ set_variables <- function(crab_data = NULL,
 
 
   ## 1MM BINS ------------------------------------------------------------------
-  if(is.null(bin_1mm)){
+  if(bin_1mm == FALSE){
     bin_combos <- NA
   }
 
-  if(!is.null(bin_1mm)){
+  if(bin_1mm == TRUE){
     # set maximum size for 1mm bins to maximum size in data if no other maximum size is specified
     if(is.null(size_max)){
       bin_max <- max(specimen_dat$SIZE_1MM, na.rm = T)
