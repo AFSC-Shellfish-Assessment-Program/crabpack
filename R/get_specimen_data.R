@@ -27,21 +27,23 @@ get_specimen_data <- function(species = NULL,
   }
 
 
+
   ## Clear schema of temporary tables created in this function if present
   for(itable in c("HAUL", "SPECIMEN", "DISTRICT_STRATUM", "STRATUM_STATIONS",
                    "STRATUM_AREA", "STRATUM_DESIGN", "SIZEGROUPS")) {
 
-    ## check if temporary table exists and if so...
+    # check if temporary table exists and if so...
     if(nrow(x = RODBC::sqlQuery(channel = channel,
                                  query = paste0("SELECT table_name
                                                  FROM user_tables
                                                  WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
                                                  itable, "_QUERY'"))) != 0)
-      ## ...drop the table
+      # ...drop the table
       RODBC::sqlQuery(channel = channel,
                       query = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
                                      itable, "_QUERY"))
   }
+
 
 
   ## Error Query: check that the argument `species` is one of the correct options.
@@ -76,25 +78,52 @@ get_specimen_data <- function(species = NULL,
                   "github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
   }
 
-
   ## Error Query: check that the correct districts are selected for the correct species.
-  # if(!is.null(district)){
-  #   if(TRUE %in% (district %in% c("E166", "W166") & species != "TANNER")){
-  #     stop(paste0("E166 and W166 districts are only available for Tanner Crab.",
-  #                 " Please remove the argument `district` if querying Snow Crab."))
-  #   }
-  # }
+  if(!is.null(district)){
+
+    if(TRUE %in% (district %in% c("166TO173", "E166", "W166") & species != "TANNER")){
+      stop(paste0("E166, W166, and 166TO173W districts are only available for Tanner Crab.",
+                  " Please verify `district` options for the selected species in the",
+                  " CRABBASE.DISTRICT_STRATUM table."))
+    }
+
+    if(TRUE %in% (district %in% c("BB", "NORTH") & !species %in% c("RKC", "HAIR"))){
+      stop(paste0("Bristol Bay and Northern Unstratified districts are only available",
+                  " for Red King Crab and Hair Crab. Please verify `district` options",
+                  " for the selected species in the CRABBASE.DISTRICT_STRATUM table."))
+    }
+
+    if(TRUE %in% (district %in% c("PRIB") & !species %in% c("RKC", "BKC", "HAIR"))){
+      stop(paste0("The Pribilof Islands district is only available for Red King Crab,",
+                  " Blue King Crab, and Hair Crab. Please verify `district` options",
+                  " for the selected species in the CRABBASE.DISTRICT_STRATUM table."))
+    }
+
+    if(TRUE %in% (district %in% c("STMATT", "UNSTRAT") & !species %in% c("BKC"))){
+      stop(paste0("The St. Matthew and Unstratified districts are only available for",
+                  " Blue King Crab. Please verify `district` options for the selected",
+                  " species in the CRABBASE.DISTRICT_STRATUM table."))
+    }
+
+    if(TRUE %in% (district %in% c("NS") & !species %in% c("RKC"))){
+      stop(paste0("The Norton Sound district is only available for Red King Crab.",
+                  " Please verify `district` options for the selected species in",
+                  " the CRABBASE.DISTRICT_STRATUM table."))
+    }
+  }
 
 
 
   ## Concatenate species, years, region, district for use in a SQL query
-  species_vec <- gapindex::stitch_entries(stitch_what = species)
-  year_vec <- gapindex::stitch_entries(stitch_what = years)
-  region_vec <- gapindex::stitch_entries(stitch_what = region)
-  district_vec <- gapindex::stitch_entries(stitch_what = district)
+  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse=", "), ")")
+  year_vec <- paste0("(", paste0(years, collapse=", "), ")")
+  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse=", "), ")")
+  # district_vec <- paste0("(", paste0(sQuote(x = district, q = FALSE), collapse=", "), ")")
 
 
-  ## Query the haul table. This table....DESCRIPTION
+
+  ## Query the haul table. This table houses haul information for all hauls included
+  ## in the standard Eastern Bering Sea and Northern Bering Sea bottom trawl time series.
   cat("Pulling haul data...\n")
 
   haul_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_HAUL_QUERY AS
@@ -117,7 +146,9 @@ get_specimen_data <- function(species = NULL,
   }
 
 
-  ## Query the specimen data. This table....DESCRIPTION
+
+  ## Query the specimen data. This table contains all specimen data, subsetted for
+  ## standard crab bottom trawl stations in the Eastern Bering Sea and Northern Bering Sea.
   cat("Pulling specimen data...\n")
 
   specimen_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_SPECIMEN_QUERY AS
@@ -136,7 +167,8 @@ get_specimen_data <- function(species = NULL,
   ## Pull relevant lookups/stratum tables
   cat("Pulling district, stratum, and station data...\n")
 
-  ## Query the district and stratum data. This table....DESCRIPTION
+  ## Query the district and stratum data. This table reports which strata are contained
+  ## within a given management district or region.
   district_stratum_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_DISTRICT_STRATUM_QUERY AS
                                 SELECT *
                                 FROM CRABBASE.DISTRICT_STRATUM
@@ -151,7 +183,8 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  ## Query the district and stratum data. This table....DESCRIPTION
+  ## Query the stratum design data. This table reports the survey years included
+  ## in each year block ID and the corresponding stratum design ID.
   stratum_design_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY AS
                                 SELECT *
                                 FROM CRABBASE.STRATUM_DESIGN
@@ -165,7 +198,8 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  ## Query the district and stratum data. This table....DESCRIPTION
+  ## Query the stratum station data. This table reports the stations that make up
+  ## each stratum for each design ID.
   stratum_stations_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY AS
                                 SELECT *
                                 FROM CRABBASE.STRATUM_STATIONS
@@ -178,10 +212,10 @@ get_specimen_data <- function(species = NULL,
                                                                 query = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY"))
   attributes(x = stratum_stations_df)$sql_query <- stratum_stations_sql
 
-  ## IF DISTRICT not NULL, filter to district too?? in tidyverse?
 
 
-  ## Query the district and stratum data. This table....DESCRIPTION
+  ## Query the stratum area data. This table reports stratum total areas for each
+  ## species across distinct year block IDs.
   stratum_area_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_AREA_QUERY AS
                                 SELECT *
                                 FROM CRABBASE.STRATUM_AREA
@@ -196,15 +230,8 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  ## Define districts, stock stations, stratum areas ---------------------------
-  # Pull strata by stock specified. If no stock/district specified, default EBS for the species
-  # #filter to region --> region never null! default to EBS...
-  # if(is.null(region)){
-  #
-  #
-  # }
-
-  #filter to district --> get the strata you need
+  ## Define districts, stock stations, stratum areas
+  # Filter to district, pull relevant strata
   if(is.null(district)){
     strata <- district_stratum_df %>%
               dplyr::filter(DISTRICT == "ALL") %>%
@@ -215,9 +242,8 @@ get_specimen_data <- function(species = NULL,
               dplyr::pull(STRATUM)
   }
 
-
   # Pull stock stations using stock districts and haul info; assign stratum and area
-  # Assign DESIGN_ID to data based off year
+  # Assign DESIGN_ID to data based on year
   data_haul <- haul_df %>%
                dplyr::left_join(., stratum_design %>%
                                      dplyr::select(-YEAR_BLOCK_ID) %>%
@@ -243,7 +269,7 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  ## Join to haul data ---------------------------------------------------------
+  ## Join specimen and stratum information to haul data
   # Add specimen data to relevant hauls for the selected districts/strata
   data_crab <- stock_stations %>%
                dplyr::left_join(., specimen_df)
@@ -291,10 +317,10 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  ## Pull size groups definition lookup
+  ## Query the size group table. This table reports size definitions for district-
+  ## and species-specific size-sex-maturity categories.
   cat("Pulling crab size group data...\n")
 
-  ## Query the size group table. This table....DESCRIPTION
   sizegroups_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_SIZEGROUPS_QUERY AS
                            SELECT *
                            FROM CRABBASE.SIZEGROUPS
@@ -307,7 +333,6 @@ get_specimen_data <- function(species = NULL,
                                                           query = "SELECT * FROM AKFIN_TEMPORARY_SIZEGROUPS_QUERY"))
   attributes(x = sizegroups_df)$sql_query <- sizegroups_sql
 
-  # IF DISTRICT, FILTER FURTHER
 
 
   ## Clear temporary tables
@@ -333,14 +358,6 @@ get_specimen_data <- function(species = NULL,
   return(do.call(what = list,
                  args = list(specimen = data_crab, # specimen data, with relevant haul and stratum info joined (includes 0-catch stations)
                              haul = data_haul, # complete haul data, with stratum info joined
-                             # stock_stations = stock_stations,
-                             sizegroups = sizegroups_df #, # table with size groupings per district/species
-
-                             # # and/or could recreate by subsetting the haul/stratum info from the joined specimen data??
-                             # district_stratum = district_stratum_df, # table with stratum definitions for each district
-                             # stratum_area = stratum_area_df, # number of stations/area per stratum
-                             # stratum_stations = stratum_stations_df, # stratum station IDs
-                             # stratum_design = stratum_design # stratum years and design IDs
-                             # # other lookups for egg/clutch codes?
+                             sizegroups = sizegroups_df # table with size groupings per district/species
                              )))
 }

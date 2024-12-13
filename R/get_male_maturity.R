@@ -74,11 +74,14 @@ get_male_maturity <- function(species = NULL,
 
 
   ## Concatenate years, region for use in a SQL query
-  species_vec <- gapindex::stitch_entries(stitch_what = species)
-  region_vec <- gapindex::stitch_entries(stitch_what = region)
+  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse=", "), ")")
+  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse=", "), ")")
 
 
-  ## Query the Chionoecetes male probability of maturity at size table. This table....DESCRIPTION
+
+  ## Query the Chionoecetes male probability of maturity at size table. This table
+  ## contains the proportion mature male Chionoecetes spp. by 10 millimeter size bin
+  ## for the Eastern Bering Sea and Northern Bering Sea.
   cat("Pulling Chionoecetes maturity ratio data...\n")
 
   mat_ratio_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY AS
@@ -102,7 +105,8 @@ get_male_maturity <- function(species = NULL,
 
 
 
-  ## Query the ogives parameter table. This table....DESCRIPTION
+  ## Query the maturity model parameter table. This table contains the fitted model
+  ## parameters for Chionoecetes spp. male 50% probability of maturity at size.
   cat("Pulling Chionoecetes model parameter data...\n")
 
   params_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY AS
