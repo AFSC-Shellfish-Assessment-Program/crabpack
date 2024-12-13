@@ -4,11 +4,14 @@
 #'              catch per unit effort (area swept, nm2).
 #'
 #' @inheritParams calc_bioabund
-#' @param output character string. One of c("cpue", "bioabund"). Default `output`
-#'               is "cpue"; "bioabund" is used for internal package purposes only, as
-#'               `calc_cpue()` is called within `calc_bioabund()`.
+#' @param female_maturity character string. One of c("morphometric", "cutline").
+#'                        Defaults to "morphometric" maturity for female crab. Morphometric
+#'                        maturity CPUE estimates are not available for male crab
+#'                        at this time.
+#' @param output character string. One of c("cpue", "bioabund"). Default output
+#'               is "cpue"; "bioabund" is used for internal package purposes only.
 #'
-#' @return a data frame with station-level crab counts and area swept-expanded
+#' @return a data frame with station-level crab counts, and area swept-expanded
 #'         estimates of weight (mt, lbs) and numerical CPUE by year.
 #'
 #' @export

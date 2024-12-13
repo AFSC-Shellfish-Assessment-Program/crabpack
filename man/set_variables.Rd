@@ -44,31 +44,31 @@ female maturity based on ADF&G size cutlines.}
 
 \item{female_maturity}{character string. One of c("morphometric", "cutline").
 Defaults to "morphometric" maturity for female crab. Morphometric
-maturity biomass and abundance estimares for male crab are not
-available at this time.}
+maturity biomass and abundance estimates are not available for
+male crab at this time.}
 
-\item{shell_condition}{character string. One or many of c("soft molting", "new hardshell",
-"oldshell", "very oldshell", "all_categories"). Optional,
+\item{shell_condition}{character string. One or many of c("soft_molting", "new_hardshell",
+"oldshell", "very_oldshell", "all_categories"). Optional,
 specifying this parameter will provide estimates for each of the
 selected shell conditions; "all_categories" will provide estimates
 for each available shell condition category.}
 
 \item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
-"dead", "empty cases", "hatching", "all_categories"). Optional,
+"dead", "empty_cases", "hatching", "all_categories"). Optional,
 specifying this parameter will provide estimates for each of the
 selected egg conditions; "all_categories" will provide estimates
 for each available egg condition category. Note that specifying
 \code{egg_condition} will return only female specimens in the final output.}
 
-\item{clutch_size}{character string. One or many of c("immature", "mature barren",
-"trace", "quarter", "half", "three quarter", "full", "all_categories").
+\item{clutch_size}{character string. One or many of c("immature", "mature_barren",
+"trace", "quarter", "half", "three_quarter", "full", "all_categories").
 Optional, specifying this parameter will provide estimates for each of
 the selected clutch sizes; "all_categories" will provide estimates for
 each available clutch size category. Note that specifying \code{clutch_size}
 will return only female specimens in the final output.}
 
 \item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
-within the size range specified in 'size_min' and/or 'size_max',
+within the size range specified in \code{size_min} and/or \code{size_max},
 or for the full range of observed sizes in the data. Defaults to FALSE.}
 }
 \value{

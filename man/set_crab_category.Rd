@@ -37,8 +37,8 @@ female maturity based on ADF&G size cutlines.}
 
 \item{female_maturity}{character string. One of c("morphometric", "cutline").
 Defaults to "morphometric" maturity for female crab. Morphometric
-maturity biomass and abundance estimares for male crab are not
-available at this time.}
+maturity biomass and abundance estimates are not available for
+male crab at this time.}
 }
 \value{
 a data frame with crab specimen data and an additional CATEGORY column

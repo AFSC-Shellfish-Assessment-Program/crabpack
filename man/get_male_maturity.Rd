@@ -24,9 +24,9 @@ c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
 }
 \value{
 a named list containing the proportion of male Chionoecetes spp. crab
-that are morphometrically mature in a given 10mm size bin, and
-yearly model parameter estimates for 50\% probability of maturity at size
-for the species, region, and district of interest.
+that are morphometrically mature in a given 10mm size bin, and yearly
+model parameter estimates for 50\% probability of maturity at size for
+the species, region, and district of interest.
 }
 \description{
 A time series of model estimated proportion of morphometrically mature

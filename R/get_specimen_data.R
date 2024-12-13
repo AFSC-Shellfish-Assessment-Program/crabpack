@@ -44,14 +44,6 @@ get_specimen_data <- function(species = NULL,
   }
 
 
-  # ## Issue a warning when choosing multiple surveys
-  # if (length(x = survey_set) > 1)
-  #   warning(paste("The gapindex package has only been tested when querying",
-  #                 "only one survey region. Use caution when querying",
-  #                 "multiple survey regions until further testing has been done.",
-  #                 "If you come across an issue, be sure to post it on",
-  #                 "github.com/afsc-gap-products/gapindex/issues"))
-
   ## Error Query: check that the argument `species` is one of the correct options.
   if(TRUE %in% (!species %in% c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR"))){
     stop(paste0("Argument `species` must contain one or more of these options",
@@ -59,12 +51,29 @@ get_specimen_data <- function(species = NULL,
 
   }
 
+  ## Issue a warning when choosing multiple species
+  if(length(x = species) > 1){
+    warning(paste("The crabpack package has only been tested when querying",
+                  "one species at a time. Use caution when querying",
+                  "multiple species until further testing has been done.",
+                  "If you come across an issue, please post it on",
+                  "github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
+  }
 
   ## Issue a warning when not specifying a region.
   if(missing(x = region)){
     warning(paste0("The default survey region is the Eastern Bering Sea. Please include",
                    " 'NBS' in the argument `region` if you would like data from the",
                    " Northern Bering Sea."))
+  }
+
+  ## Issue a warning when choosing multiple regions
+  if(length(x = region) > 1){
+    warning(paste("The crabpack package has only been tested when querying",
+                  "only one survey region. Use caution when querying",
+                  "multiple survey regions until further testing has been done.",
+                  "If you come across an issue, please post it on",
+                  "github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
   }
 
 
@@ -76,7 +85,6 @@ get_specimen_data <- function(species = NULL,
   #   }
   # }
 
-  ## error/warning for multiple species right now? Hasn't been tested...
 
 
   ## Concatenate species, years, region, district for use in a SQL query

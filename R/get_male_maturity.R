@@ -12,9 +12,9 @@
 #' @inheritParams get_specimen_data
 #'
 #' @return a named list containing the proportion of male Chionoecetes spp. crab
-#'         that are morphometrically mature in a given 10mm size bin, and
-#'         yearly model parameter estimates for 50% probability of maturity at size
-#'         for the species, region, and district of interest.
+#'         that are morphometrically mature in a given 10mm size bin, and yearly
+#'         model parameter estimates for 50% probability of maturity at size for
+#'         the species, region, and district of interest.
 #'
 #' @export
 #'
@@ -81,23 +81,23 @@ get_male_maturity <- function(species = NULL,
   ## Query the Chionoecetes male probability of maturity at size table. This table....DESCRIPTION
   cat("Pulling Chionoecetes maturity ratio data...\n")
 
-  ogives_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY AS
+  mat_ratio_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY AS
                         SELECT *
                         FROM CRABBASE.CHIONOECETES_MAT_RATIO
                         WHERE SPECIES IN ", species_vec,
                       " AND REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = ogives_sql)
+  RODBC::sqlQuery(channel = channel, query = mat_ratio_sql)
 
-  ogives_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                      query = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY"),
-                                      key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
-  attributes(x = ogives_df)$sql_query <- ogives_sql
+  mat_ratio_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
+                                                         query = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY"),
+                                         key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
+  attributes(x = ogives_df)$sql_query <- mat_ratio_sql
 
   # further filter by district if specified
   if(!is.null(district)){
-    ogives_df <- ogives_df %>%
-                 dplyr::filter(DISTRICT %in% district)
+    mat_ratio_df <- mat_ratio_df %>%
+                    dplyr::filter(DISTRICT %in% district)
   }
 
 
@@ -146,7 +146,7 @@ get_male_maturity <- function(species = NULL,
 
   ## Collate data into a list and return
   return(do.call(what = list,
-                 args = list(male_mat_ratio = ogives_df, # Chionoecetes proportion males mature at size
+                 args = list(male_mat_ratio = mat_ratio_df, # Chionoecetes proportion males mature at size
                              model_parameters = params_df))) # Chionoecetes 50% probability of maturity model parameters
 
 

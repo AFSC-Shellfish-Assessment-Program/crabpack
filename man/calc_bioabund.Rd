@@ -59,31 +59,31 @@ female maturity based on ADF&G size cutlines.}
 
 \item{female_maturity}{character string. One of c("morphometric", "cutline").
 Defaults to "morphometric" maturity for female crab. Morphometric
-maturity biomass and abundance estimares for male crab are not
-available at this time.}
+maturity biomass and abundance estimates are not available for
+male crab at this time.}
 
-\item{shell_condition}{character string. One or many of c("soft molting", "new hardshell",
-"oldshell", "very oldshell", "all_categories"). Optional,
+\item{shell_condition}{character string. One or many of c("soft_molting", "new_hardshell",
+"oldshell", "very_oldshell", "all_categories"). Optional,
 specifying this parameter will provide estimates for each of the
 selected shell conditions; "all_categories" will provide estimates
 for each available shell condition category.}
 
 \item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
-"dead", "empty cases", "hatching", "all_categories"). Optional,
+"dead", "empty_cases", "hatching", "all_categories"). Optional,
 specifying this parameter will provide estimates for each of the
 selected egg conditions; "all_categories" will provide estimates
 for each available egg condition category. Note that specifying
 \code{egg_condition} will return only female specimens in the final output.}
 
-\item{clutch_size}{character string. One or many of c("immature", "mature barren",
-"trace", "quarter", "half", "three quarter", "full", "all_categories").
+\item{clutch_size}{character string. One or many of c("immature", "mature_barren",
+"trace", "quarter", "half", "three_quarter", "full", "all_categories").
 Optional, specifying this parameter will provide estimates for each of
 the selected clutch sizes; "all_categories" will provide estimates for
 each available clutch size category. Note that specifying \code{clutch_size}
 will return only female specimens in the final output.}
 
 \item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
-within the size range specified in 'size_min' and/or 'size_max',
+within the size range specified in \code{size_min} and/or \code{size_max},
 or for the full range of observed sizes in the data. Defaults to FALSE.}
 
 \item{spatial_level}{character string. One of c("station", "district", "region").
@@ -91,17 +91,17 @@ Describes the spatial resolution of biomass and abundance output,
 either kept at the haul level, or aggregated to the district (default)
 or regional scale.}
 
-\item{replace_retow}{boolean T/F. Replace female Bristol Bay red king crab observations
-with resampled data (haul type "17") in years when a Bristol Bay
-retow took place? Defaults to TRUE, please use care when interpreting
+\item{replace_retow}{boolean T/F. If TRUE, replace female Bristol Bay red king crab observations
+with resampled data (haul type = 17) in years when a Bristol Bay
+retow took place. Defaults to TRUE, please use care when interpreting
 BBRKC outputs if using FALSE.}
 }
 \value{
-A data frame with area swept-expanded estimates of species- or district-level abundance,
+A data frame with area swept-expanded estimates of station-, district-, or region-level abundance,
 biomass (mt), and biomass (lbs) by year.
 }
 \description{
-This function calculates indices of abundance and biomass (MT and LBS)
+This function calculates indices of abundance and biomass (mt and lbs)
 at the station-, district-, or region-level for a given crab species.
 Optional arguments also allow these indices to be calculated for subsets of
 crab by biometric categories such as size, sex, maturity, and shell condition.
