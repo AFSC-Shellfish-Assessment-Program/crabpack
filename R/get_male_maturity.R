@@ -1,22 +1,29 @@
-#' Pull time series of estimated proportion mature by 10mm bin for Chionoecetes males
+#' Pull proportion morphometrically mature Chionoecetes spp. males by size
 #'
-#' @description .... time series of Tanner Crab and Snow Crab male ogives...proportion mature
-#'              Also yearly parameter estimates....
+#' @description A time series of model estimated proportion of morphometrically mature
+#'              male Tanner Crab and Snow Crab by 10 millimeter size bin for a given
+#'              region or district, based on chela height measurements. Yearly model
+#'              parameter estimates of 50% probability of maturity at size are also
+#'              provided.
 #'
 #' @param species character string. One of c("TANNER", "SNOW").
 #' @param district character string. One of c("ALL", "E166", "W166"). Defaults to
 #'                 "ALL", "E166" and "W166" are to be used for Tanner Crab only.
 #' @inheritParams get_specimen_data
 #'
-#' @return TBD
+#' @return a named list containing the proportion of male Chionoecetes spp. crab
+#'         that are morphometrically mature in a given 10mm size bin, and
+#'         yearly model parameter estimates for 50% probability of maturity at size
+#'         for the species, region, and district of interest.
 #'
 #' @export
 #'
 
-get_male_ogives <- function(species = NULL,
-                            region = c("EBS", "NBS")[1], # not sure if we have ogive calcs for NBS??
-                            district = NULL,
-                            channel = NULL){
+
+get_male_maturity <- function(species = NULL,
+                              region = c("EBS", "NBS")[1],
+                              district = NULL,
+                              channel = NULL){
 
   ## Set up channel if channel = NULL
   if(is.null(x = channel)){
@@ -25,7 +32,7 @@ get_male_ogives <- function(species = NULL,
 
 
   ## Clear schema of temporary tables created in this function if present
-  for(itable in c("CHIONOECETES_OGIVE_PARAMS", "CHIONOECETES_MAT_RATIO")) {
+  for(itable in c("CHIONOECETES_MAT_RATIO", "CHIONOECETES_MATMODEL_PARAMS")) {
 
     ## check if temporary table exists and if so...
     if(nrow(x = RODBC::sqlQuery(channel = channel,
@@ -98,16 +105,16 @@ get_male_ogives <- function(species = NULL,
   ## Query the ogives parameter table. This table....DESCRIPTION
   cat("Pulling Chionoecetes model parameter data...\n")
 
-  params_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_OGIVE_PARAMS_QUERY AS
+  params_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY AS
                         SELECT *
-                        FROM CRABBASE.CHIONOECETES_OGIVE_PARAMS
+                        FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS
                         WHERE SPECIES IN ", species_vec,
                         " AND REGION IN ", region_vec)
 
   RODBC::sqlQuery(channel = channel, query = params_sql)
 
   params_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                    query = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_OGIVE_PARAMS_QUERY"),
+                                                    query = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY"),
                                     key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
   attributes(x = params_df)$sql_query <- params_sql
 
@@ -121,7 +128,7 @@ get_male_ogives <- function(species = NULL,
 
   ## Clear temporary tables
   cat("Clearing temporary tables...")
-  for(itable in c("CHIONOECETES_OGIVE_PARAMS", "CHIONOECETES_MAT_RATIO")) {
+  for(itable in c("CHIONOECETES_MAT_RATIO", "CHIONOECETES_MATMODEL_PARAMS")) {
 
     if(nrow(x = RODBC::sqlQuery(channel = channel,
                                  query = paste0("SELECT table_name
@@ -139,8 +146,8 @@ get_male_ogives <- function(species = NULL,
 
   ## Collate data into a list and return
   return(do.call(what = list,
-                 args = list(male_ogives = ogives_df, # Chionoecetes proportion males mature at size
-                             model_parameters = params_df))) # Chionoecetes ogive model parameters
+                 args = list(male_mat_ratio = ogives_df, # Chionoecetes proportion males mature at size
+                             model_parameters = params_df))) # Chionoecetes 50% probability of maturity model parameters
 
 
 }
