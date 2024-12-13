@@ -17,9 +17,7 @@ Imports:
     data.table,
     keyring,
     lifecycle,
-    magrittr,
-    purrr,
-    gapindex
+    purrr
 Depends: 
     R (>= 4.0.0)
 LazyData: true
