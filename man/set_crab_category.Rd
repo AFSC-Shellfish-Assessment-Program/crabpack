@@ -14,36 +14,25 @@ set_crab_category(
 )
 }
 \arguments{
-\item{crab_data}{object created from \code{crabpack::get_data()}.}
-
-\item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
-
-\item{region}{character string describing the region of interest. One of
-c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
-
-\item{district}{character string. One or many of c("ALL", "BB", "NORTH", "NS",
-"PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
-Defaults to "ALL" districts within the selected region if not specified.}
-
-\item{crab_category}{character string. One or many of c("legal_male", "preferred_male",
-"mature_male", "immature_male", "mature_female", "immature_female",
-"all_categories"). Optional, specifying this parameter will provide
-estimates for each of the selected categories; "all_categories" will
+\item{crab_category}{Character string. One or many of
+\code{c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")}.
+Optional, specifying this parameter will provide estimates
+for each of the selected categories; \code{"all_categories"} will
 provide estimates for each relevant category for the given species.
 If using a female category, maturity will be based on morphometric
-maturity (default "morphometric" for the optional \code{female_maturity}
-parameter). Set \code{female_maturity} to "cutline" if you want to define
-female maturity based on ADF&G size cutlines.}
-
-\item{female_maturity}{character string. One of c("morphometric", "cutline").
-Defaults to "morphometric" maturity for female crab. Morphometric
-maturity biomass and abundance estimates are not available for
-male crab at this time.}
+maturity (default \code{female_maturity = "morphometric"}). Set
+\code{female_maturity = "cutline"} if you want to define female maturity
+based on ADF&G size cutlines.}
 }
 \value{
-a data frame with crab specimen data and an additional CATEGORY column
+A data frame with crab specimen data and an additional "CATEGORY" column
 with stock-specific maturity designations.
 }
 \description{
-TBD
+A utility function to assign standard size-sex-maturity categories to crab
+specimen data. Standard categories for Red King Crab and Blue King Crab are
+\code{immature_male}, \code{mature_male}, \code{legal_male}, \code{immature_female}, and \code{mature_female}.
+Categories for Tanner Crab, Snow Crab, and Hybrid Crab are \code{small_male}, \code{large_male},
+\code{legal_male}, \code{preferred_male}, \code{immature_female}, and \code{mature_female}. Categories
+for Hair Crab are \code{sublegal_male}, \code{legal_male}, and \code{female}.
 }

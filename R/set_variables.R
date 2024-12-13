@@ -1,10 +1,13 @@
 #' Helper function to set optional variables and subset data
 #'
-#' @description A utility function to...
+#' @description A utility function to subset specimen data by optional specimen
+#'              biometric categories, and to set these variables for further use
+#'              in CPUE, abundance, and biomass calculations within the `crabpack::calc_cpue()`
+#'              and `crabpack::calc_bioabund()` functions.
 #'
 #' @inheritParams calc_bioabund
 #'
-#' @return a named list of subsetted specimen data by biometrics of interest
+#' @return A named list of subsetted specimen data by biometrics of interest
 #'         as well as variables to be carried forward for CPUE, abundance, and
 #'         biomass calculations across the selected biometrics.
 #'

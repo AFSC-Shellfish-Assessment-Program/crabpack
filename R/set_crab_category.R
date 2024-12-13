@@ -1,10 +1,23 @@
 #' Assign size-sex-maturity categories based on species- and district-specific size definitions
 #'
-#' @description TBD
+#' @description A utility function to assign standard size-sex-maturity categories to crab
+#'              specimen data. Standard categories for Red King Crab and Blue King Crab are
+#'              `immature_male`, `mature_male`, `legal_male`, `immature_female`, and `mature_female`.
+#'              Categories for Tanner Crab, Snow Crab, and Hybrid Crab are `small_male`, `large_male`,
+#'              `legal_male`, `preferred_male`, `immature_female`, and `mature_female`. Categories
+#'              for Hair Crab are `sublegal_male`, `legal_male`, and `female`.
 #'
-#' @inheritParams calc_bioabund
+#' @param crab_category Character string. One or many of
+#'                      `c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")`.
+#'                      Optional, specifying this parameter will provide estimates
+#'                      for each of the selected categories; `"all_categories"` will
+#'                      provide estimates for each relevant category for the given species.
+#'                      If using a female category, maturity will be based on morphometric
+#'                      maturity (default `female_maturity = "morphometric"`). Set
+#'                      `female_maturity = "cutline"` if you want to define female maturity
+#'                      based on ADF&G size cutlines.
 #'
-#' @return a data frame with crab specimen data and an additional CATEGORY column
+#' @return A data frame with crab specimen data and an additional "CATEGORY" column
 #'         with stock-specific maturity designations.
 #'
 #' @export

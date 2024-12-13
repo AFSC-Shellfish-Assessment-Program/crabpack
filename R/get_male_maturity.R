@@ -6,12 +6,12 @@
 #'              parameter estimates of 50% probability of maturity at size are also
 #'              provided.
 #'
-#' @param species character string. One of c("TANNER", "SNOW").
-#' @param district character string. One of c("ALL", "E166", "W166"). Defaults to
-#'                 "ALL", "E166" and "W166" are to be used for Tanner Crab only.
+#' @param species Character string. One of `c("TANNER", "SNOW")`.
+#' @param district Character string. One or many of `c("ALL", "E166", "W166")`. Defaults to
+#'                 `"ALL"`; `"E166"` and `"W166"` are to be used for Tanner Crab only.
 #' @inheritParams get_specimen_data
 #'
-#' @return a named list containing the proportion of male Chionoecetes spp. crab
+#' @return A named list containing the proportion of male Chionoecetes spp. crab
 #'         that are morphometrically mature in a given 10mm size bin, and yearly
 #'         model parameter estimates for 50% probability of maturity at size for
 #'         the species, region, and district of interest.

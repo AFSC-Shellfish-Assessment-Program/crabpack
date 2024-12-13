@@ -25,77 +25,74 @@ calc_cpue(
 )
 }
 \arguments{
-\item{crab_data}{object created from \code{crabpack::get_data()}.}
+\item{crab_data}{Object created from \code{crabpack::get_data()}.}
 
-\item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
+\item{species}{Character string. One of \code{c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")}.}
 
-\item{region}{character string describing the region of interest. One of
-c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
+\item{region}{Character string describing the region of interest. One of
+\verb{c("EBS", "NBS"}). Defaults to \code{"EBS"} for Eastern Bering Sea.}
 
-\item{district}{character string. One or many of c("ALL", "BB", "NORTH", "NS",
-"PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
-Defaults to "ALL" districts within the selected region if not specified.}
+\item{district}{Character string. One or many of \code{c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")}.
+Defaults to \code{"ALL"} districts within the selected region if not specified.}
 
-\item{years}{numeric or integer vector of years.}
+\item{years}{Numeric or integer vector of years.}
 
-\item{sex}{character string. One or both of c("male", "female"). Optional,
-"male" or "female" only will provide estimates for the selected sex,
-specifying both "male" and "female" will provide estimates for
+\item{sex}{Character string. One or both of \code{c("male", "female")}. Optional,
+\code{"male"} or \code{"female"} only will provide estimates for the selected sex,
+specifying both \code{"male"} and \code{"female"} will provide estimates for
 each of the selected sexes.}
 
-\item{size_min}{integer. Optional, desired lower range of crab size (inclusive).}
+\item{size_min}{Integer. Optional, desired lower range of crab size (inclusive).}
 
-\item{size_max}{integer. Optional, desired upper range of crab size (inclusive).}
+\item{size_max}{Integer. Optional, desired upper range of crab size (inclusive).}
 
-\item{crab_category}{character string. One or many of c("legal_male", "preferred_male",
-"mature_male", "immature_male", "mature_female", "immature_female",
-"all_categories"). Optional, specifying this parameter will provide
-estimates for each of the selected categories; "all_categories" will
+\item{crab_category}{Character string. One or many of
+\code{c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")}.
+Optional, specifying this parameter will provide estimates
+for each of the selected categories; \code{"all_categories"} will
 provide estimates for each relevant category for the given species.
 If using a female category, maturity will be based on morphometric
-maturity (default "morphometric" for the optional \code{female_maturity}
-parameter). Set \code{female_maturity} to "cutline" if you want to define
-female maturity based on ADF&G size cutlines.}
+maturity (default \code{female_maturity = "morphometric"}). Set
+\code{female_maturity = "cutline"} if you want to define female maturity
+based on ADF&G size cutlines. See \code{crabpack::set_crab_category()}
+documentation for description of species-specific category combinations.}
 
-\item{female_maturity}{character string. One of c("morphometric", "cutline").
-Defaults to "morphometric" maturity for female crab. Morphometric
+\item{female_maturity}{Character string. One of \code{c("morphometric", "cutline")}.
+Defaults to \code{"morphometric"} maturity for female crab. Morphometric
 maturity CPUE estimates are not available for male crab
 at this time.}
 
-\item{shell_condition}{character string. One or many of c("soft_molting", "new_hardshell",
-"oldshell", "very_oldshell", "all_categories"). Optional,
-specifying this parameter will provide estimates for each of the
-selected shell conditions; "all_categories" will provide estimates
-for each available shell condition category.}
+\item{shell_condition}{Character string. One or many of \code{c("soft_molting", "new_hardshell", "oldshell", "very_oldshell", "all_categories")}.
+Optional, specifying this parameter will provide estimates for
+each of the selected shell conditions; \code{"all_categories"} will
+provide estimates for each available shell condition category.}
 
-\item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
-"dead", "empty_cases", "hatching", "all_categories"). Optional,
-specifying this parameter will provide estimates for each of the
-selected egg conditions; "all_categories" will provide estimates
+\item{egg_condition}{Character string. One or many of \code{c("none", "uneyed", "eyed", "dead", "empty_cases", "hatching", "all_categories")}.
+Optional, specifying this parameter will provide estimates for each of the
+selected egg conditions; \code{"all_categories"} will provide estimates
 for each available egg condition category. Note that specifying
 \code{egg_condition} will return only female specimens in the final output.}
 
-\item{clutch_size}{character string. One or many of c("immature", "mature_barren",
-"trace", "quarter", "half", "three_quarter", "full", "all_categories").
+\item{clutch_size}{Character string. One or many of \code{c("immature", "mature_barren", "trace", "quarter", "half", "three_quarter", "full", "all_categories")}.
 Optional, specifying this parameter will provide estimates for each of
-the selected clutch sizes; "all_categories" will provide estimates for
+the selected clutch sizes; \code{"all_categories"} will provide estimates for
 each available clutch size category. Note that specifying \code{clutch_size}
 will return only female specimens in the final output.}
 
-\item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
+\item{bin_1mm}{Boolean T/F. If \code{TRUE}, estimates will be provided for each 1mm bin
 within the size range specified in \code{size_min} and/or \code{size_max},
-or for the full range of observed sizes in the data. Defaults to FALSE.}
+or for the full range of observed sizes in the data. Defaults to \code{FALSE}.}
 
-\item{replace_retow}{boolean T/F. If TRUE, replace female Bristol Bay red king crab observations
+\item{replace_retow}{Boolean T/F. If \code{TRUE}, replace female Bristol Bay red king crab observations
 with resampled data (haul type = 17) in years when a Bristol Bay
-retow took place. Defaults to TRUE, please use care when interpreting
-BBRKC outputs if using FALSE.}
+retow took place. Defaults to \code{TRUE}, please use care when interpreting
+BBRKC outputs if using \code{FALSE}.}
 
-\item{output}{character string. One of c("cpue", "bioabund"). Default output
-is "cpue"; "bioabund" is used for internal package purposes only.}
+\item{output}{Character string. One of \code{c("cpue", "bioabund")}. Default output
+is \code{"cpue"}; \code{"bioabund"} is used for internal package purposes only.}
 }
 \value{
-a data frame with station-level crab counts and area swept-expanded
+A data frame with station-level crab counts, and area swept-expanded
 estimates of weight (mt, lbs) and numerical CPUE by year.
 }
 \description{

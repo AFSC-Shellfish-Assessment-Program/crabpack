@@ -1,17 +1,17 @@
 #' Define RODBC connection to Oracle
 #'
-#' @description Creates the RODBC connection to Oracle needed to pull SQL queries
-#'              from AKFIN database. Also support users who use the Rpackage `keyring`
+#' @description Creates the `RODBC` connection to Oracle needed to pull SQL queries
+#'              from AKFIN database. Also support users who use the R package `keyring`
 #'              to store usernames and passwords.
 #'
-#' @param db string. A registered data source name, in this case "AKFIN" by default.
-#'        This argument is passed to the `dsn` argument in `RODBC::odbcConnect()`
-#' @param check_access boolean. If TRUE (by default), checks whether you have the
-#'        specific tables in AKFIN used in the crabpack package. Outputs an error
+#' @param db String. A registered data source name, in this case `"AKFIN"` by default.
+#'        This argument is passed to the `dsn` argument in `RODBC::odbcConnect()`.
+#' @param check_access Boolean. If `TRUE` (by default), checks whether you have the
+#'        specific tables in AKFIN used in the `crabpack` package. Outputs an error
 #'        if the user does not have access to these tables with a message of the
 #'        point of contact information for access.
 #'
-#' @return channel of class "RODBC". See `?RODBC::odbcConnect()` for more detail.
+#' @return Channel of class "RODBC". See `?RODBC::odbcConnect()` for more detail.
 #'
 #' @export
 #'

@@ -19,63 +19,64 @@ set_variables(
 )
 }
 \arguments{
-\item{crab_data}{object created from \code{crabpack::get_data()}.}
+\item{crab_data}{Object created from \code{crabpack::get_data()}.}
 
-\item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
+\item{species}{Character string. One of \code{c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")}.}
 
-\item{sex}{character string. One or both of c("male", "female"). Optional,
-"male" or "female" only will provide estimates for the selected sex,
-specifying both "male" and "female" will provide estimates for
+\item{sex}{Character string. One or both of \code{c("male", "female")}. Optional,
+\code{"male"} or \code{"female"} only will provide estimates for the selected sex,
+specifying both \code{"male"} and \code{"female"} will provide estimates for
 each of the selected sexes.}
 
-\item{size_min}{integer. Optional, desired lower range of crab size (inclusive).}
+\item{size_min}{Integer. Optional, desired lower range of crab size (inclusive).}
 
-\item{size_max}{integer. Optional, desired upper range of crab size (inclusive).}
+\item{size_max}{Integer. Optional, desired upper range of crab size (inclusive).}
 
-\item{crab_category}{character string. One or many of c("legal_male", "preferred_male",
-"mature_male", "immature_male", "mature_female", "immature_female",
-"all_categories"). Optional, specifying this parameter will provide
-estimates for each of the selected categories; "all_categories" will
+\item{crab_category}{Character string. One or many of
+\code{c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")}.
+Optional, specifying this parameter will provide estimates
+for each of the selected categories; \code{"all_categories"} will
 provide estimates for each relevant category for the given species.
 If using a female category, maturity will be based on morphometric
-maturity (default "morphometric" for the optional \code{female_maturity}
-parameter). Set \code{female_maturity} to "cutline" if you want to define
-female maturity based on ADF&G size cutlines.}
+maturity (default \code{female_maturity = "morphometric"}). Set
+\code{female_maturity = "cutline"} if you want to define female maturity
+based on ADF&G size cutlines. See \code{crabpack::set_crab_category()}
+documentation for description of species-specific category combinations.}
 
-\item{female_maturity}{character string. One of c("morphometric", "cutline").
-Defaults to "morphometric" maturity for female crab. Morphometric
+\item{female_maturity}{Character string. One of \code{c("morphometric", "cutline")}.
+Defaults to \code{"morphometric"} maturity for female crab. Morphometric
 maturity biomass and abundance estimates are not available for
 male crab at this time.}
 
-\item{shell_condition}{character string. One or many of c("soft_molting", "new_hardshell",
-"oldshell", "very_oldshell", "all_categories"). Optional,
-specifying this parameter will provide estimates for each of the
-selected shell conditions; "all_categories" will provide estimates
-for each available shell condition category.}
+\item{shell_condition}{Character string. One or many of \code{c("soft_molting", "new_hardshell", "oldshell", "very_oldshell", "all_categories")}.
+Optional, specifying this parameter will provide estimates for
+each of the selected shell conditions; \code{"all_categories"} will
+provide estimates for each available shell condition category.}
 
-\item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
-"dead", "empty_cases", "hatching", "all_categories"). Optional,
-specifying this parameter will provide estimates for each of the
-selected egg conditions; "all_categories" will provide estimates
+\item{egg_condition}{Character string. One or many of \code{c("none", "uneyed", "eyed", "dead", "empty_cases", "hatching", "all_categories")}.
+Optional, specifying this parameter will provide estimates for each of the
+selected egg conditions; \code{"all_categories"} will provide estimates
 for each available egg condition category. Note that specifying
 \code{egg_condition} will return only female specimens in the final output.}
 
-\item{clutch_size}{character string. One or many of c("immature", "mature_barren",
-"trace", "quarter", "half", "three_quarter", "full", "all_categories").
+\item{clutch_size}{Character string. One or many of \code{c("immature", "mature_barren", "trace", "quarter", "half", "three_quarter", "full", "all_categories")}.
 Optional, specifying this parameter will provide estimates for each of
-the selected clutch sizes; "all_categories" will provide estimates for
+the selected clutch sizes; \code{"all_categories"} will provide estimates for
 each available clutch size category. Note that specifying \code{clutch_size}
 will return only female specimens in the final output.}
 
-\item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
+\item{bin_1mm}{Boolean T/F. If \code{TRUE}, estimates will be provided for each 1mm bin
 within the size range specified in \code{size_min} and/or \code{size_max},
-or for the full range of observed sizes in the data. Defaults to FALSE.}
+or for the full range of observed sizes in the data. Defaults to \code{FALSE}.}
 }
 \value{
-a named list of subsetted specimen data by biometrics of interest
+A named list of subsetted specimen data by biometrics of interest
 as well as variables to be carried forward for CPUE, abundance, and
 biomass calculations across the selected biometrics.
 }
 \description{
-A utility function to...
+A utility function to subset specimen data by optional specimen
+biometric categories, and to set these variables for further use
+in CPUE, abundance, and biomass calculations within the \code{crabpack::calc_cpue()}
+and \code{crabpack::calc_bioabund()} functions.
 }

@@ -13,21 +13,20 @@ get_specimen_data(
 )
 }
 \arguments{
-\item{species}{character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").}
+\item{species}{Character string. One of \code{c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")}.}
 
-\item{region}{character string describing the region of interest. One of
-c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
+\item{region}{Character string describing the region of interest. One of
+\verb{c("EBS", "NBS"}). Defaults to \code{"EBS"} for Eastern Bering Sea.}
 
-\item{district}{character string. One or many of c("ALL", "BB", "NORTH", "NS",
-"PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
-Defaults to "ALL" districts within the selected region if not specified.}
+\item{district}{Character string. One or many of \code{c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")}.
+Defaults to \code{"ALL"} districts within the selected region if not specified.}
 
-\item{years}{numeric or integer vector of years.}
+\item{years}{Numeric or integer vector of years.}
 
-\item{channel}{connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
+\item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
 }
 \value{
-a named list containing specimen, haul, stratum, area, and size group
+A named list containing specimen, haul, stratum, area, and size group
 information for the region, districts, years, and species of interest.
 }
 \description{

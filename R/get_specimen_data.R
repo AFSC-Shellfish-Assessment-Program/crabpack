@@ -5,9 +5,9 @@
 #'              CRABBASE schema in the AKFIN Oracle database.
 #'
 #' @inheritParams calc_bioabund
-#' @param channel connection to Oracle created via `crabpack::get_connected()` or `RODBC::odbcConnect()`.
+#' @param channel Connection to Oracle created via `crabpack::get_connected()` or `RODBC::odbcConnect()`.
 #'
-#' @return a named list containing specimen, haul, stratum, area, and size group
+#' @return A named list containing specimen, haul, stratum, area, and size group
 #'         information for the region, districts, years, and species of interest.
 #'
 #' @export

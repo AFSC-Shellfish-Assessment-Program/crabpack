@@ -12,18 +12,18 @@ get_male_maturity(
 )
 }
 \arguments{
-\item{species}{character string. One of c("TANNER", "SNOW").}
+\item{species}{Character string. One of \code{c("TANNER", "SNOW")}.}
 
-\item{region}{character string describing the region of interest. One of
-c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
+\item{region}{Character string describing the region of interest. One of
+\verb{c("EBS", "NBS"}). Defaults to \code{"EBS"} for Eastern Bering Sea.}
 
-\item{district}{character string. One of c("ALL", "E166", "W166"). Defaults to
-"ALL", "E166" and "W166" are to be used for Tanner Crab only.}
+\item{district}{Character string. One or many of \code{c("ALL", "E166", "W166")}. Defaults to
+\code{"ALL"}; \code{"E166"} and \code{"W166"} are to be used for Tanner Crab only.}
 
-\item{channel}{connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
+\item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
 }
 \value{
-a named list containing the proportion of male Chionoecetes spp. crab
+A named list containing the proportion of male Chionoecetes spp. crab
 that are morphometrically mature in a given 10mm size bin, and yearly
 model parameter estimates for 50\% probability of maturity at size for
 the species, region, and district of interest.
