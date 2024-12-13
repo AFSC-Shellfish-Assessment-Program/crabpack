@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_variables.R
 \name{set_variables}
 \alias{set_variables}
-\title{Set optional variables used in \code{calc_cpue} and \code{calc_bioabund} and subset data}
+\title{Helper function to set optional variables and subset data}
 \usage{
 set_variables(
   crab_data = NULL,
@@ -11,7 +11,7 @@ set_variables(
   size_min = NULL,
   size_max = NULL,
   crab_category = NULL,
-  female_maturity = c("morphological", "cutline")[1],
+  female_maturity = c("morphometric", "cutline")[1],
   shell_condition = NULL,
   egg_condition = NULL,
   clutch_size = NULL,
@@ -28,47 +28,53 @@ set_variables(
 specifying both "male" and "female" will provide estimates for
 each of the selected sexes.}
 
-\item{size_min}{integer. Optional, desired lower range of crab sizes (inclusive).}
+\item{size_min}{integer. Optional, desired lower range of crab size (inclusive).}
 
-\item{size_max}{integer. Optional, desired upper range of crab sizes (inclusive).}
+\item{size_max}{integer. Optional, desired upper range of crab size (inclusive).}
 
-\item{crab_category}{character string. One of c("legal_male", "preferred_male", "mature_male",
-"immature_male", "mature_female", "immature_female", "all").
-Optional, specifying this parameter will provide estimates for
-each of the selected categories; "all" will provide estimates for each
-relevant category for the given species. If using a female category,
-maturity will be based on morphological maturity (default "morphological"
-for the optional 'female_maturity' parameter). Set 'female_maturity'
-to "cutline" if you want to define female maturity based on ADF&G size cutlines.}
+\item{crab_category}{character string. One or many of c("legal_male", "preferred_male",
+"mature_male", "immature_male", "mature_female", "immature_female",
+"all_categories"). Optional, specifying this parameter will provide
+estimates for each of the selected categories; "all_categories" will
+provide estimates for each relevant category for the given species.
+If using a female category, maturity will be based on morphometric
+maturity (default "morphometric" for the optional \code{female_maturity}
+parameter). Set \code{female_maturity} to "cutline" if you want to define
+female maturity based on ADF&G size cutlines.}
 
-\item{female_maturity}{character string. One of c("morphological", "cutline").
-Defaults to "morphological" maturity for female crab. Morphological
-maturity designation for male crab are not available at this time.}
+\item{female_maturity}{character string. One of c("morphometric", "cutline").
+Defaults to "morphometric" maturity for female crab. Morphometric
+maturity biomass and abundance estimares for male crab are not
+available at this time.}
 
-\item{shell_condition}{character string. One or many of c("soft molting",
-"new hardshell", "oldshell", "very oldshell", "all_categories").
-Optional, specifying this parameter will provide estimates
-for each of the selected shell conditions; "all_categories" will
-provide estimates for each available shell condition category.}
+\item{shell_condition}{character string. One or many of c("soft molting", "new hardshell",
+"oldshell", "very oldshell", "all_categories"). Optional,
+specifying this parameter will provide estimates for each of the
+selected shell conditions; "all_categories" will provide estimates
+for each available shell condition category.}
 
 \item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
 "dead", "empty cases", "hatching", "all_categories"). Optional,
 specifying this parameter will provide estimates for each of the
 selected egg conditions; "all_categories" will provide estimates
-for each available egg condition category.}
+for each available egg condition category. Note that specifying
+\code{egg_condition} will return only female specimens in the final output.}
 
 \item{clutch_size}{character string. One or many of c("immature", "mature barren",
 "trace", "quarter", "half", "three quarter", "full", "all_categories").
 Optional, specifying this parameter will provide estimates for each of
 the selected clutch sizes; "all_categories" will provide estimates for
-each available clutch size category.}
+each available clutch size category. Note that specifying \code{clutch_size}
+will return only female specimens in the final output.}
 
 \item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
 within the size range specified in 'size_min' and/or 'size_max',
 or for the full range of observed sizes in the data. Defaults to FALSE.}
 }
 \value{
-....
+a named list of subsetted specimen data by biometrics of interest
+as well as variables to be carried forward for CPUE, abundance, and
+biomass calculations across the selected biometrics.
 }
 \description{
 A utility function to...

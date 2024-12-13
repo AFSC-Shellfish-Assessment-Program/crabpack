@@ -18,19 +18,20 @@ get_specimen_data(
 \item{region}{character string describing the region of interest. One of
 c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
 
-\item{district}{character string. One of c("ALL", "BB", "NORTH", "NS",
+\item{district}{character string. One or many of c("ALL", "BB", "NORTH", "NS",
 "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
 Defaults to "ALL" districts within the selected region if not specified.}
 
 \item{years}{numeric or integer vector of years.}
 
-\item{channel}{connection to Oracle created via crabpack::get_connected() or RODBC::odbcConnect().
-'channel = "local"' is to be used for internal development purposes only.}
+\item{channel}{connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
 }
 \value{
-a named list containing survey, cruise, haul, catch, size, specimen,
-stratum, subarea, and stratum_groups information for the years and species of interest.
+a named list containing specimen, haul, stratum, area, and size group
+information for the region, districts, years, and species of interest.
 }
 \description{
-TBD
+Pulls haul, specimen, and stratum grouping information for the
+region, districts, years, and species of interest from the
+CRABBASE schema in the AKFIN Oracle database.
 }

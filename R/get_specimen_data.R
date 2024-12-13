@@ -1,38 +1,18 @@
-### JOIN HAUL, STRATUM, and SPECIMEN DATA ---------------------------
-
-## function to join stratum/area info with haul and specimen data
-# -- need to ID pos-catch stations for each species...
-# -- need to filter out HT17 for everyone but RKC
-# -- return just one DF with haul/stratum/specimen all joined together
-
-## INPUTS: data_haul, data_specimen, species and/or stock, years....
-## dependencies: tidyverse, lookups....specify that you need to have them loaded? Or give script on loading so naming works within function?
-## -- can we just make sure they're loaded into environment (with the right names) and it'll be fine?
-
-# # Set file paths
-# path <- paste0("Y:/KOD_Survey/EBS Shelf/", current_year, "/Tech Memo/Data/")
-# out_dir <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Test/Outputs/"
-#
-# # Load data, set function inputs for testing
-# data_haul <- read.csv("Y:/KOD_Survey/EBS Shelf/Data_Processing/Test/Data/haul_table.csv")
-# data_specimen <- read.csv("Y:/KOD_Survey/EBS Shelf/Data_Processing/Test/Data/specimen_table.csv")
-# species <- "Red King Crab"
-# district <- "EBS" # if(missing), district default EBS?
-# years <- 2024
-
 #' Pull AFSC Shellfish Assessment Program Bering Sea survey data
 #'
-#' @description TBD
+#' @description Pulls haul, specimen, and stratum grouping information for the
+#'              region, districts, years, and species of interest from the
+#'              CRABBASE schema in the AKFIN Oracle database.
 #'
 #' @inheritParams calc_bioabund
-#' @param channel connection to Oracle created via crabpack::get_connected() or RODBC::odbcConnect().
-#'                'channel = "local"' is to be used for internal development purposes only.
+#' @param channel connection to Oracle created via `crabpack::get_connected()` or `RODBC::odbcConnect()`.
 #'
-#' @return a named list containing survey, cruise, haul, catch, size, specimen,
-#'         stratum, subarea, and stratum_groups information for the years and species of interest.
+#' @return a named list containing specimen, haul, stratum, area, and size group
+#'         information for the region, districts, years, and species of interest.
 #'
-#' @export get_specimen_data
+#' @export
 #'
+
 
 get_specimen_data <- function(species = NULL,
                               region = c("EBS", "NBS")[1],

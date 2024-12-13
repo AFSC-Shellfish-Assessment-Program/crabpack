@@ -15,7 +15,7 @@ calc_cpue(
   size_min = NULL,
   size_max = NULL,
   crab_category = NULL,
-  female_maturity = c("morphological", "cutline")[1],
+  female_maturity = c("morphometric", "cutline")[1],
   shell_condition = NULL,
   egg_condition = NULL,
   clutch_size = NULL,
@@ -32,7 +32,7 @@ calc_cpue(
 \item{region}{character string describing the region of interest. One of
 c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
 
-\item{district}{character string. One of c("ALL", "BB", "NORTH", "NS",
+\item{district}{character string. One or many of c("ALL", "BB", "NORTH", "NS",
 "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
 Defaults to "ALL" districts within the selected region if not specified.}
 
@@ -43,40 +43,44 @@ Defaults to "ALL" districts within the selected region if not specified.}
 specifying both "male" and "female" will provide estimates for
 each of the selected sexes.}
 
-\item{size_min}{integer. Optional, desired lower range of crab sizes (inclusive).}
+\item{size_min}{integer. Optional, desired lower range of crab size (inclusive).}
 
-\item{size_max}{integer. Optional, desired upper range of crab sizes (inclusive).}
+\item{size_max}{integer. Optional, desired upper range of crab size (inclusive).}
 
-\item{crab_category}{character string. One of c("legal_male", "preferred_male", "mature_male",
-"immature_male", "mature_female", "immature_female", "all").
-Optional, specifying this parameter will provide estimates for
-each of the selected categories; "all" will provide estimates for each
-relevant category for the given species. If using a female category,
-maturity will be based on morphological maturity (default "morphological"
-for the optional 'female_maturity' parameter). Set 'female_maturity'
-to "cutline" if you want to define female maturity based on ADF&G size cutlines.}
+\item{crab_category}{character string. One or many of c("legal_male", "preferred_male",
+"mature_male", "immature_male", "mature_female", "immature_female",
+"all_categories"). Optional, specifying this parameter will provide
+estimates for each of the selected categories; "all_categories" will
+provide estimates for each relevant category for the given species.
+If using a female category, maturity will be based on morphometric
+maturity (default "morphometric" for the optional \code{female_maturity}
+parameter). Set \code{female_maturity} to "cutline" if you want to define
+female maturity based on ADF&G size cutlines.}
 
-\item{female_maturity}{character string. One of c("morphological", "cutline").
-Defaults to "morphological" maturity for female crab. Morphological
-maturity designation for male crab are not available at this time.}
+\item{female_maturity}{character string. One of c("morphometric", "cutline").
+Defaults to "morphometric" maturity for female crab. Morphometric
+maturity biomass and abundance estimares for male crab are not
+available at this time.}
 
-\item{shell_condition}{character string. One or many of c("soft molting",
-"new hardshell", "oldshell", "very oldshell", "all_categories").
-Optional, specifying this parameter will provide estimates
-for each of the selected shell conditions; "all_categories" will
-provide estimates for each available shell condition category.}
+\item{shell_condition}{character string. One or many of c("soft molting", "new hardshell",
+"oldshell", "very oldshell", "all_categories"). Optional,
+specifying this parameter will provide estimates for each of the
+selected shell conditions; "all_categories" will provide estimates
+for each available shell condition category.}
 
 \item{egg_condition}{character string. One or many of c("none", "uneyed", "eyed",
 "dead", "empty cases", "hatching", "all_categories"). Optional,
 specifying this parameter will provide estimates for each of the
 selected egg conditions; "all_categories" will provide estimates
-for each available egg condition category.}
+for each available egg condition category. Note that specifying
+\code{egg_condition} will return only female specimens in the final output.}
 
 \item{clutch_size}{character string. One or many of c("immature", "mature barren",
 "trace", "quarter", "half", "three quarter", "full", "all_categories").
 Optional, specifying this parameter will provide estimates for each of
 the selected clutch sizes; "all_categories" will provide estimates for
-each available clutch size category.}
+each available clutch size category. Note that specifying \code{clutch_size}
+will return only female specimens in the final output.}
 
 \item{bin_1mm}{boolean T/F. If TRUE, estimates will be provided for each 1mm bin
 within the size range specified in 'size_min' and/or 'size_max',
@@ -87,15 +91,15 @@ with resampled data (haul type "17") in years when a Bristol Bay
 retow took place? Defaults to TRUE, please use care when interpreting
 BBRKC outputs if using FALSE.}
 
-\item{output}{character string. One of c("cpue", "bioabund"). Defaults output to
-"cpue", "bioabund" is used for internal package purposes, as the
-'calc_cpue()' function is called within 'calc_bioabund()'.}
+\item{output}{character string. One of c("cpue", "bioabund"). Default \code{output}
+is "cpue"; "bioabund" is used for internal package purposes only, as
+\code{calc_cpue()} is called within \code{calc_bioabund()}.}
 }
 \value{
-A data frame with station-level area swept-expanded estimates of weight
-and numerical CPUE by year. \strong{ADD MORE TEXT HERE about return if \code{output = "bioabund"}}
+a data frame with station-level crab counts and area swept-expanded
+estimates of weight (mt, lbs) and numerical CPUE by year.
 }
 \description{
-This function calculates and zero-fills weight and numerical
-catch per unit effort (area swept, km2)
+This function calculates and zero-fills weight (mt, lbs) and numerical
+catch per unit effort (area swept, nm2).
 }

@@ -9,7 +9,7 @@
 #' @param species character string. One of c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR").
 #' @param region character string describing the region of interest. One of
 #'               c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.
-#' @param district character string. One of c("ALL", "BB", "NORTH", "NS",
+#' @param district character string. One or many of c("ALL", "BB", "NORTH", "NS",
 #'                 "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
 #'                 Defaults to "ALL" districts within the selected region if not specified.
 #' @param years numeric or integer vector of years.
@@ -17,34 +17,38 @@
 #'            "male" or "female" only will provide estimates for the selected sex,
 #'            specifying both "male" and "female" will provide estimates for
 #'            each of the selected sexes.
-#' @param size_min integer. Optional, desired lower range of crab sizes (inclusive).
-#' @param size_max integer. Optional, desired upper range of crab sizes (inclusive).
-#' @param crab_category character string. One of c("legal_male", "preferred_male", "mature_male",
-#'                      "immature_male", "mature_female", "immature_female", "all").
-#'                      Optional, specifying this parameter will provide estimates for
-#'                      each of the selected categories; "all" will provide estimates for each
-#'                      relevant category for the given species. If using a female category,
-#'                      maturity will be based on morphological maturity (default "morphological"
-#'                      for the optional 'female_maturity' parameter). Set 'female_maturity'
-#'                      to "cutline" if you want to define female maturity based on ADF&G size cutlines.
-#' @param female_maturity character string. One of c("morphological", "cutline").
-#'                        Defaults to "morphological" maturity for female crab. Morphological
-#'                        maturity designation for male crab are not available at this time.
-#' @param shell_condition character string. One or many of c("soft molting",
-#'                        "new hardshell", "oldshell", "very oldshell", "all_categories").
-#'                        Optional, specifying this parameter will provide estimates
-#'                        for each of the selected shell conditions; "all_categories" will
-#'                        provide estimates for each available shell condition category.
+#' @param size_min integer. Optional, desired lower range of crab size (inclusive).
+#' @param size_max integer. Optional, desired upper range of crab size (inclusive).
+#' @param crab_category character string. One or many of c("legal_male", "preferred_male",
+#'                      "mature_male", "immature_male", "mature_female", "immature_female",
+#'                      "all_categories"). Optional, specifying this parameter will provide
+#'                      estimates for each of the selected categories; "all_categories" will
+#'                      provide estimates for each relevant category for the given species.
+#'                      If using a female category, maturity will be based on morphometric
+#'                      maturity (default "morphometric" for the optional `female_maturity`
+#'                      parameter). Set `female_maturity` to "cutline" if you want to define
+#'                      female maturity based on ADF&G size cutlines.
+#' @param female_maturity character string. One of c("morphometric", "cutline").
+#'                        Defaults to "morphometric" maturity for female crab. Morphometric
+#'                        maturity biomass and abundance estimares for male crab are not
+#'                        available at this time.
+#' @param shell_condition character string. One or many of c("soft molting", "new hardshell",
+#'                        "oldshell", "very oldshell", "all_categories"). Optional,
+#'                        specifying this parameter will provide estimates for each of the
+#'                        selected shell conditions; "all_categories" will provide estimates
+#'                        for each available shell condition category.
 #' @param egg_condition character string. One or many of c("none", "uneyed", "eyed",
-#'                       "dead", "empty cases", "hatching", "all_categories"). Optional,
-#'                       specifying this parameter will provide estimates for each of the
-#'                       selected egg conditions; "all_categories" will provide estimates
-#'                       for each available egg condition category.
+#'                      "dead", "empty cases", "hatching", "all_categories"). Optional,
+#'                      specifying this parameter will provide estimates for each of the
+#'                      selected egg conditions; "all_categories" will provide estimates
+#'                      for each available egg condition category. Note that specifying
+#'                      `egg_condition` will return only female specimens in the final output.
 #' @param clutch_size character string. One or many of c("immature", "mature barren",
-#'                     "trace", "quarter", "half", "three quarter", "full", "all_categories").
-#'                     Optional, specifying this parameter will provide estimates for each of
-#'                     the selected clutch sizes; "all_categories" will provide estimates for
-#'                     each available clutch size category.
+#'                    "trace", "quarter", "half", "three quarter", "full", "all_categories").
+#'                    Optional, specifying this parameter will provide estimates for each of
+#'                    the selected clutch sizes; "all_categories" will provide estimates for
+#'                    each available clutch size category. Note that specifying `clutch_size`
+#'                    will return only female specimens in the final output.
 #' @param bin_1mm boolean T/F. If TRUE, estimates will be provided for each 1mm bin
 #'                within the size range specified in 'size_min' and/or 'size_max',
 #'                or for the full range of observed sizes in the data. Defaults to FALSE.
@@ -61,6 +65,8 @@
 #'         biomass (mt), and biomass (lbs) by year.
 #'
 #' @export
+#'
+
 
 calc_bioabund <- function(crab_data = NULL,
                           species = NULL,
@@ -72,7 +78,7 @@ calc_bioabund <- function(crab_data = NULL,
                           size_min = NULL,
                           size_max = NULL,
                           crab_category = NULL,
-                          female_maturity = c("morphological", "cutline")[1],
+                          female_maturity = c("morphometric", "cutline")[1],
                           shell_condition = NULL,
                           egg_condition = NULL,
                           clutch_size = NULL,
@@ -103,14 +109,17 @@ calc_bioabund <- function(crab_data = NULL,
   groups_out <- cpue$group_cols
 
   # LOOP OVER YEARS??
-  # DO I NEED TO CALL set_variables() again here?? need 'groups_out'
+
+  ## NEED TO CONSIDER SPATIAL LEVEL!!
+  # 'if's in calculations/aggregating --> break into steps for outputs....
+  #
 
   ## Calculate abundance and biomass -------------
   #Sum across haul, scale abundance, biomass, and variance to strata, then sum across strata and calc CIs
   bio_abund_df <- station_cpue %>%
                   dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'STRATUM', groups_out, 'TOTAL_AREA')))) %>%
                   dplyr::summarise(COUNT = sum(COUNT), CPUE = sum(CPUE), CPUE_KG = sum(CPUE_KG)) %>%
-                  #Scale to abundance by strata
+                  # Scale to abundance by strata
                   dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STRATUM', groups_out)))) %>%
                   dplyr::reframe(AREA = TOTAL_AREA,
                                  MEAN_CPUE = mean(CPUE),
@@ -154,30 +163,33 @@ calc_bioabund <- function(crab_data = NULL,
                   dplyr::ungroup()# %>%
                 # complete.cases()
 
-                ## format output better!!
-                # bio_abund_out <- bio_abund_out_EBS %>%
-                #   mutate(SPECIES_CODE = 69323,
-                #          SPECIES_NAME = "Blue King Crab",
-                #          DISTRICT_CODE = "STMATT",
-                #          SEX = "MALE",
-                #          SIZE_GROUP = paste(SEX, SIZE_CLASS_MM, sep = "_"),
-                #          SHELL_CONDITION = "",
-                #          MATURITY = "") %>%
-                #   select(YEAR, SPECIES_CODE, SPECIES_NAME, DISTRICT_CODE, SIZE_GROUP, MATURITY, SEX, SIZE_CLASS_MM, SHELL_CONDITION,
-                #          BIOMASS_LBS, BIOMASS_LBS_CV, BIOMASS_LBS_CI, ABUNDANCE, ABUNDANCE_CV, ABUNDANCE_CI, BIOMASS_MT, BIOMASS_MT_CV, BIOMASS_MT_CI)
-                #
-                # bio_abund_out2 <- bio_abund_out_EBS2 %>%
-                #   mutate(SPECIES_CODE = 69323,
-                #          SPECIES_NAME = "Blue King Crab",
-                #          DISTRICT_CODE = "STMATT",
-                #          SEX = "MALE",
-                #          SIZE_GROUP = paste(SEX, SIZE_CLASS_MM, sep = "_"),
-                #          SHELL_CONDITION = "",
-                #          MATURITY = "",
-                #          SIZE_CATEGORY = "SIZE_GROUP") %>%
-                #   select(SPECIES_CODE, SPECIES_NAME, DISTRICT_CODE, YEAR, SIZE_CATEGORY, SIZE_GROUP, MATURITY, SEX, SIZE_CLASS_MM, SHELL_CONDITION,
-                #          ABUNDANCE, ABUNDANCE_CV, ABUNDANCE_CI, BIOMASS_MT, BIOMASS_MT_CV, BIOMASS_MT_CI, BIOMASS_LBS, BIOMASS_LBS_CV, BIOMASS_LBS_CI)
+  ## format output better!!
+  # bio_abund_out <- bio_abund_out_EBS %>%
+  #   mutate(#SPECIES_CODE = 69323,
+  #          SPECIES = species,
+  #          DISTRICT = district,
+  #          SEX = "MALE",
+  #          SIZE_GROUP = paste(SEX, SIZE_CLASS_MM, sep = "_"),
+  #          SHELL_CONDITION = "",
+  #          MATURITY = "") %>%
+  #   select(YEAR, SPECIES, DISTRICT, CATEGORY, MATURITY, SEX, SIZE_CLASS_MM, SHELL_CONDITION,
+  #          ABUNDANCE, ABUNDANCE_CV, ABUNDANCE_CI,
+  #          BIOMASS_MT, BIOMASS_MT_CV, BIOMASS_MT_CI,
+  #          BIOMASS_LBS, BIOMASS_LBS_CV, BIOMASS_LBS_CI)
+  #
+  # bio_abund_out2 <- bio_abund_out_EBS2 %>%
+  #   mutate(SPECIES_CODE = 69323,
+  #          SPECIES_NAME = "Blue King Crab",
+  #          DISTRICT_CODE = "STMATT",
+  #          SEX = "MALE",
+  #          SIZE_GROUP = paste(SEX, SIZE_CLASS_MM, sep = "_"),
+  #          SHELL_CONDITION = "",
+  #          MATURITY = "",
+  #          SIZE_CATEGORY = "SIZE_GROUP") %>%
+  #   select(SPECIES_CODE, SPECIES_NAME, DISTRICT_CODE, YEAR, SIZE_CATEGORY, SIZE_GROUP, MATURITY, SEX, SIZE_CLASS_MM, SHELL_CONDITION,
+  #          ABUNDANCE, ABUNDANCE_CV, ABUNDANCE_CI, BIOMASS_MT, BIOMASS_MT_CV, BIOMASS_MT_CI, BIOMASS_LBS, BIOMASS_LBS_CV, BIOMASS_LBS_CI)
 
 
-                return(list(bio_abund_df))
+  return(list(bio_abund_df))
+
 }

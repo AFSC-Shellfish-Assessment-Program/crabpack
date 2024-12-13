@@ -1,4 +1,4 @@
-#' Set optional variables used in `calc_cpue` and `calc_bioabund` and subset data
+#' Helper function to set optional variables and subset data
 #'
 #' @description A utility function to...
 #'
@@ -18,7 +18,7 @@ set_variables <- function(crab_data = NULL,
                           size_min = NULL,
                           size_max = NULL,
                           crab_category = NULL,
-                          female_maturity = c("morphological", "cutline")[1],
+                          female_maturity = c("morphometric", "cutline")[1],
                           shell_condition = NULL,
                           egg_condition = NULL,
                           clutch_size = NULL,
@@ -33,7 +33,7 @@ set_variables <- function(crab_data = NULL,
   # - can't call 'all_categories' and another category -- redundant: egg condition, shell condition, clutch size, category
   ## **SOME SORT OF WARNING if wanting male, can't do morphometric, it's cutline only for this. But see Chionoecetes maturity tables?
   ## Hair --> no female maturity...cutline at least -- I guess could do morphometric? And legal/sublegal == mature/immature? (but not recommended)
-  # female maturity - if not specified, warning that using morphological default, error if length > 1
+  # female maturity - if not specified, warning that using morphometric default, error if length > 1
 
 
   # Define set of columns to 'group_by()' and define 'expand_grid()' combinations

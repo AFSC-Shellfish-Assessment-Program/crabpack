@@ -1,17 +1,19 @@
 #' Calculate haul-level catch per unit effort
 #'
-#' @description This function calculates and zero-fills weight and numerical
-#'              catch per unit effort (area swept, km2)
+#' @description This function calculates and zero-fills weight (mt, lbs) and numerical
+#'              catch per unit effort (area swept, nm2).
 #'
 #' @inheritParams calc_bioabund
-#' @param output character string. One of c("cpue", "bioabund"). Defaults output to
-#'               "cpue", "bioabund" is used for internal package purposes, as the
-#'               'calc_cpue()' function is called within 'calc_bioabund()'.
+#' @param output character string. One of c("cpue", "bioabund"). Default `output`
+#'               is "cpue"; "bioabund" is used for internal package purposes only, as
+#'               `calc_cpue()` is called within `calc_bioabund()`.
 #'
-#' @return A data frame with station-level area swept-expanded estimates of weight
-#'         and numerical CPUE by year. **ADD MORE TEXT HERE about return if `output = "bioabund"`**
+#' @return a data frame with station-level crab counts and area swept-expanded
+#'         estimates of weight (mt, lbs) and numerical CPUE by year.
 #'
 #' @export
+#'
+
 
 calc_cpue <- function(crab_data = NULL,
                       species = NULL,
@@ -22,7 +24,7 @@ calc_cpue <- function(crab_data = NULL,
                       size_min = NULL,
                       size_max = NULL,
                       crab_category = NULL,
-                      female_maturity = c("morphological", "cutline")[1],
+                      female_maturity = c("morphometric", "cutline")[1],
                       shell_condition = NULL,
                       egg_condition = NULL,
                       clutch_size = NULL,

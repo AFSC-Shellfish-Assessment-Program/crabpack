@@ -1,13 +1,14 @@
-#' Assign maturity-sex categories based on stock-specific size definitions
-#' #' NEEDS MAT_LOOKUP!
+#' Assign size-sex-maturity categories based on species- and district-specific size definitions
+#'
 #' @description TBD
 #'
 #' @inheritParams calc_bioabund
 #'
-#' @return Returns a data frame with crab specimen data and a CATEGORY column with
-#'         stock-specific maturity designations
+#' @return a data frame with crab specimen data and an additional CATEGORY column
+#'         with stock-specific maturity designations.
 #'
-#' @export set_crab_category
+#' @export
+#'
 
 
 set_crab_category <- function(crab_data = NULL,
@@ -15,7 +16,7 @@ set_crab_category <- function(crab_data = NULL,
                               region = c("EBS", "NBS")[1],
                               district = NULL,
                               crab_category = NULL,
-                              female_maturity = c("morphological", "cutline")[1]) {
+                              female_maturity = c("morphometric", "cutline")[1]) {
 
   ## Get crab category size definitions
   sizegroups <- crab_data$sizegroups
@@ -31,7 +32,7 @@ set_crab_category <- function(crab_data = NULL,
                                                              TRUE ~ MAT_DISTRICT))
 
 
-  ## Assign female maturity -- default to "morphological" ----------------------
+  ## Assign female maturity -- default to "morphometric" ----------------------
   if(female_maturity == "cutline"){
     # look up cutlines for mature and immature females
     if(!species == "HAIR"){

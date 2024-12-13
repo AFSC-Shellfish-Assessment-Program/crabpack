@@ -2,8 +2,7 @@
 % Please edit documentation in R/set_crab_category.R
 \name{set_crab_category}
 \alias{set_crab_category}
-\title{Assign maturity-sex categories based on stock-specific size definitions
-#' NEEDS MAT_LOOKUP!}
+\title{Assign size-sex-maturity categories based on species- and district-specific size definitions}
 \usage{
 set_crab_category(
   crab_data = NULL,
@@ -11,7 +10,7 @@ set_crab_category(
   region = c("EBS", "NBS")[1],
   district = NULL,
   crab_category = NULL,
-  female_maturity = c("morphological", "cutline")[1]
+  female_maturity = c("morphometric", "cutline")[1]
 )
 }
 \arguments{
@@ -22,26 +21,28 @@ set_crab_category(
 \item{region}{character string describing the region of interest. One of
 c("EBS", "NBS"). Defaults to "EBS" for Eastern Bering Sea.}
 
-\item{district}{character string. One of c("ALL", "BB", "NORTH", "NS",
+\item{district}{character string. One or many of c("ALL", "BB", "NORTH", "NS",
 "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173").
 Defaults to "ALL" districts within the selected region if not specified.}
 
-\item{crab_category}{character string. One of c("legal_male", "preferred_male", "mature_male",
-"immature_male", "mature_female", "immature_female", "all").
-Optional, specifying this parameter will provide estimates for
-each of the selected categories; "all" will provide estimates for each
-relevant category for the given species. If using a female category,
-maturity will be based on morphological maturity (default "morphological"
-for the optional 'female_maturity' parameter). Set 'female_maturity'
-to "cutline" if you want to define female maturity based on ADF&G size cutlines.}
+\item{crab_category}{character string. One or many of c("legal_male", "preferred_male",
+"mature_male", "immature_male", "mature_female", "immature_female",
+"all_categories"). Optional, specifying this parameter will provide
+estimates for each of the selected categories; "all_categories" will
+provide estimates for each relevant category for the given species.
+If using a female category, maturity will be based on morphometric
+maturity (default "morphometric" for the optional \code{female_maturity}
+parameter). Set \code{female_maturity} to "cutline" if you want to define
+female maturity based on ADF&G size cutlines.}
 
-\item{female_maturity}{character string. One of c("morphological", "cutline").
-Defaults to "morphological" maturity for female crab. Morphological
-maturity designation for male crab are not available at this time.}
+\item{female_maturity}{character string. One of c("morphometric", "cutline").
+Defaults to "morphometric" maturity for female crab. Morphometric
+maturity biomass and abundance estimares for male crab are not
+available at this time.}
 }
 \value{
-Returns a data frame with crab specimen data and a CATEGORY column with
-stock-specific maturity designations
+a data frame with crab specimen data and an additional CATEGORY column
+with stock-specific maturity designations.
 }
 \description{
 TBD

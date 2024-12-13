@@ -7,14 +7,19 @@
 get_connected(db = "AKFIN", check_access = TRUE)
 }
 \arguments{
-\item{db}{string. A registered data source name, in this case "AKFIN" by default. This argument is passed to the \code{dsn} argument in \code{RODBC::odbcConnect()}}
+\item{db}{string. A registered data source name, in this case "AKFIN" by default.
+This argument is passed to the \code{dsn} argument in \code{RODBC::odbcConnect()}}
 
-\item{check_access}{boolean. If TRUE (by default), checks whether you have the specific tables in AKFIN used in the crabpack package. Outputs an error if the user does not have access to these tables with a message of the point of contact information for access.}
+\item{check_access}{boolean. If TRUE (by default), checks whether you have the
+specific tables in AKFIN used in the crabpack package. Outputs an error
+if the user does not have access to these tables with a message of the
+point of contact information for access.}
 }
 \value{
-channel of class "RODBC". See \code{?RODBC::odbcConnect()} for more detail
+channel of class "RODBC". See \code{?RODBC::odbcConnect()} for more detail.
 }
 \description{
-Creates the RODBC connection to Oracle needed to pull SQL queries from AKFIN database.
-Also support users who use the Rpackage \code{keyring} to store usernames and passwords.
+Creates the RODBC connection to Oracle needed to pull SQL queries
+from AKFIN database. Also support users who use the Rpackage \code{keyring}
+to store usernames and passwords.
 }
