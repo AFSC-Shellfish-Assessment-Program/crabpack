@@ -261,7 +261,7 @@ get_specimen_data <- function(species = NULL,
                                            dplyr::left_join(., stratum_design,
                                                             relationship = "many-to-many") %>%
                                            dplyr::select(STRATUM, TOTAL_AREA, YEAR)) %>%
-                    dplyr::select(HAULJOIN, YEAR, STATION_ID, HAUL_TYPE,
+                    dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HAUL_TYPE,
                                   AREA_SWEPT, MID_LATITUDE, MID_LONGITUDE, DISTRICT,
                                   STRATUM, TOTAL_AREA) %>%
                     dplyr::rename(LATITUDE = MID_LATITUDE,
@@ -272,7 +272,17 @@ get_specimen_data <- function(species = NULL,
   ## Join specimen and stratum information to haul data
   # Add specimen data to relevant hauls for the selected districts/strata
   data_crab <- stock_stations %>%
-               dplyr::left_join(., specimen_df)
+               dplyr::left_join(., specimen_df) %>%
+               # assign unstratified districts for RKC/BKC
+               {if(species == "RKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "NORTH",
+                                                                                  TRUE ~ DISTRICT),
+                                                      STRATUM = dplyr::case_when(is.na(STRATUM) ~ "NORTH",
+                                                                                 TRUE ~ STRATUM)) else .} %>%
+               {if(species == "BKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "UNSTRAT",
+                                                                                  TRUE ~ DISTRICT),
+                                                      STRATUM = dplyr::case_when(is.na(STRATUM) ~ "UNSTRAT",
+                                                                                 TRUE ~ STRATUM)) else .}
+
 
   # If district is "Northern Unstratified" or "BKC Unstratified",
   # add TOTAL_AREA based on the number of positive catch stations in a given year
@@ -280,7 +290,7 @@ get_specimen_data <- function(species = NULL,
     n_pos_catch <- data_crab %>%
                    dplyr::filter(!is.na(SEX),
                                  STRATUM %in% c("NORTH", "UNSTRAT")) %>%
-                   dplyr::select(HAULJOIN, YEAR, STATION_ID,
+                   dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID,
                                  HAUL_TYPE, DISTRICT, STRATUM) %>%
                    dplyr::distinct() %>%
                    dplyr::group_by(YEAR, STRATUM) %>%
@@ -310,10 +320,19 @@ get_specimen_data <- function(species = NULL,
   ## end goal is the correct stratum name and total area joined to haul and specimen data --> one df
   ## -- works for EBS RKC so far
 
-  ## Format haul data for output
+  ## Format haul data for output, filter region, district, years
   data_haul <- data_haul %>%
                dplyr::left_join(., stock_stations %>%
-                                   dplyr::select(-c('LATITUDE', 'LONGITUDE')))
+                                   dplyr::select(-c('LATITUDE', 'LONGITUDE'))) %>%
+               dplyr::filter(YEAR %in% years,
+                             REGION %in% region) %>%
+               {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .}
+
+  ## Format specimen data for output, filter region, district, years
+  data_crab <- data_crab %>%
+               dplyr::filter(YEAR %in% years,
+                             REGION %in% region) %>%
+               {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .}
 
 
 
