@@ -23,8 +23,6 @@ crabpack use functions from _XX_ additional packages:
 - tidyr:
 - dplyr:
 - purrr::map2
-- gapindex::stitch_entries
-- magrittr %>%
 
 Please make sure these _XX_ packages are installed before installing crabpack.
 
