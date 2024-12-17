@@ -40,7 +40,7 @@ get_connected <- function(db = "AKFIN",
     return(invisible())
   }
 
-  if(is(channel) == "RODBC"){
+  if(class(channel) == "RODBC"){
     cat("Successfully connected to Oracle.\n")
 
     if(check_access & db == "AKFIN"){
