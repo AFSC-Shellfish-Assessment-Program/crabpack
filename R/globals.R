@@ -4,4 +4,4 @@ utils::globalVariables(c(read.csv("inst/extdata/metadata.csv")$Field,
                          'region', 'sex_combos', 'shell_combos', 'specimen_dat', 'MAT_DISTRICT',
                          'N_CPUE', 'N_CPUE_LBS', 'N_CPUE_MT', 'SD_CPUE', 'SD_CPUE_LBS', 'SD_CPUE_MT',
                          'VAR_CPUE', 'VAR_CPUE_LBS', 'VAR_CPUE_MT', 'MEAN_CPUE', 'MEAN_CPUE_LBS',
-                         'MEAN_CPUE_MT', 'data', 'CPUE_KG', 'AREA'))
+                         'MEAN_CPUE_MT', 'data', 'CPUE_KG', 'AREA', 'HT', 'RANGE'))
