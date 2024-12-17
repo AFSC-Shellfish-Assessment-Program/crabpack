@@ -142,7 +142,7 @@ calc_bioabund <- function(crab_data = NULL,
                                               BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
                        dplyr::distinct()
 
-  if(output == "stratum"){
+  if(spatial_level == "stratum"){
     # Format output dataframe
     stratum_out <- bio_abund_stratum %>%
                    dplyr::mutate(SPECIES = species,
@@ -190,7 +190,7 @@ calc_bioabund <- function(crab_data = NULL,
                                                BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
                         dplyr::ungroup()
 
-  if(output == "district"){
+  if(spatial_level == "district"){
     # Format output dataframe
     district_out <- bio_abund_district %>%
                     dplyr::mutate(SPECIES = species,
@@ -232,7 +232,7 @@ calc_bioabund <- function(crab_data = NULL,
                                      N_STATIONS = sum(N_STATIONS)) %>%
                       dplyr::ungroup()
 
-  if(output == "region"){
+  if(spatial_level == "region"){
     # Format output dataframe
     region_out <- bio_abund_region %>%
                   dplyr::mutate(SPECIES = species,
