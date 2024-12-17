@@ -25,7 +25,7 @@ set_variables <- function(crab_data = NULL,
                           shell_condition = NULL,
                           egg_condition = NULL,
                           clutch_size = NULL,
-                          bin_1mm = NULL){
+                          bin_1mm = FALSE){
 
 
   ## Error messages:
@@ -39,63 +39,30 @@ set_variables <- function(crab_data = NULL,
   # female maturity - if not specified, warning that using morphometric default, error if length > 1
 
 
+
   # Define set of columns to 'group_by()' and define 'expand_grid()' combinations
   # based on whether or not there are optional specimen modifiers defined in function
   group_cols <- c()
   expand_combos <- list()
 
 
-  ## SEX -----------------------------------------------------------------------
-  # Always include initially to carry through for BBRKC resample filtering
-  data_crab <- crab_data %>%
-               dplyr::mutate(SEX_TEXT = case_when(SEX == 1 ~ "male",
-                                                  SEX == 2 ~ "female"))
-  sex_combos <- c("male", "female")
-
-  # filter sex if only want one
-  if(!is.null(sex)){
-    if(!sex %in% c("all_categories", TRUE)){
-      data_crab <- data_crab %>%
-                   dplyr::filter(SEX_TEXT %in% sex)
-      sex_combos <- unique(data_crab$SEX_TEXT)
-    }
-  }
-
-  # append expand combinations
-  expand_combos <- append(expand_combos, list(sex_combos = sex_combos))
-
-
-  ## SIZE_MIN ------------------------------------------------------------------
-  if(!is.null(size_min)){
-    # filter minimum size
-    data_crab <- data_crab %>%
-                  dplyr::filter(SIZE_1MM >= size_min)
-
-  }
-
-
-  ## SIZE_MAX ------------------------------------------------------------------
-  if(!is.null(size_max)){
-    # filter maximum size
-    data_crab <- data_crab %>%
-                  dplyr::filter(SIZE_1MM <= size_max)
-  }
-
-
   ## CRAB CATEGORY -------------------------------------------------------------
   if(is.null(crab_category)){
+    # If not using crab_category, pull specimen dataframe, remove 0-catch stations
+    data_crab <- crab_data$specimen %>%
+                 dplyr::filter(!is.na(SEX))
+
     category_combos <- NA
   }
 
   if(!is.null(crab_category)){
     # assign crab CATEGORY
-    data_crab <- set_crab_category(crab_data = data_crab,
-                                   species = species,
-                                   region = region,
-                                   district = district,
-                                   crab_category = crab_category,
-                                   female_maturity = female_maturity) %>%
-                 filter(!is.na(CATEGORY)) # maybe don't need line?
+    data_crab <- crabpack::set_crab_category(crab_data = crab_data,
+                                             species = species,
+                                             region = region,
+                                             district = district,
+                                             crab_category = crab_category,
+                                             female_maturity = female_maturity)
 
     # assign expand_combos
     if(species %in% c("RKC", "BKC")){
@@ -130,6 +97,43 @@ set_variables <- function(crab_data = NULL,
 
   # append expand combinations
   expand_combos <- append(expand_combos, list(category_combos = category_combos))
+
+
+  ## SEX -----------------------------------------------------------------------
+  # Always include initially to carry through for BBRKC resample filtering
+  data_crab <- data_crab %>%
+               dplyr::mutate(SEX_TEXT = case_when(SEX == 1 ~ "male",
+                                                  SEX == 2 ~ "female"))
+  sex_combos <- c("male", "female")
+
+  # filter sex if only want one
+  if(!is.null(sex)){
+    if(!sex %in% c("all_categories", TRUE)){
+      data_crab <- data_crab %>%
+                   dplyr::filter(SEX_TEXT %in% sex)
+      sex_combos <- unique(data_crab$SEX_TEXT)
+    }
+  }
+
+  # append expand combinations
+  expand_combos <- append(expand_combos, list(sex_combos = sex_combos))
+
+
+  ## SIZE_MIN ------------------------------------------------------------------
+  if(!is.null(size_min)){
+    # filter minimum size
+    data_crab <- data_crab %>%
+                 dplyr::filter(SIZE_1MM >= size_min)
+
+  }
+
+
+  ## SIZE_MAX ------------------------------------------------------------------
+  if(!is.null(size_max)){
+    # filter maximum size
+    data_crab <- data_crab %>%
+                 dplyr::filter(SIZE_1MM <= size_max)
+  }
 
 
   ## SHELL CONDITION -----------------------------------------------------------
