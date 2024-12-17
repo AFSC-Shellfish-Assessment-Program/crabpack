@@ -53,7 +53,7 @@ get_connected <- function(db = "AKFIN",
                                                    "CRABBASE.STRATUM_AREA",
                                                    "CRABBASE.STRATUM_DESIGN",
                                                    "CRABBASE.CHIONOECETES_MAT_RATIO",
-                                                   "CRABBASE.CHIONOECETES_OGIVE_PARAMS"),
+                                                   "CRABBASE.CHIONOECETES_MATMODEL_PARAMS"),
                                                    access = F)
 
       for(itable in 1:nrow(x = tables_to_check)){
