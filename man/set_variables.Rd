@@ -15,7 +15,7 @@ set_variables(
   shell_condition = NULL,
   egg_condition = NULL,
   clutch_size = NULL,
-  bin_1mm = NULL
+  bin_1mm = FALSE
 )
 }
 \arguments{

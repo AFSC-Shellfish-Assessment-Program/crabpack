@@ -18,7 +18,7 @@ get_male_maturity(
 \verb{c("EBS", "NBS"}). Defaults to \code{"EBS"} for Eastern Bering Sea.}
 
 \item{district}{Character string. One or many of \code{c("ALL", "E166", "W166")}. Defaults to
-\code{"ALL"}; \code{"E166"} and \code{"W166"} are to be used for Tanner Crab only.}
+\code{"ALL"}; \code{"E166"} and \code{"W166"} are used for Tanner Crab only.}
 
 \item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
 }

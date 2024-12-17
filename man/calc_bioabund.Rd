@@ -20,7 +20,7 @@ calc_bioabund(
   egg_condition = NULL,
   clutch_size = NULL,
   bin_1mm = FALSE,
-  spatial_level = c("station", "district", "region")[2],
+  spatial_level = c("stratum", "district", "region")[2],
   replace_retow = TRUE
 )
 }
@@ -83,10 +83,9 @@ will return only female specimens in the final output.}
 within the size range specified in \code{size_min} and/or \code{size_max},
 or for the full range of observed sizes in the data. Defaults to \code{FALSE}.}
 
-\item{spatial_level}{Character string. One of \code{c("station", "district", "region")}.
+\item{spatial_level}{Character string. One of \code{c("stratum", "district", "region")}.
 Describes the spatial resolution of biomass and abundance output,
-either kept at the haul level, or aggregated to the district (default)
-or regional scale.}
+aggregated to the stratum, district (default), or regional scale.}
 
 \item{replace_retow}{Boolean T/F. If \code{TRUE}, replace female Bristol Bay red king crab observations
 with resampled data (haul type = 17) in years when a Bristol Bay
@@ -94,7 +93,7 @@ retow took place. Defaults to \code{TRUE}, please use care when interpreting
 BBRKC outputs if using \code{FALSE}.}
 }
 \value{
-A data frame with area swept-expanded estimates of station-, district-, or region-level abundance,
+A data frame with area swept-expanded estimates of stratum-, district-, or region-level abundance,
 biomass (mt), and biomass (lbs) by year.
 }
 \description{
