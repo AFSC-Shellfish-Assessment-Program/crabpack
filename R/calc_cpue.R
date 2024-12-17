@@ -37,60 +37,70 @@ calc_cpue <- function(crab_data = NULL,
 
 
   ## ERROR: must specify just one output if length(output > 1)
-
+  ## something about certain preferred years for certain stocks/species too?
 
   ## Set variables, define and filter specimen modifiers
-  vars <- set_variables(crab_data = crab_data,
-                        species = species,
-                        sex = sex,
-                        size_min = size_min,
-                        size_max = size_max,
-                        crab_category = crab_category,
-                        female_maturity = female_maturity,
-                        shell_condition = shell_condition,
-                        egg_condition = egg_condition,
-                        clutch_size = clutch_size,
-                        bin_1mm = bin_1mm)
+  vars <- crabpack::set_variables(crab_data = crab_data,
+                                  species = species,
+                                  sex = sex,
+                                  size_min = size_min,
+                                  size_max = size_max,
+                                  crab_category = crab_category,
+                                  female_maturity = female_maturity,
+                                  shell_condition = shell_condition,
+                                  egg_condition = egg_condition,
+                                  clutch_size = clutch_size,
+                                  bin_1mm = bin_1mm)
 
-  # Pull specimen dataframe
-  specimen_dat <- vars$specimen_data
 
   # Pull column names and expand_grid() categories to track throughout calculations
   group_cols <- vars$group_cols
-  list2env(expand_combos, .GlobalEnv)
+  list2env(vars$expand_combos, .GlobalEnv)
 
 
   #*SOMETHING IN HERE to make sure species designated is same as the species you pulled data for??**
   ## CHECK SPECIES IN DATA == SPECIES CALLED IN FUNCTION
+  ## something to detect district in data too?
+
+  # Pull specimen dataframe
+  specimen_dat <- vars$specimen_data
 
 
-  # Filter region, district, years
+  # Filter by species, make sure species is the same as the data pulled
   specimen_dat <- specimen_dat %>%
-                  dplyr::filter(REGION %in% region)
+                  dplyr::filter(SPECIES %in% species)
+  if(nrow(specimen_dat) == 0){
+    stop(paste0("Selected `species` is not present in the specimen data. Verify",
+                " that the species specified in `crabpack::get_specimen_data()`",
+                " is the same species specified in `crabpack::calc_cpue()`."))
+  }
 
 
   # Specify stock stations
-  stock_stations <- specimen_dat %>%
-                    dplyr::select(HAULJOIN, YEAR, STATION_ID, HAUL_TYPE, AREA_SWEPT,
-                                  LATITUDE, LONGITUDE, DISTRICT, STRATUM, TOTAL_AREA)
-
-
-  # Specify retow stations for BBRKC, pull by year
-  ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
-  retow_stations <- stock_stations %>%
-                    dplyr::filter(HAUL_TYPE == 17) %>%
-                    dplyr::select(STATION_ID) %>%
-                    dplyr::pull()
+  stock_stations <- crab_data$specimen %>%
+                    # Filter years, region, district
+                    dplyr::filter(YEAR %in% years,
+                                  REGION %in% region) %>%
+                    {if(!district == "ALL") dplyr::filter(., DISTRICT %in% district) else .} %>%
+                    dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HAUL_TYPE, AREA_SWEPT,
+                                  LATITUDE, LONGITUDE, DISTRICT, STRATUM, TOTAL_AREA) %>%
+                    # make dummy HT for retow station tracking, all HT = 3 except 17
+                    dplyr::mutate(HT = ifelse(HAUL_TYPE == 17, 17, 3)) %>%
+                    dplyr::distinct()
 
 
   ## Calculate CPUE by STATION, YEAR, and other biometrics ---------------------
   cpue <- specimen_dat %>%
-          dplyr::filter(STATION_ID %in% stock_stations$STATION_ID) %>%
+          # make dummy HT for retow station tracking, all HT = 3 except 17
+          dplyr::mutate(HT = ifelse(HAUL_TYPE == 17, 17, 3)) %>%
+          # dplyr::filter(STATION_ID %in% stock_stations$STATION_ID) %>%
+          dplyr::filter(HAULJOIN %in% stock_stations$HAULJOIN) %>% # filter hauls in relevant stock stations...
           dplyr::mutate(COUNT = SAMPLING_FACTOR, # here's where I could do n_crab vs. total_counts....
                         CPUE = SAMPLING_FACTOR/AREA_SWEPT,
                         CPUE_MT = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) / AREA_SWEPT / 1000 / 1000,
-                        CPUE_LBS = CPUE_MT*2204.6) %>%
-          dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>% # don't actually need the 'group_by()' if using base R, that's mostly just to keep those cols in the 'summarise'
+                        # CPUE_LBS = CPUE_MT*2204.62,
+                        CPUE_LBS = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) * 0.0022046226218488 / AREA_SWEPT) %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HT', 'REGION', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>% # don't actually need the 'group_by()' if using base R, that's mostly just to keep those cols in the 'summarise'
           dplyr::summarise(COUNT = sum(COUNT),
                            CPUE = sum(CPUE),
                            CPUE_MT = sum(CPUE_MT),
@@ -157,14 +167,17 @@ calc_cpue <- function(crab_data = NULL,
                                                          EGG_CONDITION_TEXT = egg_combos,
                                                          CLUTCH_TEXT = clutch_combos,
                                                          SIZE_1MM = bin_combos,
-                                                         HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
+                                                         HT = unique(stock_stations$HT),
                                                          stock_stations %>%
-                                                           dplyr::select(STATION_ID, STRATUM, TOTAL_AREA) %>%
+                                                           dplyr::select(YEAR, REGION, STATION_ID,
+                                                                         DISTRICT, STRATUM, TOTAL_AREA))) %>% #%>%
                                                            # tibble::add_column(YEAR = years) %>%
-                                                           mutate(YEAR = years))) %>%
+                                                           #mutate(YEAR = years))) %>%
                     tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
-                    dplyr::select(dplyr::all_of(c("YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
-                                                  "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM", "TOTAL_AREA")))
+                    dplyr::ungroup() %>%
+                    dplyr::select(dplyr::all_of(c("YEAR", "HT", "STATION_ID", "SEX_TEXT", group_cols,
+                                                  "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS",
+                                                  "REGION", "DISTRICT", "STRATUM", "TOTAL_AREA")))
     # # }
     # }
   # } else{
@@ -196,19 +209,18 @@ calc_cpue <- function(crab_data = NULL,
   # will probably have to remove those too
   if(!is.null(crab_category)){
     station_cpue <- station_cpue %>%
-      filter(!((CATEGORY %in% c("mature_male", "immature_male", "legal_male",
-                                      "sublegal_male", "preferred_male") & SEX_TEXT == "female") |
-                 (CATEGORY %in% c("mature_female", "immature_female", "female") & SEX_TEXT == "male")))
+                    dplyr::filter(!((CATEGORY %in% c("mature_male", "immature_male", "legal_male",
+                                                     "sublegal_male", "preferred_male") & SEX_TEXT == "female") |
+                                    (CATEGORY %in% c("mature_female", "immature_female", "female") & SEX_TEXT == "male")))
   }
 
 
-  ## MAKE THIS AN NA???? NEED TO INCORPORATE CHANGE EVEN IF NOT CATEGORY....
-  #Filtering out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
-  if(species == "RKC" & district == "BB"){
+  # Filter out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
+  if(species == "RKC" & region == "EBS" & district %in% c("ALL", "BB")){
     station_cpue <- station_cpue %>%
-      dplyr::filter(!(YEAR == 2000 &
-                        STATION_ID == "E-11" &
-                        SEX_TEXT == "male"))
+                    dplyr::filter(!(YEAR == 2000 &
+                                      STATION_ID == "E-11" &
+                                      SEX_TEXT == "male"))
   } else{
     station_cpue <- station_cpue
   }
@@ -216,6 +228,20 @@ calc_cpue <- function(crab_data = NULL,
 
   # Replace retow BBRKC --------------------------------------------------------
   if(species == "RKC" & replace_retow != FALSE){
+    # Specify retow stations and years for BBRKC, pull by year
+    ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
+    retow_stations <- stock_stations %>%
+                      dplyr::filter(HAUL_TYPE == 17) %>%
+                      dplyr::select(STATION_ID) %>%
+                      dplyr::distinct() %>%
+                      dplyr::pull()
+
+    retow_years <- stock_stations %>%
+                   dplyr::filter(HAUL_TYPE == 17) %>%
+                   dplyr::select(YEAR) %>%
+                   dplyr::distinct() %>%
+                   dplyr::pull()
+
     # replace female BBRKC with female data from station with HT 17
     station_cpue <- station_cpue %>%
                     dplyr::group_by(YEAR, STATION_ID, SEX_TEXT) %>%
@@ -223,12 +249,14 @@ calc_cpue <- function(crab_data = NULL,
                     # Females: replacing original stations with resampled stations in retow yrs for BBRKC females
                     ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
                     dplyr::mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
-                      if(17 %in% data$HAUL_TYPE & district == "BB" & SEX_TEXT == "female" & STATION_ID %in% retow_stations)
-                      {data %>% dplyr::filter(HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(HAUL_TYPE != 17)}
-                      return(x)
+                        if(17 %in% data$HT & district == "BB" & SEX_TEXT == "female" &
+                           STATION_ID %in% retow_stations & YEAR %in% retow_years)
+                        {data %>% dplyr::filter(HT == 17) -> x} else{x <- data %>% dplyr::filter(HT != 17)}
+                        return(x)
                     })) %>%
                     tidyr::unnest(cols = c(data)) %>%
-                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM', 'TOTAL_AREA')))) %>%
+                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', group_cols,
+                                                                  'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
                     dplyr::summarise(COUNT = sum(COUNT),
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
@@ -236,8 +264,9 @@ calc_cpue <- function(crab_data = NULL,
   } else{
     # remove all HT 17 data and re-summarise to ignore SEX
     station_cpue <- station_cpue %>%
-                    dplyr::filter(HAUL_TYPE != 17) %>%
-                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM', 'TOTAL_AREA')))) %>%
+                    dplyr::filter(HT != 17) %>%
+                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', group_cols,
+                                                                  'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
                     dplyr::summarise(COUNT = sum(COUNT),
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
@@ -263,28 +292,30 @@ calc_cpue <- function(crab_data = NULL,
   # }
 
   ## CPUE output ---------------------------------------------------------------
+  # make final list of groupings to carry over to `calc_bioabund()`
+  if(is.null(sex)){
+    groups_out <- group_cols[!group_cols %in% c("SEX_TEXT")]
+  } else{
+    groups_out <- group_cols
+  }
+
+
+  cpue_out <- station_cpue %>%
+              dplyr::left_join(., stock_stations) %>%
+              dplyr::ungroup() %>%
+              dplyr::mutate(SPECIES = species) %>%
+              dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
+                                            groups_out, 'DISTRICT', 'STRATUM', 'TOTAL_AREA',
+                                            "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS")))
+
+
   # If 'output' is specified, return appropriate data
   if(!is.null(output)){
     if(output == "cpue"){
-
-      cpue_out <- station_cpue %>%
-                  dplyr::left_join(., stock_stations) %>%
-                  dplyr::ungroup() %>%
-                  dplyr::mutate(SPECIES = species) %>%
-                  dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
-                                                groups_out, 'STRATUM', 'TOTAL_AREA',
-                                                "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS")))
-      return(list(cpue = cpue_out))
+      return(cpue = cpue_out)
     }
 
     if(output == "bioabund"){
-      # make final list of groupings to carry over to `calc_bioabund()`
-      if(is.null(sex)){
-        groups_out <- group_cols[!group_cols %in% c("SEX_TEXT")]
-      } else{
-        groups_out <- group_cols
-      }
-
       return(list(cpue = station_cpue,
                   group_cols = groups_out))
     }
@@ -292,14 +323,7 @@ calc_cpue <- function(crab_data = NULL,
 
   # If 'output' isn't specified, default output is 'cpue'
   if(is.null(output)){
-    cpue_out <- station_cpue %>%
-      dplyr::left_join(., stock_stations) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(SPECIES = species) %>%
-      dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
-                                    groups_out, 'STRATUM', 'TOTAL_AREA',
-                                    "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS")))
-    return(list(cpue = cpue_out))
+    return(cpue = cpue_out)
   }
 
 }
