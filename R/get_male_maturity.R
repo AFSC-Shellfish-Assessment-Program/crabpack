@@ -8,7 +8,7 @@
 #'
 #' @param species Character string. One of `c("TANNER", "SNOW")`.
 #' @param district Character string. One or many of `c("ALL", "E166", "W166")`. Defaults to
-#'                 `"ALL"`; `"E166"` and `"W166"` are to be used for Tanner Crab only.
+#'                 `"ALL"`; `"E166"` and `"W166"` are used for Tanner Crab only.
 #' @inheritParams get_specimen_data
 #'
 #' @return A named list containing the proportion of male Chionoecetes spp. crab
