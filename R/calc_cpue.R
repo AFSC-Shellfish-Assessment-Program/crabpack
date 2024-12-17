@@ -93,116 +93,43 @@ calc_cpue <- function(crab_data = NULL,
   cpue <- specimen_dat %>%
           # make dummy HT for retow station tracking, all HT = 3 except 17
           dplyr::mutate(HT = ifelse(HAUL_TYPE == 17, 17, 3)) %>%
-          # dplyr::filter(STATION_ID %in% stock_stations$STATION_ID) %>%
-          dplyr::filter(HAULJOIN %in% stock_stations$HAULJOIN) %>% # filter hauls in relevant stock stations...
-          dplyr::mutate(COUNT = SAMPLING_FACTOR, # here's where I could do n_crab vs. total_counts....
+          # filter hauls in relevant stock stations
+          dplyr::filter(HAULJOIN %in% stock_stations$HAULJOIN) %>%
+          dplyr::mutate(COUNT = SAMPLING_FACTOR,
                         CPUE = SAMPLING_FACTOR/AREA_SWEPT,
                         CPUE_MT = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) / AREA_SWEPT / 1000 / 1000,
-                        # CPUE_LBS = CPUE_MT*2204.62,
                         CPUE_LBS = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) * 0.0022046226218488 / AREA_SWEPT) %>%
-          dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HT', 'REGION', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>% # don't actually need the 'group_by()' if using base R, that's mostly just to keep those cols in the 'summarise'
+          dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HT', 'REGION', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>%
           dplyr::summarise(COUNT = sum(COUNT),
                            CPUE = sum(CPUE),
                            CPUE_MT = sum(CPUE_MT),
                            CPUE_LBS = sum(CPUE_LBS))
 
 
-  # Join to zero catch stations, summarize -------------------------------------
-  # If using 1mm bins, include in expand_grid
-  # if(!is.null(bin_1mm)){
-
-    # # set maximum size for 1mm bins to maximum size in data if no other maximum size is specified
-    # if(is.null(size_max)){
-    #   size_max <- max(specimen_dat$SIZE_1MM, na.rm = T)
-    # }
-    #
-    # # set minimum size for 1mm bins to 1mm if no other minimum size is specified
-    # if(is.null(size_min)){
-    #   size_min <- 1
-    # }
-
-    # # If no crab, exclude size bin (get weird NA things)
-    # if(nrow(cpue) == 0){
-    #   station_haul_cpue <- cpue %>%
-    #     right_join(expand_grid(SEX_TEXT = sex_combos,
-    #                            CATEGORY = category_combos,
-    #                            SHELL_TEXT = shell_combos,
-    #                            EGG_CONDITION_TEXT = egg_combos,
-    #                            CLUTCH_TEXT = clutch_combos,
-    #                            # BIN_1MM = 1:max(cpue$BIN_1MM, na.rm = T),
-    #                            HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
-    #                            stock_stations %>%
-    #                              dplyr::rename(GIS_STATION = STATION_ID) %>%
-    #                              select(GIS_STATION, STRATUM, TOTAL_AREA) %>%
-    #                              add_column(YEAR = years))) %>%
-    #     replace_na(list(COUNT = 0, CPUE = 0, CPUE_KG = 0)) %>%
-    #     dplyr::select(all_of(c("YEAR", "HAUL_TYPE", "GIS_STATION", "SEX_TEXT", group_cols[!group_cols == "BIN_1MM"],
-    #                            "COUNT", "CPUE", "CPUE_KG", "STRATUM", "TOTAL_AREA"))) %>%
-    #     dplyr::mutate(BIN_1MM = 100)
-    # } else{
-    # # if(!is.null(max_bin)){
-    # #   # if cpue != 0 and there's a max size bin specified, set max to that
-    # #   station_haul_cpue <- cpue %>%
-    # #     right_join(expand_grid(SEX_TEXT = sex_combos,
-    # #                            CATEGORY = category_combos,
-    # #                            SHELL_TEXT = shell_combos,
-    # #                            EGG_CONDITION_TEXT = egg_combos,
-    # #                            CLUTCH_TEXT = clutch_combos,
-    # #                            BIN_1MM = 1:max_bin,
-    # #                            HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
-    # #                            stock_stations %>%
-    # #                              dplyr::rename(GIS_STATION = STATION_ID) %>%
-    # #                              select(GIS_STATION, STRATUM, TOTAL_AREA) %>%
-    # #                              add_column(YEAR = years))) %>%
-    # #     replace_na(list(COUNT = 0, CPUE = 0, CPUE_KG = 0)) %>%
-    # #     dplyr::select(all_of(c("YEAR", "HAUL_TYPE", "GIS_STATION", "SEX_TEXT", group_cols,
-    # #                            "COUNT", "CPUE", "CPUE_KG", "STRATUM", "TOTAL_AREA")))
-    # # }
-    #   # else {
-    #   # if cpue != 0 and no max size bin, set max to whatever max in data is
-    station_cpue <- cpue %>%
-                    dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
-                                                         CATEGORY = category_combos,
-                                                         SHELL_TEXT = shell_combos,
-                                                         EGG_CONDITION_TEXT = egg_combos,
-                                                         CLUTCH_TEXT = clutch_combos,
-                                                         SIZE_1MM = bin_combos,
-                                                         HT = unique(stock_stations$HT),
-                                                         stock_stations %>%
-                                                           dplyr::select(YEAR, REGION, STATION_ID,
-                                                                         DISTRICT, STRATUM, TOTAL_AREA))) %>% #%>%
-                                                           # tibble::add_column(YEAR = years) %>%
-                                                           #mutate(YEAR = years))) %>%
-                    tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
-                    dplyr::ungroup() %>%
-                    dplyr::select(dplyr::all_of(c("YEAR", "HT", "STATION_ID", "SEX_TEXT", group_cols,
-                                                  "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS",
-                                                  "REGION", "DISTRICT", "STRATUM", "TOTAL_AREA")))
-    # # }
-    # }
-  # } else{
-  #   # if no 1mm bin, don't include that in the expand_grid
-  #   station_cpue <- cpue %>%
-  #     dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
-  #                                          CATEGORY = category_combos, # 816
-  #                                          SHELL_TEXT = shell_combos,
-  #                                          EGG_CONDITION_TEXT = egg_combos,
-  #                                          CLUTCH_TEXT = clutch_combos,
-  #                                          HAUL_TYPE = unique(stock_stations$HAUL_TYPE),
-  #                                          stock_stations %>%
-  #                                            dplyr::select(STATION_ID, STRATUM, TOTAL_AREA) %>%
-  #                                            tibble::add_column(YEAR = years) %>%
-  #                                            dplyr::distinct())) %>%
-  #     tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
-  #     dplyr::select(dplyr::all_of(c("YEAR", "HAUL_TYPE", "STATION_ID", "SEX_TEXT", group_cols,
-  #                                   "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS", "STRATUM", "TOTAL_AREA")))
-  # }
+  ## Join to zero catch stations, summarize ------------------------------------
+  station_cpue <- cpue %>%
+                  dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
+                                                       CATEGORY = category_combos,
+                                                       SHELL_TEXT = shell_combos,
+                                                       EGG_CONDITION_TEXT = egg_combos,
+                                                       CLUTCH_TEXT = clutch_combos,
+                                                       SIZE_1MM = bin_combos,
+                                                       HT = unique(stock_stations$HT),
+                                                       stock_stations %>%
+                                                         dplyr::select(YEAR, REGION, STATION_ID,
+                                                                       DISTRICT, STRATUM, TOTAL_AREA))) %>%
+                  tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
+                  dplyr::ungroup() %>%
+                  dplyr::select(dplyr::all_of(c("YEAR", "HT", "STATION_ID", "SEX_TEXT", group_cols,
+                                                "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS",
+                                                "REGION", "DISTRICT", "STRATUM", "TOTAL_AREA")))
 
 
   # add sex_text to group_cols if still needed (ie. specified in function)
   if(!is.null(sex)){
     group_cols <- append(group_cols, "SEX_TEXT")
   }
+
 
   # REMOVE NONSENSICAL CRAB CATEGORY COMBOS REMNANT FROM EXPAND_GRID......
   # if we end up making egg_condition and clutch_size not dependent on female only,
@@ -247,7 +174,6 @@ calc_cpue <- function(crab_data = NULL,
                     dplyr::group_by(YEAR, STATION_ID, SEX_TEXT) %>%
                     tidyr::nest() %>%
                     # Females: replacing original stations with resampled stations in retow yrs for BBRKC females
-                    ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
                     dplyr::mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
                         if(17 %in% data$HT & district == "BB" & SEX_TEXT == "female" &
                            STATION_ID %in% retow_stations & YEAR %in% retow_years)
@@ -271,25 +197,8 @@ calc_cpue <- function(crab_data = NULL,
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
                                      CPUE_LBS = sum(CPUE_LBS))
-  } # else{
-  #   # replace female BBRKC with female data from station with HT 17
-  #   station_haul_cpue <- station_haul_cpue %>%
-  #                        dplyr::group_by(YEAR, STATION_ID, SEX_TEXT) %>%
-  #                        tidyr::nest() %>%
-  #                        #Females: replacing original stations with resampled stations in retow yrs for BBRKC females
-  #                        ## I DON'T THINK WE NEED 'sex' IN THE FUNCTION?
-  #                        dplyr::mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
-  #                          if(17 %in% data$HAUL_TYPE & district == "BB" & SEX_TEXT == "female" & STATION_ID %in% retow_stations)
-  #                          {data %>% dplyr::filter(HAUL_TYPE == 17) -> x} else{x <- data %>% dplyr::filter(HAUL_TYPE != 17)}
-  #                          return(x)
-  #                        })) %>%
-  #                        tidyr::unnest(cols = c(data)) %>%
-  #                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HAUL_TYPE', 'STATION_ID', group_cols, 'STRATUM', 'TOTAL_AREA')))) %>%
-  #                        dplyr::summarise(COUNT = sum(COUNT),
-  #                                         CPUE = sum(CPUE),
-  #                                         CPUE_MT = sum(CPUE_MT),
-  #                                         CPUE_LBS = sum(CPUE_LBS))
-  # }
+  }
+
 
   ## CPUE output ---------------------------------------------------------------
   # make final list of groupings to carry over to `calc_bioabund()`
@@ -300,6 +209,7 @@ calc_cpue <- function(crab_data = NULL,
   }
 
 
+  # Format output df
   cpue_out <- station_cpue %>%
               dplyr::left_join(., stock_stations) %>%
               dplyr::ungroup() %>%
