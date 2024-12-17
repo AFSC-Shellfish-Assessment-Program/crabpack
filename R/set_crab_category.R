@@ -64,20 +64,6 @@ set_crab_category <- function(crab_data = NULL,
                  dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                  dplyr::filter(!is.na(RANGE)) %>%
                  dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
-
-      # imm_fem <- sizegroups %>%
-      #            dplyr::filter(SEX == 2,
-      #                          CATEGORY == "immature_female")
-      # mat_fem <- sizegroups %>%
-      #            dplyr::filter(SEX == 2,
-      #                          CATEGORY == "mature_female")
-      #
-      # female_dat <- specimen_dat %>%
-      #               dplyr::filter(SEX == 2) %>%
-      #               dplyr::rowwise() %>%
-      #               dplyr::mutate(CATEGORY = case_when((SIZE_1MM >= mat_fem$SIZE_MIN[mat_fem$DISTRICT == MAT_DISTRICT]) ~ "mature_female",
-      #                                                  (SIZE_1MM <= imm_fem$SIZE_MAX[imm_fem$DISTRICT == MAT_DISTRICT]) ~ "immature_female",
-      #                                                  TRUE ~ NA))
       } else{
         # no female maturity cutline for hair crab, just "female"
         female_dat <- specimen_dat %>%
@@ -106,32 +92,6 @@ set_crab_category <- function(crab_data = NULL,
                 dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                 dplyr::filter(!is.na(RANGE)) %>%
                 dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
-
-    # imm_male <- sizegroups %>%
-    #             dplyr::filter(SEX == 1,
-    #                           CATEGORY == "immature_male")
-    # mat_male <- sizegroups %>%
-    #             dplyr::filter(SEX == 1,
-    #                           CATEGORY == "mature_male")
-    #
-    # mat_male_dat <- specimen_dat %>%
-    #                 dplyr::filter(SEX == 1) %>%
-    #                 dplyr::rowwise() %>%
-    #                 dplyr::mutate(CATEGORY = case_when((SIZE_1MM >= mat_male$SIZE_MIN[mat_male$DISTRICT == MAT_DISTRICT]) ~ "mature_male",
-    #                                                    (SIZE_1MM <= imm_male$SIZE_MAX[imm_male$DISTRICT == MAT_DISTRICT]) ~ "immature_male"))
-    #
-    # # legal males
-    # leg_male <- sizegroups %>%
-    #             dplyr::filter(SEX == 1,
-    #                           CATEGORY == "legal_male")
-    #
-    # leg_male_dat <- specimen_dat %>%
-    #                 dplyr::filter(SEX == 1) %>%
-    #                 dplyr::rowwise() %>%
-    #                 dplyr::mutate(CATEGORY = case_when((SIZE_1MM >= leg_male$SIZE_MIN[leg_male$DISTRICT == MAT_DISTRICT]) ~ "legal_male")) %>%
-    #                 dplyr::filter(!is.na(CATEGORY))
-    #
-    # male_dat <- rbind(mat_male_dat, leg_male_dat)
   }
 
   # Assign small, large, legal, preferred for Chionoecetes spp.
@@ -146,45 +106,6 @@ set_crab_category <- function(crab_data = NULL,
                 dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                 dplyr::filter(!is.na(RANGE)) %>%
                 dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
-
-    # small_male <- sizegroups %>%
-    #               dplyr::filter(SEX == 1,
-    #                             CATEGORY == "small_male")
-    # large_male <- sizegroups %>%
-    #               dplyr::filter(SEX == 1,
-    #                             CATEGORY == "large_male")
-    #
-    # mat_male_dat <- specimen_dat %>%
-    #                 dplyr::filter(SEX == 1) %>%
-    #                 dplyr::rowwise() %>%
-    #                 dplyr::mutate(CATEGORY = case_when((SIZE_1MM >= large_male$SIZE_MIN[large_male$DISTRICT == MAT_DISTRICT]) ~ "large_male",
-    #                                                    (SIZE_1MM <= small_male$SIZE_MAX[small_male$DISTRICT == MAT_DISTRICT]) ~ "small_male"))
-    #
-    # # legal males
-    # leg_male <- sizegroups %>%
-    #             dplyr::filter(SEX == 1,
-    #                           CATEGORY == "legal_male")
-    #
-    # leg_male_dat <- specimen_dat %>%
-    #                 dplyr::filter(SEX == 1) %>%
-    #                 dplyr::rowwise() %>%
-    #                 dplyr::mutate(CATEGORY = case_when((SIZE_1MM >= leg_male$SIZE_MIN[leg_male$DISTRICT == MAT_DISTRICT]) ~ "legal_male")) %>%
-    #                 dplyr::filter(!is.na(CATEGORY))
-    #
-    #
-    # # industry-preferred males
-    # pref_male <- sizegroups %>%
-    #              dplyr::filter(SEX == 1,
-    #                            CATEGORY == "preferred_male")
-    #
-    # ind_pref_dat <- specimen_dat %>%
-    #                 dplyr::filter(SEX == 1) %>%
-    #                 dplyr::rowwise() %>%
-    #                 dplyr::mutate(CATEGORY = case_when((SIZE_1MM >= pref_male$SIZE_MIN[pref_male$DISTRICT == MAT_DISTRICT]) ~ "preferred_male")) %>%
-    #                 dplyr::filter(!is.na(CATEGORY))
-    #
-    #
-    # male_dat <- rbind(mat_male_dat, leg_male_dat, ind_pref_dat)
   }
 
   # Assign sublegal, legal for Hair Crab
