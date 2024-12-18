@@ -272,7 +272,7 @@ set_variables <- function(crab_data = NULL,
   expand_combos <- append(expand_combos, list(bin_combos = bin_combos))
 
 
-  return(list(specimen_data = data_crab,
-              group_cols = group_cols,
-              expand_combos = expand_combos))
+  return(list(group_cols = group_cols,
+              expand_combos = expand_combos,
+              specimen_data = data_crab))
 }
