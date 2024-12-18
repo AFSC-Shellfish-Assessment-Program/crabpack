@@ -43,8 +43,8 @@ get_connected <- function(db = "AKFIN",
   if(class(channel) == "RODBC"){
     cat("Successfully connected to Oracle.\n")
 
-    if(check_access & db == "AKFIN"){
-      cat("Checking that you have access to the tables queried in the crabpack package.\n") ## NEED TO UPDATE THIS WITH CORRECT TABLE NAMES!
+    if(check_access & db %in% c("AKFIN", "AFSC")){
+      cat("Checking that you have access to the tables queried in the crabpack package.\n")
       tables_to_check <- data.frame(table_name = c("CRABBASE.HAUL",
                                                    "CRABBASE.SPECIMEN",
                                                    "CRABBASE.SIZEGROUPS",
