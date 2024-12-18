@@ -335,14 +335,7 @@ get_specimen_data <- function(species = NULL,
                                    dplyr::select(-c('LATITUDE', 'LONGITUDE'))) %>%
                dplyr::filter(YEAR %in% years,
                              REGION %in% region,
-                             STRATUM %in% strata) #%>%
-               # {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .} #%>%
-               # # remove stations with no TOTAL_AREA (ie. not defined in stratum tables, too early in time series)
-               # # dplyr::filter(!is.na(TOTAL_AREA))
-
-  # stock_stations <- stock_stations %>%
-  #                   # remove stations with no TOTAL_AREA (ie. not defined in stratum tables, too early in time series)
-  #                   dplyr::filter(!is.na(TOTAL_AREA))
+                             STRATUM %in% strata)
 
   ## Format specimen data for output, filter region, district, years
   data_crab <- data_crab %>%
@@ -350,10 +343,6 @@ get_specimen_data <- function(species = NULL,
                              REGION %in% region,
                              !SEX == 3,
                              STRATUM %in% strata)
-               # {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .} #%>%
-               # remove stations with no TOTAL_AREA (ie. not defined in stratum tables, too early in time series)
-               # dplyr::filter(!is.na(TOTAL_AREA))
-
 
 
   ## Query the size group table. This table reports size definitions for district-
