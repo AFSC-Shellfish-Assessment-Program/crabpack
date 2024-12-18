@@ -62,6 +62,13 @@ calc_cpue <- function(crab_data = NULL,
   ## CHECK SPECIES IN DATA == SPECIES CALLED IN FUNCTION
   ## something to detect district in data too?
 
+
+  # define year if not specified
+  if(missing(years)){
+    years <- c(1975:2030) # put dummy end year to accommodate future years?
+  }
+
+
   # Pull specimen dataframe
   specimen_dat <- vars$specimen_data
 
@@ -77,15 +84,18 @@ calc_cpue <- function(crab_data = NULL,
 
 
   # Specify stock stations
-  stock_stations <- crab_data$specimen %>%
+  stock_stations <- crab_data$haul %>%
                     # Filter years, region, district
                     dplyr::filter(YEAR %in% years,
-                                  REGION %in% region) %>%
+                                  REGION %in% region,
+                                  !is.na(TOTAL_AREA)) %>%
                     {if(!district == "ALL") dplyr::filter(., DISTRICT %in% district) else .} %>%
-                    dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HAUL_TYPE, AREA_SWEPT,
-                                  LATITUDE, LONGITUDE, DISTRICT, STRATUM, TOTAL_AREA) %>%
                     # make dummy HT for retow station tracking, all HT = 3 except 17
-                    dplyr::mutate(HT = ifelse(HAUL_TYPE == 17, 17, 3)) %>%
+                    dplyr::mutate(HT = ifelse(HAUL_TYPE == 17, 17, 3),
+                                  LATITUDE = MID_LATITUDE,
+                                  LONGITUDE = MID_LONGITUDE) %>%
+                    dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HT, AREA_SWEPT,
+                                  LATITUDE, LONGITUDE, DISTRICT, STRATUM, TOTAL_AREA) %>%
                     dplyr::distinct()
 
 
@@ -136,8 +146,8 @@ calc_cpue <- function(crab_data = NULL,
   # will probably have to remove those too
   if(!is.null(crab_category)){
     station_cpue <- station_cpue %>%
-                    dplyr::filter(!((CATEGORY %in% c("mature_male", "immature_male", "legal_male",
-                                                     "sublegal_male", "preferred_male") & SEX_TEXT == "female") |
+                    dplyr::filter(!((CATEGORY %in% c("mature_male", "large_male", "immature_male", "small_male",
+                                                     "legal_male", "sublegal_male", "preferred_male") & SEX_TEXT == "female") |
                                     (CATEGORY %in% c("mature_female", "immature_female", "female") & SEX_TEXT == "male")))
   }
 
@@ -226,8 +236,8 @@ calc_cpue <- function(crab_data = NULL,
     }
 
     if(output == "bioabund"){
-      return(list(cpue = station_cpue,
-                  group_cols = groups_out))
+      return(list(group_cols = groups_out,
+                  cpue = station_cpue))
     }
   }
 
