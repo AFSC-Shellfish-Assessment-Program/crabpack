@@ -5,13 +5,13 @@
 #'              Optional arguments also allow these indices to be calculated for subsets of
 #'              crab by biometric categories such as size, sex, maturity, and shell condition.
 #'
-#' @param crab_data Object created from `crabpack::get_data()`.
+#' @param crab_data Object created from `crabpack::get_specimen_data()`.
 #' @param species Character string. One of `c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")`.
 #' @param region Character string describing the region of interest. One of
 #'               `c("EBS", "NBS"`). Defaults to `"EBS"` for Eastern Bering Sea.
 #' @param district Character string. One or many of `c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")`.
 #'                 Defaults to `"ALL"` districts within the selected region if not specified.
-#' @param years Numeric or integer vector of years.
+#' @param years Numeric or integer vector of years. Default output is all available years in data.
 #' @param sex Character string. One or both of `c("male", "female")`. Optional,
 #'            `"male"` or `"female"` only will provide estimates for the selected sex,
 #'            specifying both `"male"` and `"female"` will provide estimates for

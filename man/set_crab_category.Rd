@@ -14,7 +14,7 @@ set_crab_category(
 )
 }
 \arguments{
-\item{crab_data}{Object created from \code{crabpack::get_data()}.}
+\item{crab_data}{Object created from \code{crabpack::get_specimen_data()}.}
 
 \item{species}{Character string. One of \code{c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")}.}
 

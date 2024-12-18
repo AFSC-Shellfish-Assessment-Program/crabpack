@@ -25,7 +25,7 @@ calc_cpue(
 )
 }
 \arguments{
-\item{crab_data}{Object created from \code{crabpack::get_data()}.}
+\item{crab_data}{Object created from \code{crabpack::get_specimen_data()}.}
 
 \item{species}{Character string. One of \code{c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR")}.}
 
@@ -35,7 +35,7 @@ calc_cpue(
 \item{district}{Character string. One or many of \code{c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")}.
 Defaults to \code{"ALL"} districts within the selected region if not specified.}
 
-\item{years}{Numeric or integer vector of years.}
+\item{years}{Numeric or integer vector of years. Default output is all available years in data.}
 
 \item{sex}{Character string. One or both of \code{c("male", "female")}. Optional,
 \code{"male"} or \code{"female"} only will provide estimates for the selected sex,

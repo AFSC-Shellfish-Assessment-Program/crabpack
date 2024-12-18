@@ -21,7 +21,7 @@ get_specimen_data(
 \item{district}{Character string. One or many of \code{c("ALL", "BB", "NORTH", "NS", "PRIB", "STMATT", "UNSTRAT", "E166", "W166", "166TO173")}.
 Defaults to \code{"ALL"} districts within the selected region if not specified.}
 
-\item{years}{Numeric or integer vector of years.}
+\item{years}{Numeric or integer vector of years. Default output is all available years in data.}
 
 \item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
 }
