@@ -4,7 +4,8 @@
 
 This R package generates the standard design-based indices of catch per unit 
 effort, abundance, and biomass from NOAA-NMFS-AFSC-RACE-SAP Eastern Bering Sea Shelf 
-(from 1975) and Northern Bering Sea Shelf (from 2010) bottom trawl survey data.
+(from 1975) and Northern Bering Sea Shelf (from 2010) bottom trawl survey data. **This package 
+is still under development, please submit an issue if you come across a bug.**
 
 ## Installation Instructions
 
