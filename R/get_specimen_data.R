@@ -116,9 +116,15 @@ get_specimen_data <- function(species = NULL,
 
   ## Concatenate species, years, region, district for use in a SQL query
   species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse=", "), ")")
+
+  # define year if not specified
+  if(missing(years)){
+    years <- c(1975:2030) # put dummy end year to accommodate future years?
+  }
+
   year_vec <- paste0("(", paste0(years, collapse=", "), ")")
+
   region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse=", "), ")")
-  # district_vec <- paste0("(", paste0(sQuote(x = district, q = FALSE), collapse=", "), ")")
 
 
 
@@ -140,6 +146,7 @@ get_specimen_data <- function(species = NULL,
   attributes(x = haul_df)$sql_query <- haul_sql
 
   # Remove HT 17 if not RKC
+  # ^might not need^, can rm when creating SPECIMEN table
   if(species != "RKC"){
     haul_df <- haul_df %>%
                dplyr::filter(!HAUL_TYPE == 17)
@@ -265,23 +272,24 @@ get_specimen_data <- function(species = NULL,
                                   AREA_SWEPT, MID_LATITUDE, MID_LONGITUDE, DISTRICT,
                                   STRATUM, TOTAL_AREA) %>%
                     dplyr::rename(LATITUDE = MID_LATITUDE,
-                                  LONGITUDE = MID_LONGITUDE)
+                                  LONGITUDE = MID_LONGITUDE) %>%
+                    # assign unstratified districts for RKC/BKC
+                    {if(species == "RKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "NORTH",
+                                                                                       TRUE ~ DISTRICT),
+                                                        STRATUM = dplyr::case_when(is.na(STRATUM) ~ "NORTH",
+                                                                                   TRUE ~ STRATUM)) else .} %>%
+                    {if(species == "BKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "UNSTRAT",
+                                                                                       TRUE ~ DISTRICT),
+                                                        STRATUM = dplyr::case_when(is.na(STRATUM) ~ "UNSTRAT",
+                                                                                   TRUE ~ STRATUM)) else .}
 
 
 
   ## Join specimen and stratum information to haul data
   # Add specimen data to relevant hauls for the selected districts/strata
   data_crab <- stock_stations %>%
-               dplyr::left_join(., specimen_df) %>%
-               # assign unstratified districts for RKC/BKC
-               {if(species == "RKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "NORTH",
-                                                                                  TRUE ~ DISTRICT),
-                                                      STRATUM = dplyr::case_when(is.na(STRATUM) ~ "NORTH",
-                                                                                 TRUE ~ STRATUM)) else .} %>%
-               {if(species == "BKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "UNSTRAT",
-                                                                                  TRUE ~ DISTRICT),
-                                                      STRATUM = dplyr::case_when(is.na(STRATUM) ~ "UNSTRAT",
-                                                                                 TRUE ~ STRATUM)) else .}
+               dplyr::left_join(., specimen_df)
+
 
 
   # If district is "Northern Unstratified" or "BKC Unstratified",
@@ -307,7 +315,8 @@ get_specimen_data <- function(species = NULL,
                   dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM),
                                                     TOTAL_AREA_POS, TOTAL_AREA)) %>%
                   dplyr::select(-TOTAL_AREA_POS) %>%
-                  dplyr::ungroup()
+                  dplyr::ungroup() %>%
+                  dplyr::mutate(TOTAL_AREA = ifelse(is.na(TOTAL_AREA), 0, TOTAL_AREA))
 
     stock_stations <- stock_stations %>%
                       dplyr::group_by(YEAR, STRATUM) %>%
@@ -315,24 +324,35 @@ get_specimen_data <- function(species = NULL,
                       dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM),
                                                         TOTAL_AREA_POS, TOTAL_AREA)) %>%
                       dplyr::select(-TOTAL_AREA_POS) %>%
-                      dplyr::ungroup()
+                      dplyr::ungroup() %>%
+                      dplyr::mutate(TOTAL_AREA = ifelse(is.na(TOTAL_AREA), 0, TOTAL_AREA))
   }
-  ## end goal is the correct stratum name and total area joined to haul and specimen data --> one df
-  ## -- works for EBS RKC so far
+
 
   ## Format haul data for output, filter region, district, years
   data_haul <- data_haul %>%
                dplyr::left_join(., stock_stations %>%
                                    dplyr::select(-c('LATITUDE', 'LONGITUDE'))) %>%
                dplyr::filter(YEAR %in% years,
-                             REGION %in% region) %>%
-               {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .}
+                             REGION %in% region,
+                             STRATUM %in% strata) #%>%
+               # {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .} #%>%
+               # # remove stations with no TOTAL_AREA (ie. not defined in stratum tables, too early in time series)
+               # # dplyr::filter(!is.na(TOTAL_AREA))
+
+  # stock_stations <- stock_stations %>%
+  #                   # remove stations with no TOTAL_AREA (ie. not defined in stratum tables, too early in time series)
+  #                   dplyr::filter(!is.na(TOTAL_AREA))
 
   ## Format specimen data for output, filter region, district, years
   data_crab <- data_crab %>%
                dplyr::filter(YEAR %in% years,
-                             REGION %in% region) %>%
-               {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .}
+                             REGION %in% region,
+                             !SEX == 3,
+                             STRATUM %in% strata)
+               # {if(!is.null(district)) dplyr::filter(., DISTRICT %in% district) else .} #%>%
+               # remove stations with no TOTAL_AREA (ie. not defined in stratum tables, too early in time series)
+               # dplyr::filter(!is.na(TOTAL_AREA))
 
 
 
