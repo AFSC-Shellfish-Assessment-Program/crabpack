@@ -64,7 +64,7 @@ calc_cpue <- function(crab_data = NULL,
 
 
   # define year if not specified
-  if(missing(years)){
+  if(is.null(years)){
     years <- c(1975:2030) # put dummy end year to accommodate future years?
   }
 
