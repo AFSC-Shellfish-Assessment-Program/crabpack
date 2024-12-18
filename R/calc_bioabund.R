@@ -136,10 +136,10 @@ calc_bioabund <- function(crab_data = NULL,
                                       BIOMASS_LBS_CV = (SD_CPUE_LBS/BIOMASS_LBS),
                                       BIOMASS_LBS_CI = 1.96*(SD_CPUE_LBS),
                                       N_STATIONS = length(unique(STATION_ID))) %>%
-                       tidyr::replace_na(list(VAR_CPUE = 0, VAR_CPUE_MT = 0, VAR_CPUE_LBS = 0,
-                                              ABUNDANCE = 0, ABUNDANCE_CV = 0, ABUNDANCE_CI = 0,
-                                              BIOMASS_MT = 0, BIOMASS_MT_CV = 0, BIOMASS_MT_CI = 0,
-                                              BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
+                       # tidyr::replace_na(list(VAR_CPUE = 0, VAR_CPUE_MT = 0, VAR_CPUE_LBS = 0,
+                       #                        ABUNDANCE = 0, ABUNDANCE_CV = 0, ABUNDANCE_CI = 0,
+                       #                        BIOMASS_MT = 0, BIOMASS_MT_CV = 0, BIOMASS_MT_CI = 0,
+                       #                        BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
                        dplyr::distinct()
 
   if(spatial_level == "stratum"){
@@ -184,10 +184,10 @@ calc_bioabund <- function(crab_data = NULL,
                                        BIOMASS_LBS_CI = 1.96*(SD_CPUE_LBS),
                                        N_STATIONS = sum(N_STATIONS)) %>%
                         dplyr::mutate(N_STATIONS = ifelse((YEAR == 2000 & DISTRICT == "BB"), 135, N_STATIONS)) %>%
-                        tidyr::replace_na(list(VAR_CPUE = 0, VAR_CPUE_MT = 0, VAR_CPUE_LBS = 0,
-                                               ABUNDANCE = 0, ABUNDANCE_CV = 0, ABUNDANCE_CI = 0,
-                                               BIOMASS_MT = 0, BIOMASS_MT_CV = 0, BIOMASS_MT_CI = 0,
-                                               BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
+                        # tidyr::replace_na(list(VAR_CPUE = 0, VAR_CPUE_MT = 0, VAR_CPUE_LBS = 0,
+                        #                        ABUNDANCE = 0, ABUNDANCE_CV = 0, ABUNDANCE_CI = 0,
+                        #                        BIOMASS_MT = 0, BIOMASS_MT_CV = 0, BIOMASS_MT_CI = 0,
+                        #                        BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
                         dplyr::ungroup()
 
   if(spatial_level == "district"){
