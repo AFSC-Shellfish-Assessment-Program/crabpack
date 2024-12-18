@@ -118,6 +118,7 @@ calc_cpue <- function(crab_data = NULL,
 
   ## Join to zero catch stations, summarize ------------------------------------
   station_cpue <- cpue %>%
+                  # dplyr::group_by(YEAR) %>%
                   dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
                                                        CATEGORY = category_combos,
                                                        SHELL_TEXT = shell_combos,
@@ -130,9 +131,11 @@ calc_cpue <- function(crab_data = NULL,
                                                                        DISTRICT, STRATUM, TOTAL_AREA))) %>%
                   tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
                   dplyr::ungroup() %>%
+                  dplyr::left_join(stock_stations, .) %>%
                   dplyr::select(dplyr::all_of(c("YEAR", "HT", "STATION_ID", "SEX_TEXT", group_cols,
                                                 "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS",
-                                                "REGION", "DISTRICT", "STRATUM", "TOTAL_AREA")))
+                                                "REGION", "DISTRICT", "STRATUM", "TOTAL_AREA"))) %>%
+                  distinct()
 
 
   # add sex_text to group_cols if still needed (ie. specified in function)
@@ -156,8 +159,8 @@ calc_cpue <- function(crab_data = NULL,
   if(species == "RKC" & region == "EBS" & district %in% c("ALL", "BB")){
     station_cpue <- station_cpue %>%
                     dplyr::filter(!(YEAR == 2000 &
-                                      STATION_ID == "E-11" &
-                                      SEX_TEXT == "male"))
+                                    STATION_ID == "E-11" &
+                                    SEX_TEXT == "male"))
   } else{
     station_cpue <- station_cpue
   }
@@ -167,36 +170,57 @@ calc_cpue <- function(crab_data = NULL,
   if(species == "RKC" & replace_retow != FALSE){
     # Specify retow stations and years for BBRKC, pull by year
     ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
-    retow_stations <- stock_stations %>%
-                      dplyr::filter(HT == 17) %>%
-                      dplyr::select(STATION_ID) %>%
-                      dplyr::distinct() %>%
-                      dplyr::pull()
+    # retow_stations <- stock_stations %>%
+    #                   dplyr::filter(HT == 17) %>%
+    #                   dplyr::select(STATION_ID) %>%
+    #                   dplyr::distinct() %>%
+    #                   dplyr::pull()
+    #
+    # retow_years <- stock_stations %>%
+    #                dplyr::filter(HT == 17) %>%
+    #                dplyr::select(YEAR) %>%
+    #                dplyr::distinct() %>%
+    #                dplyr::pull()
 
-    retow_years <- stock_stations %>%
-                   dplyr::filter(HT == 17) %>%
-                   dplyr::select(YEAR) %>%
-                   dplyr::distinct() %>%
-                   dplyr::pull()
+    retows <- stock_stations %>%
+              dplyr::filter(HT == 17) %>%
+              dplyr::mutate(RETOW = "yes") %>%
+              dplyr::select(-c('HAULJOIN', 'AREA_SWEPT', 'LATITUDE', 'LONGITUDE', 'HT'))
 
     # replace female BBRKC with female data from station with HT 17
     station_cpue <- station_cpue %>%
-                    dplyr::group_by(YEAR, DISTRICT, STATION_ID, SEX_TEXT) %>%
-                    tidyr::nest() %>%
-                    # Females: replacing original stations with resampled stations in retow yrs for BBRKC females
-                    dplyr::mutate(data = purrr::map2(data, SEX_TEXT, function(data, sex) {
-                        if(17 %in% data$HT & DISTRICT == "BB" & SEX_TEXT == "female" &
-                           STATION_ID %in% retow_stations & YEAR %in% retow_years)
-                        {data %>% dplyr::filter(HT == 17) -> x} else{x <- data %>% dplyr::filter(HT != 17)}
-                        return(x)
-                    })) %>%
-                    tidyr::unnest(cols = c(data)) %>%
-                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, # keeping HT in for output verification
+                    # dplyr::ungroup() %>%
+                    # # dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, 'SEX_TEXT'
+                    # #                                               'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
+                    # # tidyr::nest() %>%
+                    # dplyr::group_nest(., group_by(across(all_of(c('YEAR', 'STATION_ID', 'SEX_TEXT', 'HT', group_cols,
+                    #                                               'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA'))))) %>%
+                    dplyr::left_join(., retows) %>%
+                    dplyr::mutate(REMOVE = dplyr::case_when(#(SEX_TEXT == 'female' & STATION_ID %in% retow_stations & YEAR %in% retow_years & HT == 17) ~ "KEEP",
+                                                           (SEX_TEXT == 'female' & RETOW == "yes" & HT == 3) ~ "remove",
+                                                           #(SEX_TEXT == 'male' & STATION_ID %in% retow_stations & YEAR %in% retow_years & HT == 3) ~ "KEEP",
+                                                           (SEX_TEXT == 'male' & RETOW == "yes" & HT == 17) ~ "remove",
+                                                           TRUE ~ "keep")) %>%
+                    # # {if(station_cpue$SEX_TEXT == 'female' &
+                    # #     station_cpue$STATION_ID %in% retow_stations
+                    # #     & station_cpue$YEAR %in% retow_years) filter(., HT == 17)
+                    # #     else filter(., HT != 17)}
+                    #
+                    # # Females: replacing original stations with resampled stations in retow yrs for BBRKC females
+                    # dplyr::mutate(data = purrr::map(data, function(data) {
+                    #                         if(17 %in% data$HT & SEX_TEXT == 'female' & STATION_ID %in% retow_stations & YEAR %in% retow_years)
+                    #                         {data %>% dplyr::filter(HT == 17) -> x} else{x <- data %>% dplyr::filter(HT != 17)}
+                    #                         return(x)
+                    #                     })) %>%
+                    # tidyr::unnest(cols = c(data)) %>%
+                    dplyr::filter(REMOVE == "keep") %>%
+                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, 'SEX_TEXT', # keeping HT in for output verification
                                                                   'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
                     dplyr::summarise(COUNT = sum(COUNT),
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
-                                     CPUE_LBS = sum(CPUE_LBS))
+                                     CPUE_LBS = sum(CPUE_LBS)) %>%
+                    dplyr::ungroup()
   } else{
     # remove all HT 17 data and re-summarise to ignore SEX
     station_cpue <- station_cpue %>%
@@ -206,7 +230,8 @@ calc_cpue <- function(crab_data = NULL,
                     dplyr::summarise(COUNT = sum(COUNT),
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
-                                     CPUE_LBS = sum(CPUE_LBS))
+                                     CPUE_LBS = sum(CPUE_LBS))%>%
+                    dplyr::ungroup()
   }
 
 
