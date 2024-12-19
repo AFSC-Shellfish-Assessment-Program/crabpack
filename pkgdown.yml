@@ -2,7 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-12-19T23:12Z
+last_built: 2024-12-19T23:30Z
 urls:
   reference: https://afsc-shellfish-assessment-program.github.io/crabpack/reference
   article: https://afsc-shellfish-assessment-program.github.io/crabpack/articles
