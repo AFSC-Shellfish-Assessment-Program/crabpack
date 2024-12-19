@@ -93,8 +93,30 @@ retow took place. Defaults to \code{TRUE}, please use care when interpreting
 BBRKC outputs if using \code{FALSE}.}
 }
 \value{
-A data frame with area swept-expanded estimates of stratum-, district-, or region-level abundance,
-biomass (mt), and biomass (lbs) by year.
+A data frame with area swept-expanded estimates of stratum-, district-, or
+region-level abundance, biomass (mt), and biomass (lbs) by year.
+\tabular{ll}{
+\bold{Field} \tab \bold{Description} \cr
+ABUNDANCE          \tab Estimated crab abundance using an area-swept expansion.                                                                                               \cr
+ABUNDANCE_CI       \tab Estimated crab abundance 95\% confidence interval.                                                                                                     \cr
+ABUNDANCE_CV       \tab Estimated crab abundance coefficient of variation.                                                                                                    \cr
+BIOMASS_LBS        \tab Estimated crab biomass in pounds.                                                                                                                     \cr
+BIOMASS_LBS_CI     \tab Estimated crab biomass (pounds) 95\% confidence interval.                                                                                              \cr
+BIOMASS_LBS_CV     \tab Estimated crab biomass (pounds) coefficient of variation.                                                                                             \cr
+BIOMASS_MT         \tab Estimated crab biomass in metric tons.                                                                                                                \cr
+BIOMASS_MT_CI      \tab Estimated crab biomass (metric tons) 95\% confidence interval.                                                                                         \cr
+BIOMASS_MT_CV      \tab Estimated crab biomass (metric tons) coefficient of variation.                                                                                        \cr
+CATEGORY           \tab Shorthand name of crab sex-size-maturity category.                                                                                                    \cr
+CLUTCH_TEXT        \tab Text describing  amount of eggs, if any, in female crabs.                                                                                             \cr
+DISTRICT           \tab Name of crab district, shorthand.                                                                                                                     \cr
+EGG_CONDITION_TEXT \tab Text describing egg condition category in female crabs.                                                                                               \cr
+REGION             \tab Survey region. EBS = Eastern Bering Sea, NBS = Northern Bering Sea.                                                                                   \cr
+SEX_TEXT           \tab Text describing sex of crab.                                                                                                                          \cr
+SHELL_TEXT         \tab Text describing carapace condition of crab.                                                                                                           \cr
+SIZE_1MM           \tab Measurement of crab in 1 millimeter bins. This number is carapace length for king crab and hair crab species, and carapace width for Chionoecetes spp.\cr
+SPECIES            \tab Name of species, shorthand.                                                                                                                           \cr
+YEAR               \tab Year the observation (survey) was collected.
+}
 }
 \description{
 This function calculates indices of abundance and biomass (mt and lbs)

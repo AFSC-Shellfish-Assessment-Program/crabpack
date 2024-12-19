@@ -57,8 +57,12 @@
 #'                      retow took place. Defaults to `TRUE`, please use care when interpreting
 #'                      BBRKC outputs if using `FALSE`.
 #'
-#' @return A data frame with area swept-expanded estimates of stratum-, district-, or region-level abundance,
-#'         biomass (mt), and biomass (lbs) by year.
+#' @eval c("@return", "A data frame with area swept-expanded estimates of stratum-, district-, or
+#'       region-level abundance, biomass (mt), and biomass (lbs) by year.",
+#'       get_table_metadata("inst/extdata/metadata.csv", select = c("SPECIES", "YEAR",
+#'       "REGION", "DISTRICT", "ABUNDANCE", "ABUNDANCE_CV", "ABUNDANCE_CI", "BIOMASS_MT",
+#'       "BIOMASS_MT_CV", "BIOMASS_MT_CI", "BIOMASS_LBS", "BIOMASS_LBS_CV", "BIOMASS_LBS_CI",
+#'       "CATEGORY", "SEX_TEXT", "SHELL_TEXT", "EGG_CONDITION_TEXT", "CLUTCH_TEXT", "SIZE_1MM") ))
 #'
 #' @export
 #'

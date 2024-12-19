@@ -11,8 +11,12 @@
 #' @param output Character string. One of `c("cpue", "bioabund")`. Default output
 #'               is `"cpue"`; `"bioabund"` is used for internal package purposes only.
 #'
-#' @return A data frame with station-level crab counts, and area swept-expanded
-#'         estimates of weight (mt, lbs) and numerical CPUE by year.
+#' @eval c("@return", "A data frame with station-level crab counts, and area swept-expanded
+#'       estimates of weight (mt, lbs) and numerical CPUE by year.",
+#'       get_table_metadata("inst/extdata/metadata.csv", select = c("SPECIES", "YEAR",
+#'       "REGION", "STATION_ID", "LATITUDE", "LONGITUDE", "DISTRICT", "STRATUM", "TOTAL_AREA",
+#'       "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS",
+#'       "CATEGORY", "SEX_TEXT", "SHELL_TEXT", "EGG_CONDITION_TEXT", "CLUTCH_TEXT", "SIZE_1MM") ))
 #'
 #' @export
 #'
@@ -38,6 +42,8 @@ calc_cpue <- function(crab_data = NULL,
 
   ## ERROR: must specify just one output if length(output > 1)
   ## something about certain preferred years for certain stocks/species too?
+
+  # ERROR: data object not created from get_spec_data?
 
   ## Set variables, define and filter specimen modifiers
   vars <- crabpack::set_variables(crab_data = crab_data,

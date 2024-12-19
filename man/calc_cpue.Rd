@@ -94,6 +94,28 @@ is \code{"cpue"}; \code{"bioabund"} is used for internal package purposes only.}
 \value{
 A data frame with station-level crab counts, and area swept-expanded
 estimates of weight (mt, lbs) and numerical CPUE by year.
+\tabular{ll}{
+\bold{Field} \tab \bold{Description} \cr
+CATEGORY           \tab Shorthand name of crab sex-size-maturity category.                                                                                                                                 \cr
+CLUTCH_TEXT        \tab Text describing  amount of eggs, if any, in female crabs.                                                                                                                          \cr
+COUNT              \tab Number of crab caught at station.                                                                                                                                                  \cr
+CPUE               \tab Numerical catch per unit effort (area swept by the net, in square nautical miles).                                                                                                 \cr
+CPUE_LBS           \tab Catch weight (lbs) per unit effort (area swept by the net, in square nautical miles).                                                                                              \cr
+CPUE_MT            \tab Catch weight (metric tons) per unit effort (area swept by the net, in square nautical miles).                                                                                      \cr
+DISTRICT           \tab Name of crab district, shorthand.                                                                                                                                                  \cr
+EGG_CONDITION_TEXT \tab Text describing egg condition category in female crabs.                                                                                                                            \cr
+LATITUDE           \tab The latitude (decimal degrees) at the midpoint of the haul for a given station.                                                                                                    \cr
+LONGITUDE          \tab The longitude (decimal degrees) at the midpoint of the haul for a given station.                                                                                                   \cr
+REGION             \tab Survey region. EBS = Eastern Bering Sea, NBS = Northern Bering Sea.                                                                                                                \cr
+SEX_TEXT           \tab Text describing sex of crab.                                                                                                                                                       \cr
+SHELL_TEXT         \tab Text describing carapace condition of crab.                                                                                                                                        \cr
+SIZE_1MM           \tab Measurement of crab in 1 millimeter bins. This number is carapace length for king crab and hair crab species, and carapace width for Chionoecetes spp.                             \cr
+SPECIES            \tab Name of species, shorthand.                                                                                                                                                        \cr
+STATION_ID         \tab Alphanumeric character that identifies a survey trawl location based. Stations are typically on a 20x20 nm grid, with Pribilof and St. Matthew corner stations included in the EBS.\cr
+STRATUM            \tab Name of stratum within crab district, shorthand.                                                                                                                                   \cr
+TOTAL_AREA         \tab Total area of stratum, in square nautical miles.                                                                                                                                   \cr
+YEAR               \tab Year the observation (survey) was collected.
+}
 }
 \description{
 This function calculates and zero-fills weight (mt, lbs) and numerical
