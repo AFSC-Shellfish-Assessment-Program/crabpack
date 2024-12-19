@@ -23,8 +23,8 @@ crabpack use functions from 7 additional packages:
   badges, deprecation warnings as the package develops over time
 - data.table: Speeds up data.frame manipulations like reading, writing, 
   aggregations, joins, ordering, sorting
-- tidyr:
-- dplyr:
+- tidyr: Aids in easy data manipulation
+- dplyr: Aids in easy data manipulation and allows for compact, readable code
 
 Please make sure these 7 packages are installed before installing crabpack.
 
@@ -35,7 +35,13 @@ devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 <!--
 ## Collaborators
 **AKCNOWLEDGE Em/GAP CONTRIBUTION!!**
-The gapindex R package is a product of two AFSC-RACE-GAP working groups 
+Matt/AKFIN folks
+Shannon Hennessey*  *package maintainer
+Emily Ryznar - overall workflow, testing
+Erin Fedewa - overall workflow, testing
+Jon Richar - sql scrpits/oracle db maintenance
+Mike? big picture?
+The crabpack R package is a product of _______....two AFSC-RACE-GAP working groups 
 regarding GAP data processes and index computation. Many thanks to those who 
 participated in those working groups:
 
