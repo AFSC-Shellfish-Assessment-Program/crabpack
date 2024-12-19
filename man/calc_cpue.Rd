@@ -21,6 +21,7 @@ calc_cpue(
   clutch_size = NULL,
   bin_1mm = FALSE,
   replace_retow = TRUE,
+  rm_corners = FALSE,
   output = c("cpue", "bioabund")[1]
 )
 }
@@ -87,6 +88,11 @@ or for the full range of observed sizes in the data. Defaults to \code{FALSE}.}
 with resampled data (haul type = 17) in years when a Bristol Bay
 retow took place. Defaults to \code{TRUE}, please use care when interpreting
 BBRKC outputs if using \code{FALSE}.}
+
+\item{rm_corners}{Boolean T/F. If \code{TRUE}, remove corner stations from Pribilof and St. Matthew
+Districts and calculate CPUE, abundance, and biomass based on a single
+stratum within the surrounding district. Defaults to \code{FALSE}, this is to
+be used for design-based data exercises only.}
 
 \item{output}{Character string. One of \code{c("cpue", "bioabund")}. Default output
 is \code{"cpue"}; \code{"bioabund"} is used for internal package purposes only.}

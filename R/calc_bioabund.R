@@ -57,9 +57,9 @@
 #'                      retow took place. Defaults to `TRUE`, please use care when interpreting
 #'                      BBRKC outputs if using `FALSE`.
 #' @param rm_corners Boolean T/F. If `TRUE`, remove corner stations from Pribilof and St. Matthew
-#'                   Districts MTCA strata and calculate abundance and biomass based on a single
-#'                   stratum within each district. Defaults to `FALSE`, this is to be used for
-#'                   design-based data exercises only.
+#'                   Districts and calculate CPUE, abundance, and biomass based on a single
+#'                   stratum within the surrounding district. Defaults to `FALSE`, this is to
+#'                   be used for design-based data exercises only.
 #'
 #' @eval c("@return", "A data frame with area swept-expanded estimates of stratum-, district-, or
 #'       region-level abundance, biomass (mt), and biomass (lbs) by year.",
