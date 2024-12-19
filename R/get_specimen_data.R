@@ -71,11 +71,11 @@ get_specimen_data <- function(species = NULL,
 
   ## Issue a warning when choosing multiple regions
   if(length(x = region) > 1){
-    warning(paste("The crabpack package has only been tested when querying",
-                  "only one survey region. Use caution when querying",
-                  "multiple survey regions until further testing has been done.",
-                  "If you come across an issue, please post it on",
-                  "github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
+    warning(paste0("The crabpack package has only been tested when querying",
+                  " only one survey region. Use caution when querying",
+                  " multiple survey regions until further testing has been done.",
+                  " If you come across an issue, please post it on",
+                  " github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
   }
 
   ## Error Query: check that the correct districts are selected for the correct species.
