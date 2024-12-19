@@ -249,7 +249,7 @@ set_variables <- function(crab_data = NULL,
   if(bin_1mm == TRUE){
     # set maximum size for 1mm bins to maximum size in data if no other maximum size is specified
     if(is.null(size_max)){
-      bin_max <- max(specimen_dat$SIZE_1MM, na.rm = T)
+      bin_max <- max(data_crab$SIZE_1MM, na.rm = T)
     } else{
       bin_max <- size_max
     }
