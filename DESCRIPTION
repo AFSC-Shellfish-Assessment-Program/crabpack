@@ -24,3 +24,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://afsc-shellfish-assessment-program.github.io/crabpack/
