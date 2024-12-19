@@ -19,6 +19,8 @@ metadata_column <- RODBC::sqlQuery(channel = sql_channel,
                                             FROM CRABBASE.METADATA_COLUMN")
 names(x = metadata_column) <- c("Field", "Description")
 
+metadata_column <- metadata_column %>% arrange(Field)
+
 
 # Write to 'inst/extdata/' folder
 utils::write.csv(x = metadata_column,
