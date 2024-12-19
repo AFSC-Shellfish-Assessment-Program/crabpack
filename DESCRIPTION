@@ -16,8 +16,7 @@ Imports:
     dplyr,
     data.table,
     keyring,
-    lifecycle,
-    purrr
+    lifecycle
 Depends: 
     R (>= 4.0.0)
 LazyData: true
