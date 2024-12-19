@@ -4,13 +4,15 @@
 
 This R package generates the standard design-based indices of catch per unit 
 effort, abundance, and biomass from NOAA-NMFS-AFSC-RACE-SAP Eastern Bering Sea Shelf 
-(from 1975) and Northern Bering Sea Shelf (from 2010) bottom trawl survey data. **This package 
-is still under development, please submit an issue if you come across a bug.**
+(from 1975) and Northern Bering Sea Shelf (from 2010) bottom trawl survey data.  
+
+**This package is still under development, please submit an issue if you come across a bug.**  
+&nbsp;
 
 ## Installation Instructions
 
 In addition to the default packages in R (base, stats, utils), the functions in 
-crabpack use functions from _XX_ additional packages:
+crabpack use functions from 7 additional packages:
 
 - RODBC: Enables ODBC (Open Database Connectivity) interface the AKFIN Oracle
   database where the survey data are housed
@@ -23,9 +25,8 @@ crabpack use functions from _XX_ additional packages:
   aggregations, joins, ordering, sorting
 - tidyr:
 - dplyr:
-- purrr::map2
 
-Please make sure these _XX_ packages are installed before installing crabpack.
+Please make sure these 7 packages are installed before installing crabpack.
 
 ```
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
