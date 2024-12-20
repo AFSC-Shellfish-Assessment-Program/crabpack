@@ -35,7 +35,7 @@ crabpack.
 ```         
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 ```
-
+&nbsp;
 ## Data Access
 There are no legal restrictions on access to the data. They reside in
 public domain and can be freely distributed. 
