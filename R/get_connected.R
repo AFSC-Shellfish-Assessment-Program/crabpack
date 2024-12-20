@@ -40,7 +40,7 @@ get_connected <- function(db = "AKFIN",
     return(invisible())
   }
 
-  if(class(channel) == "RODBC"){
+  if(inherits(channel, "RODBC")){
     cat("Successfully connected to Oracle.\n")
 
     if(check_access & db %in% c("AKFIN", "AFSC")){
