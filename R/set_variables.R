@@ -29,11 +29,6 @@ set_variables <- function(crab_data = NULL,
 
 
   ## Error messages:
-  # Can only handle 1 species at a time
-  if(length(species) > 1){
-    stop("Argument `species` must be of length = 1.")
-  }
-
   # clutch size, egg condition only for females (right now), default subsets
   if(!is.null(egg_condition) | !is.null(clutch_size)){
     warning(paste0("`egg_condition` and `clutch_size` are for female crab only.",
