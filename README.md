@@ -7,12 +7,12 @@ editor_options:
 # crabpack
 
 This R package generates the standard design-based indices of catch per
-unit effort, abundance, and biomass from NOAA-NMFS-AFSC-RACE-SAP Eastern
-Bering Sea Shelf (from 1975) and Northern Bering Sea Shelf (from 2010)
-bottom trawl survey data.
+unit effort, abundance, and biomass from NOAA Alaska Fisheries Science
+Center RACE Eastern Bering Sea Shelf (from 1975) and Northern Bering Sea
+Shelf (from 2010) bottom trawl survey data.
 
-**This package is still under development, please submit an issue if you
-come across a bug.**\
+***This package is still under development, please submit an issue if
+you come across a bug.***\
  
 
 <!-- make package logo!! https://github.com/GuangchuangYu/hexSticker -->
@@ -87,6 +87,9 @@ Wakabayashi, K., R. G. Bakkala, and M. S. Alton. 1985. Methods of the
      Fish. Comm. Bull. 44.
 -->
 ```
+```{=html}
+<!--
+
 ## Organization Acronymns
 
 NOAA: National Oceanic and Atmospheric Administration
@@ -99,9 +102,11 @@ RACE: Resource Assessment and Conservation Engineering Division
 
 SAP: Shellfish Assessment Program
 
+-->
+```
  
 
-## Legal disclaimer
+### Legal disclaimer
 
 This repository is a software product and is not official communication
 of the National Oceanic and Atmospheric Administration (NOAA), or the
