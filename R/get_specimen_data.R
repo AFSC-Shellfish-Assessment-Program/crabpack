@@ -87,6 +87,13 @@ get_specimen_data <- function(species = NULL,
                   " CRABBASE.DISTRICT_STRATUM table."))
     }
 
+    if(TRUE %in% (district %in% c("166TO173") & length(district > 1))){
+      stop(paste0("The 166TO173W district is a special case area for Tanner Crab, and",
+                  " should not be pulled in conjunction with any other districts due to",
+                  " spatial overlap with W166. Please set `district` to just `166TO173`",
+                  " if you wish to use those data."))
+    }
+
     if(TRUE %in% (district %in% c("BB", "NORTH") & !species %in% c("RKC", "HAIR"))){
       stop(paste0("Bristol Bay and Northern Unstratified districts are only available",
                   " for Red King Crab and Hair Crab. Please verify `district` options",
