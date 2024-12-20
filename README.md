@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # crabpack
 
 This R package generates the standard design-based indices of catch per
@@ -11,8 +5,8 @@ unit effort, abundance, and biomass from NOAA Alaska Fisheries Science
 Center RACE Eastern Bering Sea Shelf (from 1975) and Northern Bering Sea
 Shelf (from 2010) bottom trawl survey data.
 
-***This package is still under development, please submit an issue if
-you come across a bug.***\
+*This package is still under development, please submit an issue if
+you come across a bug.*  
  
 
 <!-- make package logo!! https://github.com/GuangchuangYu/hexSticker -->
@@ -43,7 +37,6 @@ crabpack.
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 ```
 
-```{=html}
 <!--
 ## Data Access?? 
 Something about AKFIN DB, who to contact/how to get access...
@@ -86,8 +79,7 @@ Wakabayashi, K., R. G. Bakkala, and M. S. Alton. 1985. Methods of the
      investigations in the Bering Sea during May-August 1979. Int. North Pac. 
      Fish. Comm. Bull. 44.
 -->
-```
-```{=html}
+
 <!--
 
 ## Organization Acronymns
@@ -103,10 +95,10 @@ RACE: Resource Assessment and Conservation Engineering Division
 SAP: Shellfish Assessment Program
 
 -->
-```
+
  
 
-### Legal disclaimer
+## Legal disclaimer
 
 This repository is a software product and is not official communication
 of the National Oceanic and Atmospheric Administration (NOAA), or the
