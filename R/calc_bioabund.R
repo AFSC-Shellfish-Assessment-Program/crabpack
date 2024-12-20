@@ -92,6 +92,13 @@ calc_bioabund <- function(crab_data = NULL,
                           replace_retow = TRUE,
                           rm_corners = FALSE){
 
+
+  ## ERROR: must specify just one output if length(output > 1)
+  if(length(spatial_level) > 1){
+    stop("Argument `spatial_level` must be of length = 1.")
+  }
+
+
   # call calc_cpue()
   cpue <- crabpack::calc_cpue(crab_data = crab_data,
                               species = species,
@@ -117,38 +124,30 @@ calc_bioabund <- function(crab_data = NULL,
   ## Calculate abundance and biomass
   # Sum across haul, scale abundance, biomass, and variance to strata, then sum across strata and calc CIs
   bio_abund_stratum <- station_cpue %>%
-                       # dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'DISTRICT', 'STRATUM',
-                       #                                               group_cols, 'TOTAL_AREA', 'REGION')))) %>%
-                       # dplyr::summarise(COUNT = sum(COUNT), CPUE = sum(CPUE), CPUE_MT = sum(CPUE_MT), CPUE_LBS = sum(CPUE_LBS)) %>%
                        # Scale to abundance by strata
                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', group_cols)))) %>%
-                       dplyr::reframe(AREA = TOTAL_AREA,
-                                      MEAN_CPUE = mean(CPUE),
+                       dplyr::reframe(MEAN_CPUE = mean(CPUE),
                                       N_CPUE = dplyr::n(),
-                                      VAR_CPUE = (stats::var(CPUE)*(AREA^2))/N_CPUE,
+                                      VAR_CPUE = (stats::var(CPUE)*(TOTAL_AREA^2))/N_CPUE,
                                       SD_CPUE = sqrt(VAR_CPUE),
                                       MEAN_CPUE_MT = mean(CPUE_MT),
                                       N_CPUE_MT = dplyr::n(),
-                                      VAR_CPUE_MT = (stats::var(CPUE_MT)*(AREA^2))/N_CPUE_MT,
+                                      VAR_CPUE_MT = (stats::var(CPUE_MT)*(TOTAL_AREA^2))/N_CPUE_MT,
                                       SD_CPUE_MT = sqrt(VAR_CPUE_MT),
                                       MEAN_CPUE_LBS = mean(CPUE_LBS),
                                       N_CPUE_LBS = dplyr::n(),
-                                      VAR_CPUE_LBS = (stats::var(CPUE_LBS)*(AREA^2))/N_CPUE_LBS,
+                                      VAR_CPUE_LBS = (stats::var(CPUE_LBS)*(TOTAL_AREA^2))/N_CPUE_LBS,
                                       SD_CPUE_LBS = sqrt(VAR_CPUE_LBS),
-                                      ABUNDANCE = (MEAN_CPUE * AREA),
+                                      ABUNDANCE = (MEAN_CPUE * TOTAL_AREA),
                                       ABUNDANCE_CV = (SD_CPUE/ABUNDANCE),
                                       ABUNDANCE_CI = 1.96*(SD_CPUE),
-                                      BIOMASS_MT = (MEAN_CPUE_MT * AREA),
+                                      BIOMASS_MT = (MEAN_CPUE_MT * TOTAL_AREA),
                                       BIOMASS_MT_CV = (SD_CPUE_MT/BIOMASS_MT),
                                       BIOMASS_MT_CI = (1.96*SD_CPUE_MT),
-                                      BIOMASS_LBS = (MEAN_CPUE_LBS * AREA),
+                                      BIOMASS_LBS = (MEAN_CPUE_LBS * TOTAL_AREA),
                                       BIOMASS_LBS_CV = (SD_CPUE_LBS/BIOMASS_LBS),
                                       BIOMASS_LBS_CI = 1.96*(SD_CPUE_LBS),
                                       N_STATIONS = length(unique(STATION_ID))) %>%
-                       # tidyr::replace_na(list(VAR_CPUE = 0, VAR_CPUE_MT = 0, VAR_CPUE_LBS = 0,
-                       #                        ABUNDANCE = 0, ABUNDANCE_CV = 0, ABUNDANCE_CI = 0,
-                       #                        BIOMASS_MT = 0, BIOMASS_MT_CV = 0, BIOMASS_MT_CI = 0,
-                       #                        BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
                        dplyr::distinct()
 
   if(spatial_level == "stratum"){
@@ -158,7 +157,8 @@ calc_bioabund <- function(crab_data = NULL,
                                  ABUNDANCE_CV = ifelse(ABUNDANCE == 0, 0, ABUNDANCE_CV),
                                  BIOMASS_MT_CV = ifelse(BIOMASS_MT == 0, 0, BIOMASS_MT_CV),
                                  BIOMASS_LBS_CV = ifelse(BIOMASS_LBS == 0, 0, BIOMASS_LBS_CV)) %>%
-                   dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'DISTRICT', 'STRATUM', group_cols,
+                   dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'DISTRICT',
+                                                 'STRATUM', 'TOTAL_AREA', group_cols,
                                                  'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                  'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
                                                  'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI')))
@@ -169,8 +169,9 @@ calc_bioabund <- function(crab_data = NULL,
 
   bio_abund_district <- bio_abund_stratum %>%
                         # Sum across strata
-                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', group_cols)))) %>%
-                        dplyr::reframe(MEAN_CPUE = sum(MEAN_CPUE),
+                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'TOTAL_AREA', group_cols)))) %>%
+                        dplyr::reframe(TOTAL_AREA = sum(TOTAL_AREA),
+                                       MEAN_CPUE = sum(MEAN_CPUE),
                                        VAR_CPUE = sum(VAR_CPUE),
                                        SD_CPUE = sqrt(VAR_CPUE),
                                        N_CPUE = sum(N_CPUE),
@@ -193,10 +194,6 @@ calc_bioabund <- function(crab_data = NULL,
                                        BIOMASS_LBS_CI = 1.96*(SD_CPUE_LBS),
                                        N_STATIONS = sum(N_STATIONS)) %>%
                         dplyr::mutate(N_STATIONS = ifelse((YEAR == 2000 & DISTRICT == "BB"), 135, N_STATIONS)) %>%
-                        # tidyr::replace_na(list(VAR_CPUE = 0, VAR_CPUE_MT = 0, VAR_CPUE_LBS = 0,
-                        #                        ABUNDANCE = 0, ABUNDANCE_CV = 0, ABUNDANCE_CI = 0,
-                        #                        BIOMASS_MT = 0, BIOMASS_MT_CV = 0, BIOMASS_MT_CI = 0,
-                        #                        BIOMASS_LBS = 0, BIOMASS_LBS_CV = 0, BIOMASS_LBS_CI = 0)) %>%
                         dplyr::ungroup()
 
   if(spatial_level == "district"){
@@ -206,7 +203,7 @@ calc_bioabund <- function(crab_data = NULL,
                                   ABUNDANCE_CV = ifelse(ABUNDANCE == 0, 0, ABUNDANCE_CV),
                                   BIOMASS_MT_CV = ifelse(BIOMASS_MT == 0, 0, BIOMASS_MT_CV),
                                   BIOMASS_LBS_CV = ifelse(BIOMASS_LBS == 0, 0, BIOMASS_LBS_CV)) %>%
-                    dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'DISTRICT', group_cols,
+                    dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'DISTRICT', 'TOTAL_AREA', group_cols,
                                                   'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                   'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
                                                   'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI')))
@@ -216,8 +213,9 @@ calc_bioabund <- function(crab_data = NULL,
 
   bio_abund_region <- bio_abund_district %>%
                       # Sum across districts
-                      dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', group_cols)))) %>%
-                      dplyr::reframe(MEAN_CPUE = sum(MEAN_CPUE),
+                      dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'TOTAL_AREA', group_cols)))) %>%
+                      dplyr::reframe(TOTAL_AREA = sum(TOTAL_AREA),
+                                     MEAN_CPUE = sum(MEAN_CPUE),
                                      VAR_CPUE = sum(VAR_CPUE),
                                      SD_CPUE = sqrt(VAR_CPUE),
                                      N_CPUE = sum(N_CPUE),
@@ -248,7 +246,7 @@ calc_bioabund <- function(crab_data = NULL,
                                 ABUNDANCE_CV = ifelse(ABUNDANCE == 0, 0, ABUNDANCE_CV),
                                 BIOMASS_MT_CV = ifelse(BIOMASS_MT == 0, 0, BIOMASS_MT_CV),
                                 BIOMASS_LBS_CV = ifelse(BIOMASS_LBS == 0, 0, BIOMASS_LBS_CV)) %>%
-                  dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', group_cols,
+                  dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'TOTAL_AREA', group_cols,
                                                 'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                 'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
                                                 'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI')))
