@@ -11,7 +11,7 @@ an issue if you come across a bug.*
 
 <!-- make package logo!! https://github.com/GuangchuangYu/hexSticker -->
 
-## Installation Instructions
+## Installation Instructions  
 In addition to the default packages in R (base, stats, utils), the
 functions in crabpack use functions from 7 additional packages:
 
@@ -35,8 +35,8 @@ crabpack.
 ```         
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 ```
-&nbsp;
-## Data Access
+&nbsp;  
+## Data Access  
 There are no legal restrictions on access to the data. They reside in
 public domain and can be freely distributed. 
 
@@ -56,8 +56,8 @@ Stevenson (<duane.stevenson@noaa.gov>). For questions specifically about
 crab data, contact Mike Litzow (<mike.litzow@noaa.gov>), the Shellfish 
 Assessment Program lead.  -->
 
-<!--&nbsp;  
-## Collaborators  
+<!--&nbsp;   
+## Collaborators   
 The crabpack R package is a product of a AFSC-RACE-SAP working group 
 regarding SAP data processes and index computation. Many thanks to those who 
 participated in those working groups.
@@ -80,8 +80,8 @@ Christopher Anderson (ChrisAnderson-NOAA)|Paul von Szalay (vszalay)|
 Nancy Roberson (NancyRoberson)|Thaddaeus Buser (ThaddaeusBuser-NOAA)| 
  |*package maintainer| 
 
-&nbsp;
-## Legacy
+&nbsp;  
+## Legacy  
 Here is an non-exhaustive list of people who provided the foundation for many 
 of the functions in this package:
 
@@ -99,22 +99,22 @@ Wakabayashi, K., R. G. Bakkala, and M. S. Alton. 1985. Methods of the
 -->
 
 
-&nbsp;  
+&nbsp;   
 ## Relevant Publications  
 Zacher, L.S., Hennessey, S.M., Richar, J.I., Fedewa, E.J., Ryznar, E.R., and Litzow,
 M.A. (2024). *The 2024 eastern Bering Sea continental shelf trawl
 survey: Results for commercial crab species*. [NOAA Tech Memo.](https://repository.library.noaa.gov/view/noaa/66166/noaa_66166_DS1.pdf)
 
-&nbsp;
-## Organization Acronymns
+&nbsp;  
+## Organization Acronymns  
 **NOAA:** National Oceanic and Atmospheric Administration  
 **NMFS:** National Marine Fisheries Service  
 **AFSC:** Alaska Fisheries Science Center  
 **RACE:** Resource Assessment and Conservation Engineering Division  
 **SAP:** Shellfish Assessment Program  
 
-&nbsp;
-## NOAA Legal Disclaimer
+&nbsp;  
+## NOAA Legal Disclaimer  
 This repository is a scientific product and is not official
 communication of the National Oceanic and Atmospheric Administration, or
 the United States Department of Commerce. All NOAA GitHub project code
@@ -129,8 +129,8 @@ The Department of Commerce seal and logo, or the seal and logo of a DOC
 bureau, shall not be used in any manner to imply endorsement of any
 commercial product or activity by DOC or the United States Government.
 
-&nbsp;
-## NOAA License
+&nbsp;  
+## NOAA License  
 Software code created by U.S. Government employees is not subject to
 copyright in the United States (17 U.S.C. §105). The United
 States/Department of Commerce reserve all rights to seek and obtain
