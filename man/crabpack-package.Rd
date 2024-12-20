@@ -12,6 +12,8 @@ This package contains functions to calculate standard NOAA AFSC Shellfish Assess
 Useful links:
 \itemize{
   \item \url{https://afsc-shellfish-assessment-program.github.io/crabpack/}
+  \item \url{https://github.com/AFSC-Shellfish-Assessment-Program/crabpack}
+  \item Report bugs at \url{https://github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues}
 }
 
 }
