@@ -16,7 +16,7 @@ navbar:
       text: Vignettes
       menu:
       - text: Example Workflow
-        # href: articles/ex_workflow.html
+        href: articles/ex_workflow.html
     # articles:
     #   text: Background
     #   href: articles/background_equations.html
@@ -37,7 +37,9 @@ home:
 reference:
   - title: Get Data
     contents:
-      - starts_with("get_")
+      - "get_connected"
+      - "get_specimen_data"
+      - "get_male_maturity"
   - title: Design-Based Index and Composition Estimation
     contents:
       - "calc_cpue"
