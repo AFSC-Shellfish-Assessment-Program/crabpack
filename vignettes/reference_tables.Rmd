@@ -1,5 +1,5 @@
 ---
-title: "Survey History"
+title: "Reference Tables"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Example Workflow}
