@@ -64,7 +64,7 @@ get_specimen_data <- function(species = NULL,
 
   ## Issue a warning when not specifying a region.
   if(missing(x = region)){
-    warning(paste0("The default survey region is the Eastern Bering Sea. Please include",
+    message(paste0("The default survey region is the Eastern Bering Sea. Please include",
                    " 'NBS' in the argument `region` if you would like data from the",
                    " Northern Bering Sea."))
   }
@@ -153,7 +153,6 @@ get_specimen_data <- function(species = NULL,
   attributes(x = haul_df)$sql_query <- haul_sql
 
   # Remove HT 17 if not RKC
-  # ^might not need^, can rm when creating SPECIMEN table
   if(species != "RKC"){
     haul_df <- haul_df %>%
                dplyr::filter(!HAUL_TYPE == 17)
@@ -206,18 +205,18 @@ get_specimen_data <- function(species = NULL,
 
   RODBC::sqlQuery(channel = channel, query = stratum_design_sql)
 
-  stratum_design <- data.table::data.table(RODBC::sqlQuery(channel = channel,
+  stratum_design_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
                                                            query = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY"))
-  attributes(x = stratum_design)$sql_query <- stratum_design_sql
+  attributes(x = stratum_design_df)$sql_query <- stratum_design_sql
 
 
 
   ## Query the stratum station data. This table reports the stations that make up
   ## each stratum for each design ID.
   stratum_stations_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY AS
-                                SELECT *
-                                FROM CRABBASE.STRATUM_STATIONS
-                                WHERE SPECIES = ", species_vec,
+                                  SELECT *
+                                  FROM CRABBASE.STRATUM_STATIONS
+                                  WHERE SPECIES = ", species_vec,
                                 "AND REGION IN", region_vec)
 
   RODBC::sqlQuery(channel = channel, query = stratum_stations_sql)
@@ -231,10 +230,10 @@ get_specimen_data <- function(species = NULL,
   ## Query the stratum area data. This table reports stratum total areas for each
   ## species across distinct year block IDs.
   stratum_area_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_AREA_QUERY AS
-                                SELECT *
-                                FROM CRABBASE.STRATUM_AREA
-                                WHERE SPECIES = ", species_vec,
-                                "AND REGION IN", region_vec)
+                              SELECT *
+                              FROM CRABBASE.STRATUM_AREA
+                              WHERE SPECIES = ", species_vec,
+                            "AND REGION IN", region_vec)
 
   RODBC::sqlQuery(channel = channel, query = stratum_area_sql)
 
@@ -244,12 +243,31 @@ get_specimen_data <- function(species = NULL,
 
 
 
+  # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column - messes with joining
+  if("AKFIN_LOAD_DATE" %in% names(haul_df)){
+    haul_df <- haul_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    specimen_df <- specimen_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    district_stratum_df <- district_stratum_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    stratum_stations_df <- stratum_stations_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    stratum_design_df <- stratum_design_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    stratum_area_df <- stratum_area_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+  }
+
+
+
   ## Define districts, stock stations, stratum areas
   # Filter to district, pull relevant strata
   if(is.null(district)){
     strata <- district_stratum_df %>%
               dplyr::filter(DISTRICT == "ALL") %>%
               dplyr::pull(STRATUM)
+
+    # If Tanner and no district specified, remove 166TO173
+    if(species == "TANNER"){
+      stratum_stations_df <- stratum_stations_df %>%
+        dplyr::filter(!DISTRICT == "166TO173")
+    }
+
   } else{
     strata <- district_stratum_df %>%
               dplyr::filter(DISTRICT %in% district) %>%
@@ -259,7 +277,7 @@ get_specimen_data <- function(species = NULL,
   # Pull stock stations using stock districts and haul info; assign stratum and area
   # Assign DESIGN_ID to data based on year
   data_haul <- haul_df %>%
-               dplyr::left_join(., stratum_design %>%
+               dplyr::left_join(., stratum_design_df %>%
                                      dplyr::select(-YEAR_BLOCK_ID) %>%
                                      dplyr::distinct())
 
@@ -272,7 +290,7 @@ get_specimen_data <- function(species = NULL,
                     dplyr::left_join(., stratum_area_df %>%
                                            dplyr::filter(STRATUM %in% strata) %>%
                                            # get relevant years for each area
-                                           dplyr::left_join(., stratum_design,
+                                           dplyr::left_join(., stratum_design_df,
                                                             relationship = "many-to-many") %>%
                                            dplyr::select(STRATUM, TOTAL_AREA, YEAR)) %>%
                     dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HAUL_TYPE,
@@ -368,6 +386,10 @@ get_specimen_data <- function(species = NULL,
                                                           query = "SELECT * FROM AKFIN_TEMPORARY_SIZEGROUPS_QUERY"))
   attributes(x = sizegroups_df)$sql_query <- sizegroups_sql
 
+  # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column
+  if("AKFIN_LOAD_DATE" %in% names(sizegroups_df)){
+    sizegroups_df <- sizegroups_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+  }
 
 
   ## Clear temporary tables
