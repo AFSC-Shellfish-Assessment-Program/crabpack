@@ -1,4 +1,47 @@
 url: https://afsc-shellfish-assessment-program.github.io/crabpack/
 template:
   bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    pkgdown-nav-height: 100px
 
+navbar:
+  structure:
+    left: [reference, vignettes, articles, citation, news]
+  components:
+    reference:
+      text: Functions
+      href: reference/index.html
+    vignettes:
+      text: Vignettes
+      menu:
+      - text: Example Workflow
+        # href: articles/ex_workflow.html
+    # articles:
+    #   text: Background
+    #   href: articles/background_equations.html
+    news:
+     text: Release Notes
+     menu:
+      - text: "crabpack 1.0.0"
+        # href: "https://github.com/afsc-shellfish-assessment-program/crabpack/releases/tag/v1.0.0"
+
+footer:
+  structure:
+    right: FALSE
+    left: built_with
+
+home:
+  sidebar: FALSE
+
+reference:
+  - title: Get Data
+    contents:
+      - starts_with("get_")
+  - title: Design-Based Index and Composition Estimation
+    contents:
+      - "calc_cpue"
+      - "calc_bioabund"
+  - title: Utility Functions
+    contents:
+      - starts_with("set_")
