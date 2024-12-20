@@ -125,7 +125,7 @@ calc_bioabund <- function(crab_data = NULL,
   # Sum across haul, scale abundance, biomass, and variance to strata, then sum across strata and calc CIs
   bio_abund_stratum <- station_cpue %>%
                        # Scale to abundance by strata
-                       dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', group_cols)))) %>%
+                       dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA', group_cols)))) %>%
                        dplyr::reframe(MEAN_CPUE = mean(CPUE),
                                       N_CPUE = dplyr::n(),
                                       VAR_CPUE = (stats::var(CPUE)*(TOTAL_AREA^2))/N_CPUE,
