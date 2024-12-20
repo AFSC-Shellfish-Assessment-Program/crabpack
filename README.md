@@ -35,7 +35,7 @@ crabpack.
 ```         
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 ```
-&nbsp;  
+
 ## Data Access  
 There are no legal restrictions on access to the data. They reside in
 public domain and can be freely distributed. 
@@ -99,13 +99,13 @@ Wakabayashi, K., R. G. Bakkala, and M. S. Alton. 1985. Methods of the
 -->
 
 
-&nbsp;   
+
 ## Relevant Publications  
 Zacher, L.S., Hennessey, S.M., Richar, J.I., Fedewa, E.J., Ryznar, E.R., and Litzow,
 M.A. (2024). *The 2024 eastern Bering Sea continental shelf trawl
 survey: Results for commercial crab species*. [NOAA Tech Memo.](https://repository.library.noaa.gov/view/noaa/66166/noaa_66166_DS1.pdf)
 
-&nbsp;  
+
 ## Organization Acronymns  
 **NOAA:** National Oceanic and Atmospheric Administration  
 **NMFS:** National Marine Fisheries Service  
@@ -113,7 +113,7 @@ survey: Results for commercial crab species*. [NOAA Tech Memo.](https://reposito
 **RACE:** Resource Assessment and Conservation Engineering Division  
 **SAP:** Shellfish Assessment Program  
 
-&nbsp;  
+
 ## NOAA Legal Disclaimer  
 This repository is a scientific product and is not official
 communication of the National Oceanic and Atmospheric Administration, or
@@ -129,7 +129,7 @@ The Department of Commerce seal and logo, or the seal and logo of a DOC
 bureau, shall not be used in any manner to imply endorsement of any
 commercial product or activity by DOC or the United States Government.
 
-&nbsp;  
+
 ## NOAA License  
 Software code created by U.S. Government employees is not subject to
 copyright in the United States (17 U.S.C. §105). The United
@@ -142,7 +142,6 @@ works of the Software outside of the United States.
 
 <img  align="right" src="https://raw.githubusercontent.com/nmfs-general-modeling-tools/nmfspalette/main/man/figures/noaa-fisheries-rgb-2line-horizontal-small.png" alt="NOAA Fisheries" height="75"/>
 
-&nbsp;  
 
 [U.S. Department of Commerce](https://www.commerce.gov/) \| [National
 Oceanographic and Atmospheric Administration](https://www.noaa.gov) \|
