@@ -47,33 +47,81 @@ calc_cpue <- function(crab_data = NULL,
                " `crabpack::get_specimen_data()`."))
   }
 
+
+  # Can only handle 1 species at a time
+  if(length(species) > 1){
+    stop("Argument `species` must be of length = 1.")
+  }
+
+
+  ## ERROR: check species in data == species called in function
+  if(unique(crab_data$specimen$SPECIES) != species){
+    stop("Argument `species` does not match species in crab_data.")
+  }
+
+
+  ## ERROR: check that district(s) specified are correct for given species
+  if(TRUE %in% (species %in% c("RKC", "HAIR")) & TRUE %in% (!district %in% c("ALL", "BB", "PRIB", "NORTH"))){
+    stop(paste0("Valid `district` options for ", species, " are:",
+                " c('ALL', 'BB', 'PRIB', 'NORTH').",
+                " Please set `district` to one or many of these options."))
+  }
+
+  if(species == "BKC" & TRUE %in% (!district %in% c("ALL", "PRIB", "STMATT", "UNSTRAT"))){
+    stop(paste0("Valid `district` options for ", species, " are:",
+                " c('ALL', 'PRIB', 'STMATT', 'UNSTRAT').",
+                " Please set `district` to one or many of these options."))
+  }
+
+  if(species == "TANNER" & TRUE %in% (!district %in% c("ALL", "E166", "W166", "166TO173"))){
+    stop(paste0("Valid `district` options for ", species, " are:",
+                " c('ALL', 'E166', 'W166', '166TO173').",
+                " Please set `district` to one or many of these options."))
+  }
+
+  if(species %in% c("SNOW", "HYBRID") & TRUE %in% (!district %in% c("ALL"))){
+    stop(paste0("Valid `district` options for ", species, " are:",
+                " c('ALL'). Please set `district` to this option."))
+  }
+
+
+  ## If "ALL" is specified in `district`, just set district to all
+  if("ALL" %in% district){
+    district <- "ALL"
+  }
+
+
+  ## ERROR: Can't calculate both W166 AND 166TO173 for Tanner, they overlap and things may be wonky. Do separately
+  if("166TO173" %in% district & length(district > 1)){
+    stop(paste0("The 166TO173W district is a special case area for Tanner Crab, and",
+                " should not be calculated in conjunction with any other districts due to",
+                " spatial overlap with W166. Please set `district` to just `166TO173`",
+                " if you wish to query that district. Data may also have to be pulled using",
+                " `crabpack::get_specimen_data` specifically for this species and district."))
+  }
+
+
   ## ERROR: must specify just one output if length(output > 1)
   if(length(output) > 1){
     stop("Argument `output` must be of length = 1.")
   }
 
-  ## ERROR: Can't calculate both W166 AND 166TO173 for Tanner, they overlap and things may be wonky. Do separately
-  if(TRUE %in% (district %in% c("166TO173") & length(district > 1))){
-    stop(paste0("The 166TO173W district is a special case area for Tanner Crab, and",
-                " should not be calculated in conjunction with any other districts due to",
-                " spatial overlap with W166. Please set `district` to just `166TO173`",
-                " if you wish to query that district."))
-  }
-
 
   ## WARNING: specifying 1mm bins across multiple categories may exceed memory limits
-  if(bin_1mm == TRUE & (length(crab_category) > 1 | crab_category == "all_categories")){
+  if(!is.null(crab_category)){
+    if(bin_1mm == TRUE & (length(crab_category) > 1 | crab_category == "all_categories")){
 
-    warning_yn = function(w) {
-      cat("Warning message:", '\n', w, '\n')
-      cont <- readline('Do you wish to continue? [Y/N] ')
-      if(!cont %in% c('Y', 'y')) stop('Aborted by user', call. = FALSE)
+      warning_yn = function(w) {
+        cat("Warning message:", '\n', w, '\n')
+        cont <- readline('Do you wish to continue? [Y/N] ')
+        if(!cont %in% c('Y', 'y')) stop('Aborted by user', call. = FALSE)
+      }
+
+      warning_yn(paste0("Calculating across multiple categories by 1mm bin may exceed",
+                        " R memory limits, especially if metrics are being calculated",
+                        " across the entire region. We suggest calculating by individual",
+                        " categories instead, and appending the outputs."))
     }
-
-    warning_yn(paste0("Calculating across multiple categories by 1mm bin may exceed",
-                      " R memory limits, especially if metrics are being calculated",
-                      " across the entire region. We suggest calculating by individual",
-                      " categories instead, and appending the outputs."))
   }
 
 
@@ -95,11 +143,6 @@ calc_cpue <- function(crab_data = NULL,
   # Pull column names and expand_grid() categories to track throughout calculations
   group_cols <- vars$group_cols
   list2env(vars$expand_combos, .GlobalEnv)
-
-
-  #*SOMETHING IN HERE to make sure species designated is same as the species you pulled data for??**
-  ## CHECK SPECIES IN DATA == SPECIES CALLED IN FUNCTION
-  ## something to detect district in data too?
 
 
   # define year if not specified
@@ -258,20 +301,8 @@ calc_cpue <- function(crab_data = NULL,
 
   # Replace retow BBRKC --------------------------------------------------------
   if(species == "RKC" & replace_retow != FALSE){
-    # Specify retow stations and years for BBRKC, pull by year
+    # Specify retow stations and years for BBRKC
     ## Retow years: 1999 2000 2006 2007 2008 2009 2010 2011 2012 2017 2021
-    # retow_stations <- stock_stations %>%
-    #                   dplyr::filter(HT == 17) %>%
-    #                   dplyr::select(STATION_ID) %>%
-    #                   dplyr::distinct() %>%
-    #                   dplyr::pull()
-    #
-    # retow_years <- stock_stations %>%
-    #                dplyr::filter(HT == 17) %>%
-    #                dplyr::select(YEAR) %>%
-    #                dplyr::distinct() %>%
-    #                dplyr::pull()
-
     retows <- stock_stations %>%
               dplyr::filter(HT == 17) %>%
               dplyr::mutate(RETOW = "yes") %>%
@@ -279,30 +310,10 @@ calc_cpue <- function(crab_data = NULL,
 
     # replace female BBRKC with female data from station with HT 17
     station_cpue <- station_cpue %>%
-                    # dplyr::ungroup() %>%
-                    # # dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, 'SEX_TEXT'
-                    # #                                               'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
-                    # # tidyr::nest() %>%
-                    # dplyr::group_nest(., group_by(across(all_of(c('YEAR', 'STATION_ID', 'SEX_TEXT', 'HT', group_cols,
-                    #                                               'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA'))))) %>%
                     dplyr::left_join(., retows) %>%
-                    dplyr::mutate(REMOVE = dplyr::case_when(#(SEX_TEXT == 'female' & STATION_ID %in% retow_stations & YEAR %in% retow_years & HT == 17) ~ "KEEP",
-                                                           (SEX_TEXT == 'female' & RETOW == "yes" & HT == 3) ~ "remove",
-                                                           #(SEX_TEXT == 'male' & STATION_ID %in% retow_stations & YEAR %in% retow_years & HT == 3) ~ "KEEP",
-                                                           (SEX_TEXT == 'male' & RETOW == "yes" & HT == 17) ~ "remove",
-                                                           TRUE ~ "keep")) %>%
-                    # # {if(station_cpue$SEX_TEXT == 'female' &
-                    # #     station_cpue$STATION_ID %in% retow_stations
-                    # #     & station_cpue$YEAR %in% retow_years) filter(., HT == 17)
-                    # #     else filter(., HT != 17)}
-                    #
-                    # # Females: replacing original stations with resampled stations in retow yrs for BBRKC females
-                    # dplyr::mutate(data = purrr::map(data, function(data) {
-                    #                         if(17 %in% data$HT & SEX_TEXT == 'female' & STATION_ID %in% retow_stations & YEAR %in% retow_years)
-                    #                         {data %>% dplyr::filter(HT == 17) -> x} else{x <- data %>% dplyr::filter(HT != 17)}
-                    #                         return(x)
-                    #                     })) %>%
-                    # tidyr::unnest(cols = c(data)) %>%
+                    dplyr::mutate(REMOVE = dplyr::case_when((SEX_TEXT == 'female' & RETOW == "yes" & HT == 3) ~ "remove",
+                                                            (SEX_TEXT == 'male' & RETOW == "yes" & HT == 17) ~ "remove",
+                                                            TRUE ~ "keep")) %>%
                     dplyr::filter(REMOVE == "keep") %>%
                     dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, 'SEX_TEXT', # keeping HT in for output verification
                                                                   'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
