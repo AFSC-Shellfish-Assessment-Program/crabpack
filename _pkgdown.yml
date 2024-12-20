@@ -17,9 +17,15 @@ navbar:
       menu:
       - text: Example Workflow
         href: articles/ex_workflow.html
-    # articles:
-    #   text: Background
-    #   href: articles/background_equations.html
+    articles:
+      text: Background
+      menu:
+      - text: Survey History
+        # href: articles/survey_history.html
+      - text: Mathematical Methods
+        # href: articles/background_equations.html
+
+
     news:
      text: Release Notes
      menu:
