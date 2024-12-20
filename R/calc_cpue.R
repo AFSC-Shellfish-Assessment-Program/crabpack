@@ -41,12 +41,42 @@ calc_cpue <- function(crab_data = NULL,
                       output = c("cpue", "bioabund")[1]){
 
 
+  ## Check inputs
+  if(is.null(x = crab_data)){
+    stop(paste0("Must provide argument `crab_data` a named list from",
+               " `crabpack::get_specimen_data()`."))
+  }
+
   ## ERROR: must specify just one output if length(output > 1)
-  ## something about certain preferred years for certain stocks/species too?
+  if(length(output) > 1){
+    stop("Argument `output` must be of length = 1.")
+  }
 
-  # ERROR: data object not created from get_spec_data?
+  ## ERROR: Can't calculate both W166 AND 166TO173 for Tanner, they overlap and things may be wonky. Do separately
+  if(TRUE %in% (district %in% c("166TO173") & length(district > 1))){
+    stop(paste0("The 166TO173W district is a special case area for Tanner Crab, and",
+                " should not be calculated in conjunction with any other districts due to",
+                " spatial overlap with W166. Please set `district` to just `166TO173`",
+                " if you wish to query that district."))
+  }
 
-  # ERROR: tanner, can't pull W166 AND 166TO173....they overlap and things get wonky. Do separate
+
+  ## WARNING: specifying 1mm bins across multiple categories may exceed memory limits
+  if(bin_1mm == TRUE & (length(crab_category) > 1 | crab_category == "all_categories")){
+
+    warning_yn = function(w) {
+      cat("Warning message:", '\n', w, '\n')
+      cont <- readline('Do you wish to continue? [Y/N] ')
+      if(!cont %in% c('Y', 'y')) stop('Aborted by user', call. = FALSE)
+    }
+
+    warning_yn(paste0("Calculating across multiple categories by 1mm bin may exceed",
+                      " R memory limits, especially if metrics are being calculated",
+                      " across the entire region. We suggest calculating by individual",
+                      " categories instead, and appending the outputs."))
+  }
+
+
 
   ## Set variables, define and filter specimen modifiers
   vars <- crabpack::set_variables(crab_data = crab_data,
