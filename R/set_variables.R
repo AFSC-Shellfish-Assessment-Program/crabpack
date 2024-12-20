@@ -29,14 +29,67 @@ set_variables <- function(crab_data = NULL,
 
 
   ## Error messages:
-  # - NOT MORE THAN 1 SPECIES AT A TIME!
-  # - clutch size, egg condition only for females (right now), default subsets
-  # - crab category/species combos...eg. mature male for chionoecetes (warning, set to lg_male)
-  # - general check inputs to see if allowed options
-  # - can't call 'all_categories' and another category -- redundant: egg condition, shell condition, clutch size, category
-  ## **SOME SORT OF WARNING if wanting male, can't do morphometric, it's cutline only for this. But see Chionoecetes maturity tables?
-  ## Hair --> no female maturity...cutline at least -- I guess could do morphometric? And legal/sublegal == mature/immature? (but not recommended)
-  # female maturity - if not specified, warning that using morphometric default, error if length > 1
+  # Can only handle 1 species at a time
+  if(length(species) > 1){
+    stop("Argument `species` must be of length = 1.")
+  }
+
+  # clutch size, egg condition only for females (right now), default subsets
+  if(!is.null(egg_condition) | !is.null(clutch_size)){
+    warning(paste0("`egg_condition` and `clutch_size` are for female crab only.",
+                   " Specifying these arguments will return female-only data."))
+  }
+
+  # - crab category/species combos
+  if(species %in% c("TANNER", "SNOW", "HYBRID")){
+
+    if("immature_male" %in% crab_category){
+      crab_category <- replace(crab_category, crab_category == "immature_male", "small_male")
+      warning(paste0("Category 'immature_male' is not available for Chionoecetes spp. crab.",
+                     " Category has been set to 'small_male' instead."))
+    }
+
+    if("mature_male" %in% crab_category){
+      crab_category <- replace(crab_category, crab_category == "mature_male", "large_male")
+      warning(paste0("Category 'mature_male' is not available for Chionoecetes spp. crab.",
+                     " Category has been set to 'large_male' instead."))
+    }
+
+    if(crab_category %in% c("sublegal_male")){
+      stop(paste("'sublegal_male' is not a valid category for this species."))
+    }
+  }
+
+
+  if(species %in% c("RKC", "BKC")){
+    if("small_male" %in% crab_category){
+      crab_category <- replace(crab_category, crab_category == "small_male", "large_male")
+      warning(paste0("Category 'small_male' is not available for king crab species.",
+                     " Category has been set to 'large_male' instead."))
+    }
+
+    if("large_male" %in% crab_category){
+      crab_category <- replace(crab_category, crab_category == "large_male", "mature_male")
+      warning(paste0("Category 'large_male' is not available for king crab species.",
+                     " Category has been set to 'mature_male' instead."))
+    }
+
+    if("sublegal_male" %in% crab_category){
+      stop(paste("'sublegal_male' is not a valid category for this species."))
+    }
+
+    if("preferred_male" %in% crab_category){
+      stop(paste("'preferred_male' is not a valid category for this species."))
+    }
+  }
+
+
+  if(species %in% c("HAIR")){
+    if(TRUE %in% (crab_category %in% c("small_male", "large_male", "immature_male", "mature_male", "preferred_male"))){
+      stop(paste0("One or many specified male category is not valid for this species. Please use",
+                  " 'sublegal_male' and/or 'legal_male' only."))
+    }
+  }
 
 
 
