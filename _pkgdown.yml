@@ -21,11 +21,11 @@ navbar:
       text: Background
       menu:
       - text: Survey History
-        # href: articles/survey_history.html
+        href: articles/survey_history.html
       - text: Mathematical Methods
-        # href: articles/background_equations.html
-
-
+        href: articles/background_equations.html
+      - text: Reference Tables
+        href: articles/reference_tables.html
     news:
      text: Release Notes
      menu:
