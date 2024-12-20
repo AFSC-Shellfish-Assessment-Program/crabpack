@@ -1,37 +1,49 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
 # crabpack
-This R package generates the standard design-based indices of catch per unit 
-effort, abundance, and biomass from NOAA-NMFS-AFSC-RACE-SAP Eastern Bering Sea Shelf 
-(from 1975) and Northern Bering Sea Shelf (from 2010) bottom trawl survey data.  
 
-**This package is still under development, please submit an issue if you come across a bug.**  
-&nbsp;
+This R package generates the standard design-based indices of catch per
+unit effort, abundance, and biomass from NOAA-NMFS-AFSC-RACE-SAP Eastern
+Bering Sea Shelf (from 1975) and Northern Bering Sea Shelf (from 2010)
+bottom trawl survey data.
 
-<!-- make package logo!! https://github.com/GuangchuangYu/hexSticker -->  
+**This package is still under development, please submit an issue if you
+come across a bug.**\
+ 
 
+<!-- make package logo!! https://github.com/GuangchuangYu/hexSticker -->
 
 ## Installation Instructions
 
-In addition to the default packages in R (base, stats, utils), the functions in 
-crabpack use functions from 7 additional packages:
+In addition to the default packages in R (base, stats, utils), the
+functions in crabpack use functions from 7 additional packages:
 
-- RODBC: Enables ODBC (Open Database Connectivity) interface the AKFIN Oracle
-  database where the survey data are housed
-- getPass: Allows for masking of Oracle user credentials (usernames, passwords) 
-  when accessing RODBC
-- keyring: Allows the option for users to store their passwords 
-- lifecycle: Aids developers and users with shared conventions, documentation 
-  badges, deprecation warnings as the package develops over time
-- data.table: Speeds up data.frame manipulations like reading, writing, 
-  aggregations, joins, ordering, sorting
-- tidyr: Aids in easy data manipulation
-- dplyr: Aids in easy data manipulation and allows for compact, readable code
+-   RODBC: Enables ODBC (Open Database Connectivity) interface the AKFIN
+    Oracle database where the survey data are housed
+-   getPass: Allows for masking of Oracle user credentials (usernames,
+    passwords) when accessing RODBC
+-   keyring: Allows the option for users to store their passwords
+-   lifecycle: Aids developers and users with shared conventions,
+    documentation badges, deprecation warnings as the package develops
+    over time
+-   data.table: Speeds up data.frame manipulations like reading,
+    writing, aggregations, joins, ordering, sorting
+-   tidyr: Aids in easy data manipulation
+-   dplyr: Aids in easy data manipulation and allows for compact,
+    readable code
 
-Please make sure these 7 packages are installed before installing crabpack.
+Please make sure these 7 packages are installed before installing
+crabpack.
 
-```
+```         
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 ```
 
+```{=html}
 <!--
 ## Data Access?? 
 Something about AKFIN DB, who to contact/how to get access...
@@ -74,9 +86,9 @@ Wakabayashi, K., R. G. Bakkala, and M. S. Alton. 1985. Methods of the
      investigations in the Bering Sea during May-August 1979. Int. North Pac. 
      Fish. Comm. Bull. 44.
 -->
-
- 
+```
 ## Organization Acronymns
+
 NOAA: National Oceanic and Atmospheric Administration
 
 NMFS: National Marine Fisheries Service
@@ -87,12 +99,19 @@ RACE: Resource Assessment and Conservation Engineering Division
 
 SAP: Shellfish Assessment Program
 
-&nbsp; 
+ 
+
 ## Legal disclaimer
-This repository is a software product and is not official communication of the National Oceanic and Atmospheric Administration (NOAA), 
-or the United States Department of Commerce (DOC). All NOAA GitHub project code is provided on an 'as is' basis and the user assumes 
-responsibility for its use. Any claims against the DOC or DOC bureaus stemming from the use of this GitHub project will be governed by 
-all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, 
-or otherwise, does not constitute or imply their endorsement, recommendation, or favoring by the DOC. The DOC seal and logo, or the seal 
-and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by the DOC or the 
-United States Government.
+
+This repository is a software product and is not official communication
+of the National Oceanic and Atmospheric Administration (NOAA), or the
+United States Department of Commerce (DOC). All NOAA GitHub project code
+is provided on an 'as is' basis and the user assumes responsibility for
+its use. Any claims against the DOC or DOC bureaus stemming from the use
+of this GitHub project will be governed by all applicable Federal law.
+Any reference to specific commercial products, processes, or services by
+service mark, trademark, manufacturer, or otherwise, does not constitute
+or imply their endorsement, recommendation, or favoring by the DOC. The
+DOC seal and logo, or the seal and logo of a DOC bureau, shall not be
+used in any manner to imply endorsement of any commercial product or
+activity by the DOC or the United States Government.
