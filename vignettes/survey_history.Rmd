@@ -2,7 +2,7 @@
 title: "Survey History"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Example Workflow}
+  %\VignetteIndexEntry{Survey History}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

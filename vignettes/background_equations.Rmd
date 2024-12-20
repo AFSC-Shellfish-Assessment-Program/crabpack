@@ -2,7 +2,7 @@
 title: "Mathematical Equations"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Example Workflow}
+  %\VignetteIndexEntry{Mathematical Equations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

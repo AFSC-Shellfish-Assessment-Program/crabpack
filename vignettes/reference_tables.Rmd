@@ -2,7 +2,7 @@
 title: "Reference Tables"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Example Workflow}
+  %\VignetteIndexEntry{Reference Tables}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
