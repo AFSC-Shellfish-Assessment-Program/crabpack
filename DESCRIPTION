@@ -1,6 +1,6 @@
 Package: crabpack
 Title: Calculate Bering Sea Crab CPUE, Abundance, and Biomass
-Version: 1.0.0
+Version: 0.0.0.9000
 Authors@R: 
     person("Shannon", "Hennessey", , "shannon.hennessey@noaa.gov", role = c("aut", "cre"))
 Description: This package contains functions to calculate standard NOAA AFSC Shellfish Assessment Program summer bottom trawl survey data products (CPUE, Abundance, and Biomass) for the Eastern Bering Sea Shelf (1975-present) and Northern Bering Sea Shelf (2010-present).
