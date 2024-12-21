@@ -29,8 +29,8 @@ navbar:
     news:
      text: Release Notes
      menu:
-      - text: "crabpack 0.0.900"
-        href: "https://github.com/afsc-shellfish-assessment-program/crabpack/releases/tag/v0.0.900"
+      - text: "crabpack 0.0.9000"
+        href: "https://github.com/AFSC-Shellfish-Assessment-Program/crabpack/releases/tag/v0.0.9000"
 
 footer:
   structure:
