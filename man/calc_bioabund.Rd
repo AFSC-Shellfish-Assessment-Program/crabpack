@@ -121,6 +121,7 @@ SEX_TEXT           \tab Text describing sex of crab.                            
 SHELL_TEXT         \tab Text describing carapace condition of crab.                                                                                                           \cr
 SIZE_1MM           \tab Measurement of crab in 1 millimeter bins. This number is carapace length for king crab and hair crab species, and carapace width for Chionoecetes spp.\cr
 SPECIES            \tab Name of species, shorthand.                                                                                                                           \cr
+TOTAL_AREA         \tab Total area of stratum, in square nautical miles.                                                                                                      \cr
 YEAR               \tab Year the observation (survey) was collected.
 }
 }
