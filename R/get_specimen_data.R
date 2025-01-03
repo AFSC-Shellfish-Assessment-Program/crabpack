@@ -265,7 +265,7 @@ get_specimen_data <- function(species = NULL,
     # If Tanner and no district specified, remove 166TO173
     if(species == "TANNER"){
       stratum_stations_df <- stratum_stations_df %>%
-        dplyr::filter(!DISTRICT == "166TO173")
+                             dplyr::filter(!DISTRICT == "166TO173")
     }
 
   } else{
@@ -275,24 +275,28 @@ get_specimen_data <- function(species = NULL,
   }
 
   # Pull stock stations using stock districts and haul info; assign stratum and area
+  cat("Joining district, stratum, and area information to specimen data...\n")
   # Assign DESIGN_ID to data based on year
   data_haul <- haul_df %>%
                dplyr::left_join(., stratum_design_df %>%
                                      dplyr::select(-YEAR_BLOCK_ID) %>%
-                                     dplyr::distinct())
+                                     dplyr::distinct(),
+                                by = c('REGION', 'YEAR'))
 
   # Add stratum name to each station for the species
   stock_stations <- data_haul %>%
                     dplyr::filter(YEAR %in% years) %>%
                     # add correct stratum names to stations based on design_ID for the given year
-                    dplyr::left_join(., stratum_stations_df %>%
-                                           dplyr::filter(STRATUM %in% strata)) %>%
+                    dplyr::left_join(., stratum_stations_df,
+                                     by = c('REGION', 'STATION_ID', 'DESIGN_ID')) %>%
                     dplyr::left_join(., stratum_area_df %>%
                                            dplyr::filter(STRATUM %in% strata) %>%
                                            # get relevant years for each area
                                            dplyr::left_join(., stratum_design_df,
-                                                            relationship = "many-to-many") %>%
-                                           dplyr::select(STRATUM, TOTAL_AREA, YEAR)) %>%
+                                                            relationship = "many-to-many",
+                                                            by = c('REGION', 'YEAR_BLOCK_ID')) %>%
+                                           dplyr::select(STRATUM, TOTAL_AREA, YEAR),
+                                     by = c('YEAR', 'STRATUM')) %>%
                     dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HAUL_TYPE,
                                   AREA_SWEPT, MID_LATITUDE, MID_LONGITUDE, DISTRICT,
                                   STRATUM, TOTAL_AREA) %>%
@@ -306,14 +310,15 @@ get_specimen_data <- function(species = NULL,
                     {if(species == "BKC") dplyr::mutate(., DISTRICT = dplyr::case_when(is.na(DISTRICT) ~ "UNSTRAT",
                                                                                        TRUE ~ DISTRICT),
                                                         STRATUM = dplyr::case_when(is.na(STRATUM) ~ "UNSTRAT",
-                                                                                   TRUE ~ STRATUM)) else .}
+                                                                                   TRUE ~ STRATUM)) else .} %>%
+                    dplyr::filter(STRATUM %in% strata)
 
 
 
   ## Join specimen and stratum information to haul data
   # Add specimen data to relevant hauls for the selected districts/strata
   data_crab <- stock_stations %>%
-               dplyr::left_join(., specimen_df)
+               dplyr::left_join(., specimen_df, by = c('HAULJOIN'))
 
 
 
@@ -336,7 +341,7 @@ get_specimen_data <- function(species = NULL,
     # Add positive catch station stratum area to haul and specimen info
     data_crab <- data_crab %>%
                   dplyr::group_by(YEAR, STRATUM) %>%
-                  dplyr::left_join(., n_pos_catch) %>%
+                  dplyr::left_join(., n_pos_catch, by = c('YEAR', 'STRATUM')) %>%
                   dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM),
                                                     TOTAL_AREA_POS, TOTAL_AREA)) %>%
                   dplyr::select(-TOTAL_AREA_POS) %>%
@@ -345,7 +350,7 @@ get_specimen_data <- function(species = NULL,
 
     stock_stations <- stock_stations %>%
                       dplyr::group_by(YEAR, STRATUM) %>%
-                      dplyr::left_join(., n_pos_catch) %>%
+                      dplyr::left_join(., n_pos_catch, by = c('YEAR', 'STRATUM')) %>%
                       dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM),
                                                         TOTAL_AREA_POS, TOTAL_AREA)) %>%
                       dplyr::select(-TOTAL_AREA_POS) %>%
@@ -357,7 +362,8 @@ get_specimen_data <- function(species = NULL,
   ## Format haul data for output, filter region, district, years
   data_haul <- data_haul %>%
                dplyr::left_join(., stock_stations %>%
-                                   dplyr::select(-c('LATITUDE', 'LONGITUDE'))) %>%
+                                   dplyr::select(-c('LATITUDE', 'LONGITUDE')),
+                                by = c('HAULJOIN', 'REGION', 'YEAR', 'HAUL_TYPE', 'AREA_SWEPT', 'STATION_ID')) %>%
                dplyr::filter(YEAR %in% years,
                              REGION %in% region,
                              STRATUM %in% strata)
