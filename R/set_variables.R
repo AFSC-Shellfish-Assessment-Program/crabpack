@@ -50,7 +50,7 @@ set_variables <- function(crab_data = NULL,
                      " Category has been set to 'large_male' instead."))
     }
 
-    if(crab_category %in% c("sublegal_male")){
+    if("sublegal_male" %in% crab_category){
       stop(paste("'sublegal_male' is not a valid category for this species."))
     }
   }
