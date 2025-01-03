@@ -199,8 +199,8 @@ calc_cpue <- function(crab_data = NULL,
       # without removing other accidental corners in older part of ts. Could manually specify
       # but not sure if anyone wants/needs these data.
       stock_stations <- stock_stations %>%
-                        dplyr::mutate(STRATUM = case_when(STRATUM == "PRIB_MTCA" ~ "PRIB",
-                                                          TRUE ~ STRATUM))
+                        dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "PRIB",
+                                                                 TRUE ~ STRATUM))
 
       warning(paste0("Corner stations within the St. Matthew district are considered",
                      " part of the Northern district for this species and have not",
@@ -213,22 +213,22 @@ calc_cpue <- function(crab_data = NULL,
     if(species == "TANNER"){
       if(district == "166TO173"){
         stock_stations <- stock_stations %>%
-                          dplyr::mutate(STRATUM = case_when(STRATUM == "PRIB_MTCA" ~ "166TO173",
-                                                            STRATUM == "STMATT_MTCA_E" ~ "166TO173",
-                                                            TRUE ~ STRATUM))
+                          dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "166TO173",
+                                                                   STRATUM == "STMATT_MTCA_E" ~ "166TO173",
+                                                                   TRUE ~ STRATUM))
       } else{
         stock_stations <- stock_stations %>%
-                          dplyr::mutate(STRATUM = case_when(STRATUM == "PRIB_MTCA" ~ "W166",
-                                                            STRATUM == "STMATT_MTCA" ~ "W166",
-                                                            TRUE ~ STRATUM))
+                          dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "W166",
+                                                                   STRATUM == "STMATT_MTCA" ~ "W166",
+                                                                   TRUE ~ STRATUM))
       }
     }
 
     if(species %in% c("SNOW", "HYBRID")){
       stock_stations <- stock_stations %>%
-                        dplyr::mutate(STRATUM = case_when(STRATUM == "PRIB_MTCA" ~ "EBS_SINGLE",
-                                                          STRATUM == "STMATT_MTCA" ~ "EBS_SINGLE",
-                                                          TRUE ~ STRATUM))
+                        dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "EBS_SINGLE",
+                                                                 STRATUM == "STMATT_MTCA" ~ "EBS_SINGLE",
+                                                                 TRUE ~ STRATUM))
     }
   }
 
@@ -261,10 +261,11 @@ calc_cpue <- function(crab_data = NULL,
                                                        HT = unique(stock_stations$HT),
                                                        stock_stations %>%
                                                          dplyr::select(YEAR, REGION, STATION_ID,
-                                                                       DISTRICT, STRATUM, TOTAL_AREA))) %>%
+                                                                       DISTRICT, STRATUM, TOTAL_AREA)),
+                                    by = c('YEAR', 'HT', 'REGION', 'STATION_ID', 'SEX_TEXT', group_cols)) %>%
                   tidyr::replace_na(list(COUNT = 0, CPUE = 0, CPUE_MT = 0, CPUE_LBS = 0)) %>%
                   dplyr::ungroup() %>%
-                  dplyr::left_join(stock_stations, .) %>%
+                  dplyr::left_join(stock_stations, ., by = c('REGION', 'YEAR', 'STATION_ID', 'HT', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
                   dplyr::select(dplyr::all_of(c("YEAR", "HT", "STATION_ID", "SEX_TEXT", group_cols,
                                                 "COUNT", "CPUE", "CPUE_MT", "CPUE_LBS",
                                                 "REGION", "DISTRICT", "STRATUM", "TOTAL_AREA"))) %>%
@@ -310,7 +311,7 @@ calc_cpue <- function(crab_data = NULL,
 
     # replace female BBRKC with female data from station with HT 17
     station_cpue <- station_cpue %>%
-                    dplyr::left_join(., retows) %>%
+                    dplyr::left_join(., retows, by = c('YEAR', 'STATION_ID', 'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
                     dplyr::mutate(REMOVE = dplyr::case_when((SEX_TEXT == 'female' & RETOW == "yes" & HT == 3) ~ "remove",
                                                             (SEX_TEXT == 'male' & RETOW == "yes" & HT == 17) ~ "remove",
                                                             TRUE ~ "keep")) %>%
@@ -346,7 +347,7 @@ calc_cpue <- function(crab_data = NULL,
 
   # Format output df
   cpue_out <- station_cpue %>%
-              dplyr::left_join(., stock_stations) %>%
+              dplyr::left_join(., stock_stations, by = c('YEAR', 'STATION_ID', 'HT', 'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
               dplyr::ungroup() %>%
               dplyr::mutate(SPECIES = species) %>%
               dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
