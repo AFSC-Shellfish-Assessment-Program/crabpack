@@ -259,18 +259,21 @@ get_specimen_data <- function(species = NULL,
   # Filter to district, pull relevant strata
   if(is.null(district)){
     strata <- district_stratum_df %>%
-              dplyr::filter(DISTRICT == "ALL") %>%
+              dplyr::filter(SPECIES == species,
+                            DISTRICT == "ALL") %>%
               dplyr::pull(STRATUM)
 
     # If Tanner and no district specified, remove 166TO173
     if(species == "TANNER"){
       stratum_stations_df <- stratum_stations_df %>%
-                             dplyr::filter(!DISTRICT == "166TO173")
+                             dplyr::filter(SPECIES == species,
+                                           !DISTRICT == "166TO173")
     }
 
   } else{
     strata <- district_stratum_df %>%
-              dplyr::filter(DISTRICT %in% district) %>%
+              dplyr::filter(SPECIES == species,
+                            DISTRICT %in% district) %>%
               dplyr::pull(STRATUM)
   }
 
