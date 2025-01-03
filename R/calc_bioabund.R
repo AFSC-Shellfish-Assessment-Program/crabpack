@@ -169,7 +169,7 @@ calc_bioabund <- function(crab_data = NULL,
 
   bio_abund_district <- bio_abund_stratum %>%
                         # Sum across strata
-                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'TOTAL_AREA', group_cols)))) %>%
+                        dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', group_cols)))) %>%
                         dplyr::reframe(TOTAL_AREA = sum(TOTAL_AREA),
                                        MEAN_CPUE = sum(MEAN_CPUE),
                                        VAR_CPUE = sum(VAR_CPUE),
@@ -213,7 +213,7 @@ calc_bioabund <- function(crab_data = NULL,
 
   bio_abund_region <- bio_abund_district %>%
                       # Sum across districts
-                      dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'TOTAL_AREA', group_cols)))) %>%
+                      dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', group_cols)))) %>%
                       dplyr::reframe(TOTAL_AREA = sum(TOTAL_AREA),
                                      MEAN_CPUE = sum(MEAN_CPUE),
                                      VAR_CPUE = sum(VAR_CPUE),
