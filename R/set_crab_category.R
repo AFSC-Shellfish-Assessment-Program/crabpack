@@ -57,10 +57,11 @@ set_crab_category <- function(crab_data = NULL,
 
       fem_dat <- specimen_dat %>%
                  dplyr::filter(SEX == 2) %>%
-                 left_join(., sizegroups %>%
-                              dplyr::filter(SEX == 2) %>%
-                              dplyr::rename(MAT_DISTRICT = DISTRICT),
-                           relationship = "many-to-many") %>%
+                 dplyr::left_join(., sizegroups %>%
+                                     dplyr::filter(SEX == 2) %>%
+                                     dplyr::rename(MAT_DISTRICT = DISTRICT),
+                                  relationship = "many-to-many",
+                                  by = c('REGION', 'SPECIES_CODE', 'SPECIES', 'SEX', 'MAT_DISTRICT')) %>%
                  dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                  dplyr::filter(!is.na(RANGE)) %>%
                  dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
@@ -74,8 +75,8 @@ set_crab_category <- function(crab_data = NULL,
     # define female maturity by clutch size
     female_dat <- specimen_dat %>%
                   dplyr::filter(SEX == 2) %>%
-                  dplyr::mutate(CATEGORY = case_when(CLUTCH_SIZE >= 1 ~ "mature_female",
-                                                     CLUTCH_SIZE == 0 ~ "immature_female"))
+                  dplyr::mutate(CATEGORY = dplyr::case_when(CLUTCH_SIZE >= 1 ~ "mature_female",
+                                                            CLUTCH_SIZE == 0 ~ "immature_female"))
   }
 
 
@@ -85,10 +86,11 @@ set_crab_category <- function(crab_data = NULL,
     # immature, mature, legal males
     male_dat <- specimen_dat %>%
                 dplyr::filter(SEX == 1) %>%
-                left_join(., sizegroups %>%
-                             dplyr::filter(SEX == 1) %>%
-                             dplyr::rename(MAT_DISTRICT = DISTRICT),
-                          relationship = "many-to-many") %>%
+                dplyr::left_join(., sizegroups %>%
+                                    dplyr::filter(SEX == 1) %>%
+                                    dplyr::rename(MAT_DISTRICT = DISTRICT),
+                                 relationship = "many-to-many",
+                                 by = c('REGION', 'SPECIES_CODE', 'SPECIES', 'SEX', 'MAT_DISTRICT')) %>%
                 dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                 dplyr::filter(!is.na(RANGE)) %>%
                 dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
@@ -99,10 +101,11 @@ set_crab_category <- function(crab_data = NULL,
     # small, large, legal, preferred males
     male_dat <- specimen_dat %>%
                 dplyr::filter(SEX == 1) %>%
-                left_join(., sizegroups %>%
-                            dplyr::filter(SEX == 1) %>%
-                            dplyr::rename(MAT_DISTRICT = DISTRICT),
-                          relationship = "many-to-many") %>%
+                dplyr::left_join(., sizegroups %>%
+                                    dplyr::filter(SEX == 1) %>%
+                                    dplyr::rename(MAT_DISTRICT = DISTRICT),
+                                 relationship = "many-to-many",
+                                 by = c('REGION', 'SPECIES_CODE', 'SPECIES', 'SEX', 'MAT_DISTRICT')) %>%
                 dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                 dplyr::filter(!is.na(RANGE)) %>%
                 dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
@@ -113,10 +116,11 @@ set_crab_category <- function(crab_data = NULL,
     # legal, sublegal males
     male_dat <- specimen_dat %>%
                 dplyr::filter(SEX == 1) %>%
-                left_join(., sizegroups %>%
-                            dplyr::filter(SEX == 1) %>%
-                            dplyr::rename(MAT_DISTRICT = DISTRICT),
-                          relationship = "many-to-many") %>%
+                dplyr::left_join(., sizegroups %>%
+                                    dplyr::filter(SEX == 1) %>%
+                                    dplyr::rename(MAT_DISTRICT = DISTRICT),
+                                 relationship = "many-to-many",
+                                 by = c('REGION', 'SPECIES_CODE', 'SPECIES', 'SEX', 'MAT_DISTRICT')) %>%
                 dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
                 dplyr::filter(!is.na(RANGE)) %>%
                 dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
