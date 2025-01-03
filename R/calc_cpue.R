@@ -171,7 +171,7 @@ calc_cpue <- function(crab_data = NULL,
                     dplyr::filter(YEAR %in% years,
                                   REGION %in% region,
                                   !is.na(TOTAL_AREA)) %>%
-                    {if(!district == "ALL") dplyr::filter(., DISTRICT %in% district) else .} %>%
+                    {if(!"ALL" %in% district) dplyr::filter(., DISTRICT %in% district) else .} %>%
                     # make dummy HT for retow station tracking, all HT = 3 except 17
                     dplyr::mutate(HT = ifelse(HAUL_TYPE == 17, 17, 3),
                                   LATITUDE = MID_LATITUDE,
