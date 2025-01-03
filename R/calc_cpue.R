@@ -290,7 +290,7 @@ calc_cpue <- function(crab_data = NULL,
 
 
   # Filter out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
-  if(species == "RKC" & region == "EBS" & district %in% c("ALL", "BB")){
+  if(species == "RKC" & region == "EBS" & TRUE %in% (district %in% c("ALL", "BB"))){
     station_cpue <- station_cpue %>%
                     dplyr::filter(!(YEAR == 2000 &
                                     STATION_ID == "E-11" &
