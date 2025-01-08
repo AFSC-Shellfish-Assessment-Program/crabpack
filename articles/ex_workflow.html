@@ -94,8 +94,18 @@
 <span></span>
 <span><span class="co">## Calculate time series of district-level biomass and abundance </span></span>
 <span><span class="co">## See ?crabpack::calc_bioabund for details on arguments</span></span>
+<span><span class="co">## Note: for each example, please verify that you have the appropriate species data loaded</span></span>
 <span></span>
-<span>  <span class="co"># Example 1: Male St. Matthew district Blue King Crab between 105 and 199mm</span></span>
+<span>  <span class="co"># Example 1: Mature female Bristol Bay Red King Crab using ADF&amp;G cutlines</span></span>
+<span>    <span class="va">matfem_bbrkc</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
+<span>                                            species <span class="op">=</span> <span class="st">"RKC"</span>,</span>
+<span>                                            region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
+<span>                                            district <span class="op">=</span> <span class="st">"BB"</span>,</span>
+<span>                                            crab_category <span class="op">=</span> <span class="st">"mature_female"</span>,</span>
+<span>                                            female_maturity <span class="op">=</span> <span class="st">"cutline"</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span>  <span class="co"># Example 2: Male St. Matthew district Blue King Crab between 105 and 199mm</span></span>
 <span>    <span class="va">smbkc_105TO119</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
 <span>                                              species <span class="op">=</span> <span class="st">"BKC"</span>,</span>
 <span>                                              region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -103,15 +113,6 @@
 <span>                                              sex <span class="op">=</span> <span class="st">"male"</span>,</span>
 <span>                                              size_min <span class="op">=</span> <span class="fl">105</span>,</span>
 <span>                                              size_max <span class="op">=</span> <span class="fl">119</span><span class="op">)</span></span>
-<span>  </span>
-<span>  </span>
-<span>  <span class="co"># Example 2: Mature female Bristol Bay Red King Crab using ADF&amp;G cutlines</span></span>
-<span>    <span class="va">matfem_bbrkc</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
-<span>                                            species <span class="op">=</span> <span class="st">"RKC"</span>,</span>
-<span>                                            region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
-<span>                                            district <span class="op">=</span> <span class="st">"BB"</span>,</span>
-<span>                                            crab_category <span class="op">=</span> <span class="st">"mature_female"</span>,</span>
-<span>                                            female_maturity <span class="op">=</span> <span class="st">"cutline"</span><span class="op">)</span></span>
 <span>  </span>
 <span>  </span>
 <span>  <span class="co"># Example 3: Legal-sized male Tanner Crab for both the E166 and W166 districts</span></span>
