@@ -30,8 +30,18 @@ specimen_data <- crabpack::get_specimen_data(species = "RKC",
 
 ## Calculate time series of district-level biomass and abundance 
 ## See ?crabpack::calc_bioabund for details on arguments
+## Note: for each example, please verify that you have the appropriate species data loaded
 
-  # Example 1: Male St. Matthew district Blue King Crab between 105 and 199mm
+  # Example 1: Mature female Bristol Bay Red King Crab using ADF&G cutlines
+    matfem_bbrkc <- crabpack::calc_bioabund(crab_data = specimen_data,
+                                            species = "RKC",
+                                            region = "EBS",
+                                            district = "BB",
+                                            crab_category = "mature_female",
+                                            female_maturity = "cutline")
+
+
+  # Example 2: Male St. Matthew district Blue King Crab between 105 and 199mm
     smbkc_105TO119 <- crabpack::calc_bioabund(crab_data = specimen_data,
                                               species = "BKC",
                                               region = "EBS",
@@ -39,15 +49,6 @@ specimen_data <- crabpack::get_specimen_data(species = "RKC",
                                               sex = "male",
                                               size_min = 105,
                                               size_max = 119)
-  
-  
-  # Example 2: Mature female Bristol Bay Red King Crab using ADF&G cutlines
-    matfem_bbrkc <- crabpack::calc_bioabund(crab_data = specimen_data,
-                                            species = "RKC",
-                                            region = "EBS",
-                                            district = "BB",
-                                            crab_category = "mature_female",
-                                            female_maturity = "cutline")
   
   
   # Example 3: Legal-sized male Tanner Crab for both the E166 and W166 districts
