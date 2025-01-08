@@ -55,16 +55,16 @@ set_crab_category <- function(crab_data = NULL,
     # look up cutlines for mature and immature females
     if(!species == "HAIR"){
 
-      fem_dat <- specimen_dat %>%
-                 dplyr::filter(SEX == 2) %>%
-                 dplyr::left_join(., sizegroups %>%
-                                     dplyr::filter(SEX == 2) %>%
-                                     dplyr::rename(MAT_DISTRICT = DISTRICT),
-                                  relationship = "many-to-many",
-                                  by = c('REGION', 'SPECIES_CODE', 'SPECIES', 'SEX', 'MAT_DISTRICT')) %>%
-                 dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
-                 dplyr::filter(!is.na(RANGE)) %>%
-                 dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
+      female_dat <- specimen_dat %>%
+                    dplyr::filter(SEX == 2) %>%
+                    dplyr::left_join(., sizegroups %>%
+                                        dplyr::filter(SEX == 2) %>%
+                                        dplyr::rename(MAT_DISTRICT = DISTRICT),
+                                     relationship = "many-to-many",
+                                     by = c('REGION', 'SPECIES_CODE', 'SPECIES', 'SEX', 'MAT_DISTRICT')) %>%
+                    dplyr::mutate(RANGE = ifelse(SIZE_1MM >= SIZE_MIN & SIZE_1MM <= SIZE_MAX, 1, NA)) %>%
+                    dplyr::filter(!is.na(RANGE)) %>%
+                    dplyr::select(-c('RANGE', 'SIZE_MIN', 'SIZE_MAX'))
       } else{
         # no female maturity cutline for hair crab, just "female"
         female_dat <- specimen_dat %>%
