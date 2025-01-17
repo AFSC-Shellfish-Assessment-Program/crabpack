@@ -34,16 +34,16 @@ get_male_maturity <- function(species = NULL,
   ## Clear schema of temporary tables created in this function if present
   for(itable in c("CHIONOECETES_MAT_RATIO", "CHIONOECETES_MATMODEL_PARAMS")) {
 
-    ## check if temporary table exists and if so...
-    if(nrow(x = RODBC::sqlQuery(channel = channel,
-                                 query = paste0("SELECT table_name
-                                                 FROM user_tables
-                                                 WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                itable, "_QUERY'"))) != 0)
-      ## ...drop the table
-      RODBC::sqlQuery(channel = channel,
-                      query = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                     itable, "_QUERY"))
+    # check if temporary table exists and if so...
+    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                               statement = paste0("SELECT table_name
+                                                                                   FROM user_tables
+                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
+                                                                                  itable, "_QUERY'"))))) != 0)
+      # ...drop the table
+      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
+                                                                        itable, "_QUERY"))))
   }
 
 
@@ -74,8 +74,8 @@ get_male_maturity <- function(species = NULL,
 
 
   ## Concatenate years, region for use in a SQL query
-  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse=", "), ")")
-  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse=", "), ")")
+  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
+  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse = ", "), ")")
 
 
 
@@ -85,17 +85,20 @@ get_male_maturity <- function(species = NULL,
   cat("Pulling Chionoecetes maturity ratio data...\n")
 
   mat_ratio_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY AS
-                        SELECT *
-                        FROM CRABBASE.CHIONOECETES_MAT_RATIO
-                        WHERE SPECIES IN ", species_vec,
-                      " AND REGION IN ", region_vec)
+                         SELECT *
+                         FROM CRABBASE.CHIONOECETES_MAT_RATIO
+                         WHERE SPECIES IN ", species_vec,
+                         " AND REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = mat_ratio_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = mat_ratio_sql)))
 
-  mat_ratio_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                         query = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY"),
+  mat_ratio_df <- data.table::data.table(
+                    suppressWarnings(
+                      DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                    statement = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY"))),
                                          key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
-  attributes(x = ogives_df)$sql_query <- mat_ratio_sql
+  attributes(x = mat_ratio_df)$sql_query <- mat_ratio_sql
 
   # further filter by district if specified
   if(!is.null(district)){
@@ -110,16 +113,19 @@ get_male_maturity <- function(species = NULL,
   cat("Pulling Chionoecetes model parameter data...\n")
 
   params_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY AS
-                        SELECT *
-                        FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS
-                        WHERE SPECIES IN ", species_vec,
-                        " AND REGION IN ", region_vec)
+                      SELECT *
+                      FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS
+                      WHERE SPECIES IN ", species_vec,
+                      " AND REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = params_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = params_sql)))
 
-  params_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                    query = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY"),
-                                    key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
+  params_df <- data.table::data.table(
+                suppressWarnings(
+                  DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                statement = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY"))),
+                                                key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
   attributes(x = params_df)$sql_query <- params_sql
 
   # further filter by district if specified
@@ -130,18 +136,26 @@ get_male_maturity <- function(species = NULL,
 
 
 
+  # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column - messes with joining
+  if("AKFIN_LOAD_DATE" %in% names(mat_ratio_df)){
+    mat_ratio_df <- mat_ratio_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    params_df <- params_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+  }
+
+
+
   ## Clear temporary tables
   cat("Clearing temporary tables...")
   for(itable in c("CHIONOECETES_MAT_RATIO", "CHIONOECETES_MATMODEL_PARAMS")) {
 
-    if(nrow(x = RODBC::sqlQuery(channel = channel,
-                                 query = paste0("SELECT table_name
-                                   FROM user_tables
-                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                itable, "_QUERY'"))) != 0)
-      RODBC::sqlQuery(channel = channel,
-                      query = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                     itable, "_QUERY"))
+    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                               statement = paste0("SELECT table_name
+                                                                                   FROM user_tables
+                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
+                                                                                  itable, "_QUERY'"))))) != 0)
+      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
+                                                                        itable, "_QUERY"))))
   }
 
   cat("Finished.\n")

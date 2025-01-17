@@ -1,17 +1,17 @@
-#' Define RODBC connection to Oracle
+#' Define DBI odbc connection to Oracle
 #'
-#' @description Creates the `RODBC` connection to Oracle needed to pull SQL queries
+#' @description Creates the `odbc` connection to Oracle needed to pull SQL queries
 #'              from AKFIN database. Also support users who use the R package `keyring`
 #'              to store usernames and passwords.
 #'
 #' @param db String. A registered data source name, in this case `"AKFIN"` by default.
-#'        This argument is passed to the `dsn` argument in `RODBC::odbcConnect()`.
+#'        This argument is passed to the `drv` argument in `DBI::dbConnect()`.
 #' @param check_access Boolean. If `TRUE` (by default), checks whether you have the
 #'        specific tables in AKFIN used in the `crabpack` package. Outputs an error
 #'        if the user does not have access to these tables with a message of the
 #'        point of contact information for access.
 #'
-#' @return Channel of class "RODBC". See `?RODBC::odbcConnect()` for more detail.
+#' @return Channel of class "Oracle". See `?DBI::dbConnect()` for more detail.
 #'
 #' @export
 #'
@@ -31,16 +31,18 @@ get_connected <- function(db = "AKFIN",
     password <-  keyring::key_get(db, keyring::key_list(db)$username)
   }
 
-  suppressWarnings(channel <- RODBC::odbcConnect(dsn = paste(db),
-                                                 uid = paste(username),
-                                                 pwd = paste(password),
-                                                 believeNRows = FALSE))
-  if(channel == -1){
+  suppressWarnings(channel <- DBI::dbConnect(drv = odbc::odbc(),
+                                             dsn = paste(db),
+                                             uid = paste(username),
+                                             pwd = paste(password),
+                                             believeNRows = FALSE))
+
+  if(missing(channel)){
     stop("Unable to connect. Username or password may be incorrect. Please re-enter.\n\n")
     return(invisible())
   }
 
-  if(inherits(channel, "RODBC")){
+  if(inherits(channel, "Oracle")){
     cat("Successfully connected to Oracle.\n")
 
     if(check_access & db %in% c("AKFIN", "AFSC")){
@@ -57,10 +59,18 @@ get_connected <- function(db = "AKFIN",
                                                    access = F)
 
       for(itable in 1:nrow(x = tables_to_check)){
-        table_check <- tryCatch(expr = RODBC::sqlFetch(channel = channel,
-                                sqtable = tables_to_check$table_name[itable],
-                                max = 5),
-                       error = function(cond) data.frame())
+        # table_check <- tryCatch(expr = RODBC::sqlFetch(channel = channel,
+        #                                                sqtable = tables_to_check$table_name[itable],
+        #                                                max = 5),
+        #                         error = function(cond) data.frame())
+
+        table_check <- suppressWarnings(
+                          tryCatch(expr = DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                                        statement = paste0("select * from ",
+                                                                                           tables_to_check$table_name[itable],
+                                                                                           " fetch  first 5 rows only;"))),
+                                   error = function(cond) data.frame()))
+
         if(nrow(x = table_check) == 5)
           tables_to_check$access[itable] <- TRUE
       }
