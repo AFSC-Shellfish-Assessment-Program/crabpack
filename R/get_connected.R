@@ -1,17 +1,17 @@
-#' Define RODBC connection to Oracle
+#' Define DBI odbc connection to Oracle
 #'
-#' @description Creates the `RODBC` connection to Oracle needed to pull SQL queries
+#' @description Creates the `odbc` connection to Oracle needed to pull SQL queries
 #'              from AKFIN database. Also support users who use the R package `keyring`
 #'              to store usernames and passwords.
 #'
 #' @param db String. A registered data source name, in this case `"AKFIN"` by default.
-#'        This argument is passed to the `dsn` argument in `RODBC::odbcConnect()`.
+#'        This argument is passed to the `drv` argument in `DBI::dbConnect()`.
 #' @param check_access Boolean. If `TRUE` (by default), checks whether you have the
 #'        specific tables in AKFIN used in the `crabpack` package. Outputs an error
 #'        if the user does not have access to these tables with a message of the
 #'        point of contact information for access.
 #'
-#' @return Channel of class "RODBC". See `?RODBC::odbcConnect()` for more detail.
+#' @return Channel of class "Oracle". See `?DBI::dbConnect()` for more detail.
 #'
 #' @export
 #'
@@ -31,17 +31,12 @@ get_connected <- function(db = "AKFIN",
     password <-  keyring::key_get(db, keyring::key_list(db)$username)
   }
 
-  # suppressWarnings(channel2 <- RODBC::odbcConnect(dsn = paste(db),
-  #                                                uid = paste(username),
-  #                                                pwd = paste(password),
-  #                                                believeNRows = FALSE))
   suppressWarnings(channel <- DBI::dbConnect(drv = odbc::odbc(),
                                              dsn = paste(db),
                                              uid = paste(username),
                                              pwd = paste(password),
                                              believeNRows = FALSE))
 
-  # if(channel == -1){
   if(missing(channel)){
     stop("Unable to connect. Username or password may be incorrect. Please re-enter.\n\n")
     return(invisible())

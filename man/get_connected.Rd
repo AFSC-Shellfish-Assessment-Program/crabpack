@@ -2,13 +2,13 @@
 % Please edit documentation in R/get_connected.R
 \name{get_connected}
 \alias{get_connected}
-\title{Define RODBC connection to Oracle}
+\title{Define DBI odbc connection to Oracle}
 \usage{
 get_connected(db = "AKFIN", check_access = TRUE)
 }
 \arguments{
 \item{db}{String. A registered data source name, in this case \code{"AKFIN"} by default.
-This argument is passed to the \code{dsn} argument in \code{RODBC::odbcConnect()}.}
+This argument is passed to the \code{drv} argument in \code{DBI::dbConnect()}.}
 
 \item{check_access}{Boolean. If \code{TRUE} (by default), checks whether you have the
 specific tables in AKFIN used in the \code{crabpack} package. Outputs an error
@@ -16,10 +16,10 @@ if the user does not have access to these tables with a message of the
 point of contact information for access.}
 }
 \value{
-Channel of class "RODBC". See \code{?RODBC::odbcConnect()} for more detail.
+Channel of class "Oracle". See \code{?DBI::dbConnect()} for more detail.
 }
 \description{
-Creates the \code{RODBC} connection to Oracle needed to pull SQL queries
+Creates the \code{odbc} connection to Oracle needed to pull SQL queries
 from AKFIN database. Also support users who use the R package \code{keyring}
 to store usernames and passwords.
 }
