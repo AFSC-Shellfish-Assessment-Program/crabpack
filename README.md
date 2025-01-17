@@ -13,9 +13,11 @@ an issue if you come across a bug.*
 
 ## Installation Instructions  
 In addition to the default packages in R (base, stats, utils), the
-functions in crabpack use functions from 7 additional packages:
+functions in crabpack use functions from 8 additional packages:
 
--   RODBC: Enables ODBC (Open Database Connectivity) interface the AKFIN
+-   odbc: Enables ODBC (Open Database Connectivity) interface the AKFIN
+    Oracle database where the survey data are housed
+-   DBI: Enables ODBC (Open Database Connectivity) interface the AKFIN
     Oracle database where the survey data are housed
 -   getPass: Allows for masking of Oracle user credentials (usernames,
     passwords) when accessing RODBC
@@ -29,7 +31,7 @@ functions in crabpack use functions from 7 additional packages:
 -   dplyr: Aids in easy data manipulation and allows for compact,
     readable code
 
-Please make sure these 7 packages are installed before installing
+Please make sure these 8 packages are installed before installing
 crabpack.
 
 ```         
