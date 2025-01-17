@@ -30,18 +30,18 @@ get_specimen_data <- function(species = NULL,
 
   ## Clear schema of temporary tables created in this function if present
   for(itable in c("HAUL", "SPECIMEN", "DISTRICT_STRATUM", "STRATUM_STATIONS",
-                   "STRATUM_AREA", "STRATUM_DESIGN", "SIZEGROUPS")) {
+                  "STRATUM_AREA", "STRATUM_DESIGN", "SIZEGROUPS")) {
 
     # check if temporary table exists and if so...
-    if(nrow(x = RODBC::sqlQuery(channel = channel,
-                                 query = paste0("SELECT table_name
-                                                 FROM user_tables
-                                                 WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                 itable, "_QUERY'"))) != 0)
+    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                               statement = paste0("SELECT table_name
+                                                                                   FROM user_tables
+                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
+                                                                                   itable, "_QUERY'"))))) != 0)
       # ...drop the table
-      RODBC::sqlQuery(channel = channel,
-                      query = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                     itable, "_QUERY"))
+      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
+                                                                         itable, "_QUERY"))))
   }
 
 
@@ -72,10 +72,10 @@ get_specimen_data <- function(species = NULL,
   ## Issue a warning when choosing multiple regions
   if(length(x = region) > 1){
     warning(paste0("The crabpack package has only been tested when querying",
-                  " only one survey region. Use caution when querying",
-                  " multiple survey regions until further testing has been done.",
-                  " If you come across an issue, please post it on",
-                  " github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
+                   " only one survey region. Use caution when querying",
+                   " multiple survey regions until further testing has been done.",
+                   " If you come across an issue, please post it on",
+                   " github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
   }
 
   ## Error Query: check that the correct districts are selected for the correct species.
@@ -122,16 +122,16 @@ get_specimen_data <- function(species = NULL,
 
 
   ## Concatenate species, years, region, district for use in a SQL query
-  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse=", "), ")")
+  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
 
   # define year if not specified
   if(missing(years)){
     years <- c(1975:2030) # put dummy end year to accommodate future years?
   }
 
-  year_vec <- paste0("(", paste0(years, collapse=", "), ")")
+  year_vec <- paste0("(", paste0(years, collapse = ", "), ")")
 
-  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse=", "), ")")
+  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse = ", "), ")")
 
 
 
@@ -145,17 +145,20 @@ get_specimen_data <- function(species = NULL,
                     WHERE YEAR IN", year_vec,
                     " AND REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = haul_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = haul_sql)))
 
-  haul_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                    query = "SELECT * FROM AKFIN_TEMPORARY_HAUL_QUERY"),
+  haul_df <- data.table::data.table(
+              suppressWarnings(
+                DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                              statement = "SELECT * FROM AKFIN_TEMPORARY_HAUL_QUERY"))),
                                     key = c("YEAR", "STATION_ID")) # KEY = which columns to sort by
   attributes(x = haul_df)$sql_query <- haul_sql
 
   # Remove HT 17 if not RKC
   if(species != "RKC"){
     haul_df <- haul_df %>%
-               dplyr::filter(!HAUL_TYPE == 17)
+      dplyr::filter(!HAUL_TYPE == 17)
   }
 
 
@@ -165,14 +168,17 @@ get_specimen_data <- function(species = NULL,
   cat("Pulling specimen data...\n")
 
   specimen_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_SPECIMEN_QUERY AS
-                         SELECT *
-                         FROM CRABBASE.SPECIMEN
-                         WHERE SPECIES IN ", species_vec)
+                        SELECT *
+                        FROM CRABBASE.SPECIMEN
+                        WHERE SPECIES IN ", species_vec)
 
-  RODBC::sqlQuery(channel = channel, query = specimen_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = specimen_sql)))
 
-  specimen_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                    query = "SELECT * FROM AKFIN_TEMPORARY_SPECIMEN_QUERY"))
+  specimen_df <- data.table::data.table(
+                  suppressWarnings(
+                    DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                  statement = "SELECT * FROM AKFIN_TEMPORARY_SPECIMEN_QUERY"))))
   attributes(x = specimen_df)$sql_query <- specimen_sql
 
 
@@ -188,10 +194,13 @@ get_specimen_data <- function(species = NULL,
                                 WHERE SPECIES IN ", species_vec,
                                 " AND REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = district_stratum_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = district_stratum_sql)))
 
-  district_stratum_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                                query = "SELECT * FROM AKFIN_TEMPORARY_DISTRICT_STRATUM_QUERY"))
+  district_stratum_df <- data.table::data.table(
+                          suppressWarnings(
+                            DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                          statement =  "SELECT * FROM AKFIN_TEMPORARY_DISTRICT_STRATUM_QUERY"))))
   attributes(x = district_stratum_df)$sql_query <- district_stratum_sql
 
 
@@ -199,14 +208,17 @@ get_specimen_data <- function(species = NULL,
   ## Query the stratum design data. This table reports the survey years included
   ## in each year block ID and the corresponding stratum design ID.
   stratum_design_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY AS
-                                SELECT *
-                                FROM CRABBASE.STRATUM_DESIGN
+                              SELECT *
+                              FROM CRABBASE.STRATUM_DESIGN
                               WHERE REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = stratum_design_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = stratum_design_sql)))
 
-  stratum_design_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                           query = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY"))
+  stratum_design_df <- data.table::data.table(
+                        suppressWarnings(
+                          DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                        statement = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY"))))
   attributes(x = stratum_design_df)$sql_query <- stratum_design_sql
 
 
@@ -214,15 +226,18 @@ get_specimen_data <- function(species = NULL,
   ## Query the stratum station data. This table reports the stations that make up
   ## each stratum for each design ID.
   stratum_stations_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY AS
-                                  SELECT *
-                                  FROM CRABBASE.STRATUM_STATIONS
-                                  WHERE SPECIES = ", species_vec,
+                                SELECT *
+                                FROM CRABBASE.STRATUM_STATIONS
+                                WHERE SPECIES = ", species_vec,
                                 "AND REGION IN", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = stratum_stations_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = stratum_stations_sql)))
 
-  stratum_stations_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                                query = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY"))
+  stratum_stations_df <- data.table::data.table(
+                          suppressWarnings(
+                            DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                          statement = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY"))))
   attributes(x = stratum_stations_df)$sql_query <- stratum_stations_sql
 
 
@@ -230,15 +245,18 @@ get_specimen_data <- function(species = NULL,
   ## Query the stratum area data. This table reports stratum total areas for each
   ## species across distinct year block IDs.
   stratum_area_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_AREA_QUERY AS
-                              SELECT *
-                              FROM CRABBASE.STRATUM_AREA
-                              WHERE SPECIES = ", species_vec,
+                            SELECT *
+                            FROM CRABBASE.STRATUM_AREA
+                            WHERE SPECIES = ", species_vec,
                             "AND REGION IN", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = stratum_area_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = stratum_area_sql)))
 
-  stratum_area_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                            query = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_AREA_QUERY"))
+  stratum_area_df <- data.table::data.table(
+                      suppressWarnings(
+                        DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                      statement = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_AREA_QUERY"))))
   attributes(x = stratum_area_df)$sql_query <- stratum_area_sql
 
 
@@ -282,8 +300,8 @@ get_specimen_data <- function(species = NULL,
   # Assign DESIGN_ID to data based on year
   data_haul <- haul_df %>%
                dplyr::left_join(., stratum_design_df %>%
-                                     dplyr::select(-YEAR_BLOCK_ID) %>%
-                                     dplyr::distinct(),
+                                  dplyr::select(-YEAR_BLOCK_ID) %>%
+                                  dplyr::distinct(),
                                 by = c('REGION', 'YEAR'))
 
   # Add stratum name to each station for the species
@@ -293,12 +311,12 @@ get_specimen_data <- function(species = NULL,
                     dplyr::left_join(., stratum_stations_df,
                                      by = c('REGION', 'STATION_ID', 'DESIGN_ID')) %>%
                     dplyr::left_join(., stratum_area_df %>%
-                                           dplyr::filter(STRATUM %in% strata) %>%
-                                           # get relevant years for each area
-                                           dplyr::left_join(., stratum_design_df,
-                                                            relationship = "many-to-many",
-                                                            by = c('REGION', 'YEAR_BLOCK_ID')) %>%
-                                           dplyr::select(STRATUM, TOTAL_AREA, YEAR),
+                                        dplyr::filter(STRATUM %in% strata) %>%
+                                        # get relevant years for each area
+                                        dplyr::left_join(., stratum_design_df,
+                                                         relationship = "many-to-many",
+                                                         by = c('REGION', 'YEAR_BLOCK_ID')) %>%
+                                        dplyr::select(STRATUM, TOTAL_AREA, YEAR),
                                      by = c('YEAR', 'STRATUM')) %>%
                     dplyr::select(HAULJOIN, REGION, YEAR, STATION_ID, HAUL_TYPE,
                                   AREA_SWEPT, MID_LATITUDE, MID_LONGITUDE, DISTRICT,
@@ -343,13 +361,13 @@ get_specimen_data <- function(species = NULL,
 
     # Add positive catch station stratum area to haul and specimen info
     data_crab <- data_crab %>%
-                  dplyr::group_by(YEAR, STRATUM) %>%
-                  dplyr::left_join(., n_pos_catch, by = c('YEAR', 'STRATUM')) %>%
-                  dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM),
-                                                    TOTAL_AREA_POS, TOTAL_AREA)) %>%
-                  dplyr::select(-TOTAL_AREA_POS) %>%
-                  dplyr::ungroup() %>%
-                  dplyr::mutate(TOTAL_AREA = ifelse(is.na(TOTAL_AREA), 0, TOTAL_AREA))
+                 dplyr::group_by(YEAR, STRATUM) %>%
+                 dplyr::left_join(., n_pos_catch, by = c('YEAR', 'STRATUM')) %>%
+                 dplyr::mutate(TOTAL_AREA = ifelse(TRUE %in% (c("NORTH", "UNSTRAT") %in% STRATUM),
+                                                   TOTAL_AREA_POS, TOTAL_AREA)) %>%
+                 dplyr::select(-TOTAL_AREA_POS) %>%
+                 dplyr::ungroup() %>%
+                 dplyr::mutate(TOTAL_AREA = ifelse(is.na(TOTAL_AREA), 0, TOTAL_AREA))
 
     stock_stations <- stock_stations %>%
                       dplyr::group_by(YEAR, STRATUM) %>%
@@ -365,7 +383,7 @@ get_specimen_data <- function(species = NULL,
   ## Format haul data for output, filter region, district, years
   data_haul <- data_haul %>%
                dplyr::left_join(., stock_stations %>%
-                                   dplyr::select(-c('LATITUDE', 'LONGITUDE')),
+                                  dplyr::select(-c('LATITUDE', 'LONGITUDE')),
                                 by = c('HAULJOIN', 'REGION', 'YEAR', 'HAUL_TYPE', 'AREA_SWEPT', 'STATION_ID')) %>%
                dplyr::filter(YEAR %in% years,
                              REGION %in% region,
@@ -389,10 +407,13 @@ get_specimen_data <- function(species = NULL,
                            WHERE SPECIES IN ", species_vec,
                           " AND REGION IN ", region_vec)
 
-  RODBC::sqlQuery(channel = channel, query = sizegroups_sql)
+  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                 statement = sizegroups_sql)))
 
-  sizegroups_df <- data.table::data.table(RODBC::sqlQuery(channel = channel,
-                                                          query = "SELECT * FROM AKFIN_TEMPORARY_SIZEGROUPS_QUERY"))
+  sizegroups_df <- data.table::data.table(
+                    suppressWarnings(
+                      DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                    statement = "SELECT * FROM AKFIN_TEMPORARY_SIZEGROUPS_QUERY"))))
   attributes(x = sizegroups_df)$sql_query <- sizegroups_sql
 
   # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column
@@ -406,14 +427,15 @@ get_specimen_data <- function(species = NULL,
   for (itable in c("HAUL", "SPECIMEN", "DISTRICT_STRATUM", "STRATUM_STATIONS",
                    "STRATUM_AREA", "STRATUM_DESIGN", "SIZEGROUPS")) {
 
-    if (nrow(x = RODBC::sqlQuery(channel = channel,
-                                 query = paste0("SELECT table_name
-                                   FROM user_tables
-                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                itable, "_QUERY'"))) != 0)
-      RODBC::sqlQuery(channel = channel,
-                      query = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                     itable, "_QUERY"))
+    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                               statement = paste0("SELECT table_name
+                                                                                   FROM user_tables
+                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
+                                                                                  itable, "_QUERY'"))))) != 0)
+      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
+                                                                        itable, "_QUERY"))))
+
   }
 
   cat("Finished.\n")
@@ -425,5 +447,5 @@ get_specimen_data <- function(species = NULL,
                  args = list(specimen = data_crab, # specimen data, with relevant haul and stratum info joined (includes 0-catch stations)
                              haul = data_haul, # complete haul data, with stratum info joined
                              sizegroups = sizegroups_df # table with size groupings per district/species
-                             )))
+                 )))
 }

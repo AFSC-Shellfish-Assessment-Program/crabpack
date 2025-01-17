@@ -31,16 +31,23 @@ get_connected <- function(db = "AKFIN",
     password <-  keyring::key_get(db, keyring::key_list(db)$username)
   }
 
-  suppressWarnings(channel <- RODBC::odbcConnect(dsn = paste(db),
-                                                 uid = paste(username),
-                                                 pwd = paste(password),
-                                                 believeNRows = FALSE))
-  if(channel == -1){
+  # suppressWarnings(channel2 <- RODBC::odbcConnect(dsn = paste(db),
+  #                                                uid = paste(username),
+  #                                                pwd = paste(password),
+  #                                                believeNRows = FALSE))
+  suppressWarnings(channel <- DBI::dbConnect(drv = odbc::odbc(),
+                                             dsn = paste(db),
+                                             uid = paste(username),
+                                             pwd = paste(password),
+                                             believeNRows = FALSE))
+
+  # if(channel == -1){
+  if(missing(channel)){
     stop("Unable to connect. Username or password may be incorrect. Please re-enter.\n\n")
     return(invisible())
   }
 
-  if(inherits(channel, "RODBC")){
+  if(inherits(channel, "Oracle")){
     cat("Successfully connected to Oracle.\n")
 
     if(check_access & db %in% c("AKFIN", "AFSC")){
@@ -57,10 +64,18 @@ get_connected <- function(db = "AKFIN",
                                                    access = F)
 
       for(itable in 1:nrow(x = tables_to_check)){
-        table_check <- tryCatch(expr = RODBC::sqlFetch(channel = channel,
-                                sqtable = tables_to_check$table_name[itable],
-                                max = 5),
-                       error = function(cond) data.frame())
+        # table_check <- tryCatch(expr = RODBC::sqlFetch(channel = channel,
+        #                                                sqtable = tables_to_check$table_name[itable],
+        #                                                max = 5),
+        #                         error = function(cond) data.frame())
+
+        table_check <- suppressWarnings(
+                          tryCatch(expr = DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                                        statement = paste0("select * from ",
+                                                                                           tables_to_check$table_name[itable],
+                                                                                           " fetch  first 5 rows only;"))),
+                                   error = function(cond) data.frame()))
+
         if(nrow(x = table_check) == 5)
           tables_to_check$access[itable] <- TRUE
       }
