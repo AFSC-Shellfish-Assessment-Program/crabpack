@@ -59,11 +59,6 @@ get_connected <- function(db = "AKFIN",
                                                    access = F)
 
       for(itable in 1:nrow(x = tables_to_check)){
-        # table_check <- tryCatch(expr = RODBC::sqlFetch(channel = channel,
-        #                                                sqtable = tables_to_check$table_name[itable],
-        #                                                max = 5),
-        #                         error = function(cond) data.frame())
-
         table_check <- suppressWarnings(
                           tryCatch(expr = DBI::dbFetch(DBI::dbSendQuery(conn = channel,
                                                                         statement = paste0("select * from ",
