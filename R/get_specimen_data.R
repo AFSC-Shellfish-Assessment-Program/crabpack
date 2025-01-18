@@ -27,25 +27,6 @@ get_specimen_data <- function(species = NULL,
   }
 
 
-
-  ## Clear schema of temporary tables created in this function if present
-  for(itable in c("HAUL", "SPECIMEN", "DISTRICT_STRATUM", "STRATUM_STATIONS",
-                  "STRATUM_AREA", "STRATUM_DESIGN", "SIZEGROUPS")) {
-
-    # check if temporary table exists and if so...
-    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                               statement = paste0("SELECT table_name
-                                                                                   FROM user_tables
-                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                                                   itable, "_QUERY'"))))) != 0)
-      # ...drop the table
-      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                                                         itable, "_QUERY"))))
-  }
-
-
-
   ## Error Query: check that the argument `species` is one of the correct options.
   if(TRUE %in% (!species %in% c("RKC", "BKC", "TANNER", "SNOW", "HYBRID", "HAIR"))){
     stop(paste0("Argument `species` must contain one or more of these options",
@@ -139,26 +120,18 @@ get_specimen_data <- function(species = NULL,
   ## in the standard Eastern Bering Sea and Northern Bering Sea bottom trawl time series.
   cat("Pulling haul data...\n")
 
-  haul_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_HAUL_QUERY AS
-                    SELECT *
-                    FROM CRABBASE.HAUL
-                    WHERE YEAR IN", year_vec,
-                    " AND REGION IN ", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = haul_sql)))
-
   haul_df <- data.table::data.table(
               suppressWarnings(
                 DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                              statement = "SELECT * FROM AKFIN_TEMPORARY_HAUL_QUERY"))),
-                                    key = c("YEAR", "STATION_ID")) # KEY = which columns to sort by
-  attributes(x = haul_df)$sql_query <- haul_sql
+                                              statement = paste0("SELECT * FROM CRABBASE.HAUL WHERE YEAR IN ",
+                                                                 year_vec, " AND REGION IN ", region_vec)))),
+              key = c("YEAR", "STATION_ID")) # KEY = which columns to sort by
+
 
   # Remove HT 17 if not RKC
   if(species != "RKC"){
     haul_df <- haul_df %>%
-      dplyr::filter(!HAUL_TYPE == 17)
+               dplyr::filter(!HAUL_TYPE == 17)
   }
 
 
@@ -167,19 +140,11 @@ get_specimen_data <- function(species = NULL,
   ## standard crab bottom trawl stations in the Eastern Bering Sea and Northern Bering Sea.
   cat("Pulling specimen data...\n")
 
-  specimen_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_SPECIMEN_QUERY AS
-                        SELECT *
-                        FROM CRABBASE.SPECIMEN
-                        WHERE SPECIES IN ", species_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = specimen_sql)))
-
   specimen_df <- data.table::data.table(
                   suppressWarnings(
                     DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                  statement = "SELECT * FROM AKFIN_TEMPORARY_SPECIMEN_QUERY"))))
-  attributes(x = specimen_df)$sql_query <- specimen_sql
+                                                  statement = paste0("SELECT * FROM CRABBASE.SPECIMEN WHERE SPECIES IN ",
+                                                                     species_vec)))))
 
 
 
@@ -188,77 +153,39 @@ get_specimen_data <- function(species = NULL,
 
   ## Query the district and stratum data. This table reports which strata are contained
   ## within a given management district or region.
-  district_stratum_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_DISTRICT_STRATUM_QUERY AS
-                                SELECT *
-                                FROM CRABBASE.DISTRICT_STRATUM
-                                WHERE SPECIES IN ", species_vec,
-                                " AND REGION IN ", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = district_stratum_sql)))
-
   district_stratum_df <- data.table::data.table(
                           suppressWarnings(
                             DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                          statement =  "SELECT * FROM AKFIN_TEMPORARY_DISTRICT_STRATUM_QUERY"))))
-  attributes(x = district_stratum_df)$sql_query <- district_stratum_sql
-
+                                                          statement = paste0("SELECT * FROM CRABBASE.DISTRICT_STRATUM WHERE SPECIES IN ",
+                                                                             species_vec, " AND REGION IN ", region_vec)))))
 
 
   ## Query the stratum design data. This table reports the survey years included
   ## in each year block ID and the corresponding stratum design ID.
-  stratum_design_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY AS
-                              SELECT *
-                              FROM CRABBASE.STRATUM_DESIGN
-                              WHERE REGION IN ", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = stratum_design_sql)))
-
   stratum_design_df <- data.table::data.table(
                         suppressWarnings(
                           DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                        statement = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_DESIGN_QUERY"))))
-  attributes(x = stratum_design_df)$sql_query <- stratum_design_sql
+                                                        statement = paste0("SELECT * FROM CRABBASE.STRATUM_DESIGN WHERE REGION IN ",
+                                                                           region_vec)))))
 
 
 
   ## Query the stratum station data. This table reports the stations that make up
   ## each stratum for each design ID.
-  stratum_stations_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY AS
-                                SELECT *
-                                FROM CRABBASE.STRATUM_STATIONS
-                                WHERE SPECIES = ", species_vec,
-                                "AND REGION IN", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = stratum_stations_sql)))
-
   stratum_stations_df <- data.table::data.table(
                           suppressWarnings(
                             DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                          statement = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_STATIONS_QUERY"))))
-  attributes(x = stratum_stations_df)$sql_query <- stratum_stations_sql
-
+                                                          statement = paste0("SELECT * FROM CRABBASE.STRATUM_STATIONS WHERE SPECIES IN ",
+                                                                             species_vec, " AND REGION IN ", region_vec)))))
 
 
   ## Query the stratum area data. This table reports stratum total areas for each
   ## species across distinct year block IDs.
-  stratum_area_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_STRATUM_AREA_QUERY AS
-                            SELECT *
-                            FROM CRABBASE.STRATUM_AREA
-                            WHERE SPECIES = ", species_vec,
-                            "AND REGION IN", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = stratum_area_sql)))
-
   stratum_area_df <- data.table::data.table(
                       suppressWarnings(
                         DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                      statement = "SELECT * FROM AKFIN_TEMPORARY_STRATUM_AREA_QUERY"))))
-  attributes(x = stratum_area_df)$sql_query <- stratum_area_sql
-
+                                                      statement = paste0("SELECT * FROM CRABBASE.STRATUM_AREA WHERE SPECIES IN ",
+                                                                         species_vec, " AND REGION IN ", region_vec)))))
 
 
   # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column - messes with joining
@@ -401,44 +328,16 @@ get_specimen_data <- function(species = NULL,
   ## and species-specific size-sex-maturity categories.
   cat("Pulling crab size group data...\n")
 
-  sizegroups_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_SIZEGROUPS_QUERY AS
-                           SELECT *
-                           FROM CRABBASE.SIZEGROUPS
-                           WHERE SPECIES IN ", species_vec,
-                          " AND REGION IN ", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = sizegroups_sql)))
-
   sizegroups_df <- data.table::data.table(
                     suppressWarnings(
                       DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                    statement = "SELECT * FROM AKFIN_TEMPORARY_SIZEGROUPS_QUERY"))))
-  attributes(x = sizegroups_df)$sql_query <- sizegroups_sql
+                                                    statement = paste0("SELECT * FROM CRABBASE.SIZEGROUPS WHERE SPECIES IN ",
+                                                                       species_vec, " AND REGION IN ", region_vec)))))
 
   # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column
   if("AKFIN_LOAD_DATE" %in% names(sizegroups_df)){
     sizegroups_df <- sizegroups_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
   }
-
-
-  ## Clear temporary tables
-  cat("Clearing temporary tables...")
-  for (itable in c("HAUL", "SPECIMEN", "DISTRICT_STRATUM", "STRATUM_STATIONS",
-                   "STRATUM_AREA", "STRATUM_DESIGN", "SIZEGROUPS")) {
-
-    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                               statement = paste0("SELECT table_name
-                                                                                   FROM user_tables
-                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                                                  itable, "_QUERY'"))))) != 0)
-      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                                                        itable, "_QUERY"))))
-
-  }
-
-  cat("Finished.\n")
 
 
 

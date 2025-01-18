@@ -31,22 +31,6 @@ get_male_maturity <- function(species = NULL,
   }
 
 
-  ## Clear schema of temporary tables created in this function if present
-  for(itable in c("CHIONOECETES_MAT_RATIO", "CHIONOECETES_MATMODEL_PARAMS")) {
-
-    # check if temporary table exists and if so...
-    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                               statement = paste0("SELECT table_name
-                                                                                   FROM user_tables
-                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                                                  itable, "_QUERY'"))))) != 0)
-      # ...drop the table
-      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                                                        itable, "_QUERY"))))
-  }
-
-
   ## Error Query: check that the argument `species` is one of the correct options.
   if(TRUE %in% (!species %in% c("TANNER", "SNOW"))){
     stop(paste0("Male chela-based maturity metrics are only available for Tanner",
@@ -72,6 +56,9 @@ get_male_maturity <- function(species = NULL,
     }
   }
 
+  # if(is.null(district)){
+  #   district <- "ALL"
+  # }
 
   ## Concatenate years, region for use in a SQL query
   species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
@@ -84,21 +71,13 @@ get_male_maturity <- function(species = NULL,
   ## for the Eastern Bering Sea and Northern Bering Sea.
   cat("Pulling Chionoecetes maturity ratio data...\n")
 
-  mat_ratio_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY AS
-                         SELECT *
-                         FROM CRABBASE.CHIONOECETES_MAT_RATIO
-                         WHERE SPECIES IN ", species_vec,
-                         " AND REGION IN ", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = mat_ratio_sql)))
-
   mat_ratio_df <- data.table::data.table(
                     suppressWarnings(
                       DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                    statement = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MAT_RATIO_QUERY"))),
-                                         key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
-  attributes(x = mat_ratio_df)$sql_query <- mat_ratio_sql
+                                                    statement = paste0("SELECT * FROM CRABBASE.CHIONOECETES_MAT_RATIO WHERE SPECIES IN ",
+                                                                       species_vec, " AND REGION IN ", region_vec)))),
+                    key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
+
 
   # further filter by district if specified
   if(!is.null(district)){
@@ -112,21 +91,12 @@ get_male_maturity <- function(species = NULL,
   ## parameters for Chionoecetes spp. male 50% probability of maturity at size.
   cat("Pulling Chionoecetes model parameter data...\n")
 
-  params_sql <- paste("CREATE TABLE AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY AS
-                      SELECT *
-                      FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS
-                      WHERE SPECIES IN ", species_vec,
-                      " AND REGION IN ", region_vec)
-
-  suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                 statement = params_sql)))
-
   params_df <- data.table::data.table(
                 suppressWarnings(
                   DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                statement = "SELECT * FROM AKFIN_TEMPORARY_CHIONOECETES_MATMODEL_PARAMS_QUERY"))),
-                                                key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
-  attributes(x = params_df)$sql_query <- params_sql
+                                                statement = paste0("SELECT * FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS WHERE SPECIES IN ",
+                                                                   species_vec, " AND REGION IN ", region_vec)))),
+                key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
 
   # further filter by district if specified
   if(!is.null(district)){
@@ -141,24 +111,6 @@ get_male_maturity <- function(species = NULL,
     mat_ratio_df <- mat_ratio_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
     params_df <- params_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
   }
-
-
-
-  ## Clear temporary tables
-  cat("Clearing temporary tables...")
-  for(itable in c("CHIONOECETES_MAT_RATIO", "CHIONOECETES_MATMODEL_PARAMS")) {
-
-    if(nrow(x = suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                               statement = paste0("SELECT table_name
-                                                                                   FROM user_tables
-                                                                                   WHERE TABLE_NAME = 'AKFIN_TEMPORARY_",
-                                                                                  itable, "_QUERY'"))))) != 0)
-      suppressWarnings(DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                     statement = paste0("DROP TABLE ", "AKFIN_TEMPORARY_",
-                                                                        itable, "_QUERY"))))
-  }
-
-  cat("Finished.\n")
 
 
 
