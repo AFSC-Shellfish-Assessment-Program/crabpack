@@ -105,21 +105,23 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  ## Set special local Kodiak connection option - just for EBS right now!!
-  if(channel == "KOD"){
-    if(region == "NBS"){
-      stop(paste0("Only EBS specimen data is available on the Kodiak Y: drive",
-                  " right now. Please reach out to Shannon if you need access",
-                  " to NBS data."))
+  # Set special local Kodiak connection option - just for EBS right now!!
+  if(inherits(channel, "character")){
+    if(channel == "KOD"){
+      if(region == "NBS"){
+        stop(paste0("Only EBS specimen data is available on the Kodiak Y: drive",
+                    " right now. Please reach out to Shannon if you need access",
+                    " to NBS data."))
+      }
+
+      path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
+      specimen_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_specimen_", region, ".rds"))),
+                               error = function(cond) {
+                                 stop("Unable to connect. Please check that you are connected to the network (e.g., VPN) and re-try. \n\n")
+                                 return(invisible())})
+
+      return(specimen_rds)
     }
-
-    path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
-    specimen_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_specimen_", region, ".rds"))),
-                             error = function(cond) {
-                               stop("Unable to connect. Please check that you are connected to the network (e.g., VPN) and re-try. \n\n")
-                               return(invisible())})
-
-    return(specimen_rds)
   }
 
 
