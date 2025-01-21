@@ -6,6 +6,9 @@
 #'
 #' @inheritParams calc_bioabund
 #' @param channel Connection to Oracle created via `crabpack::get_connected()` or `RODBC::odbcConnect()`.
+#'                Local AFSC Kodiak users can also set `channel = "KOD"` to access specimen data on the
+#'                network drives (requires VPN connection). This is only available for the EBS right now,
+#'                and will pull all available years and districts for the given species.
 #'
 #' @return A named list containing specimen, haul, stratum, area, and size group
 #'         information for the region, districts, years, and species of interest.
@@ -98,6 +101,19 @@ get_specimen_data <- function(species = NULL,
                   " Please verify `district` options for the selected species in",
                   " the CRABBASE.DISTRICT_STRATUM table."))
     }
+  }
+
+
+
+  ## Set special local Kodiak connection option - just for EBS right now!!
+  if(channel == "KOD"){
+    path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
+    specimen_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_specimen.rds"))),
+                             error = function(cond) {
+                               stop("Unable to connect. Please check that you are connected to the network (e.g., VPN) and re-try. \n\n")
+                               return(invisible())})
+
+    return(specimen_rds)
   }
 
 
