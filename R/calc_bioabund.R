@@ -120,6 +120,29 @@ calc_bioabund <- function(crab_data = NULL,
   station_cpue <- cpue$cpue
   group_cols <- cpue$group_cols
 
+  # make a vector of years to re-expand zero-catch years by
+  year_vec <- unique(station_cpue$YEAR)
+
+
+  # Identify zero-catch stations for Northern District RKC and Hair Crab, and BKC Unstratified
+  if(TRUE %in% (c("NORTH", "UNSTRAT") %in% unique(station_cpue$DISTRICT))){
+    # Filter out zero-catch stations if District is NORTH or UNSTRAT
+    zero_catch <- station_cpue %>%
+                  dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA', 'STATION_ID')))) %>%
+                  dplyr::reframe(TOTAL_CPUE = sum(CPUE)) %>%
+                  dplyr::mutate(REMOVE = dplyr::case_when((DISTRICT %in% c("NORTH", "UNSTRAT") & TOTAL_CPUE == 0) ~ "remove",
+                                                          TRUE ~ "keep")) %>%
+                  dplyr::select(-TOTAL_CPUE)
+
+    station_cpue <- station_cpue %>%
+                    dplyr::left_join(., zero_catch,
+                                     by = c('YEAR', 'STATION_ID', 'REGION',
+                                            'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
+                    dplyr::filter(REMOVE == "keep") %>%
+                    dplyr::select(-REMOVE)
+  }
+
+
 
   ## Calculate abundance and biomass
   # Sum across haul, scale abundance, biomass, and variance to strata, then sum across strata and calc CIs
@@ -150,18 +173,42 @@ calc_bioabund <- function(crab_data = NULL,
                                       N_STATIONS = length(unique(STATION_ID))) %>%
                        dplyr::distinct()
 
+
+  # Re-expand by year to add back in 0-catch years for Northern District RKC and Hair Crab, and BKC Unstratified
+  if(TRUE %in% (c("NORTH", "UNSTRAT") %in% unique(station_cpue$DISTRICT))){
+    bio_abund_stratum <- bio_abund_stratum %>%
+                         dplyr::right_join(tidyr::expand_grid(SEX_TEXT = sex_combos,
+                                                              CATEGORY = category_combos,
+                                                              SHELL_TEXT = shell_combos,
+                                                              EGG_CONDITION_TEXT = egg_combos,
+                                                              CLUTCH_TEXT = clutch_combos,
+                                                              SIZE_1MM = bin_combos,
+                                                              YEAR = year_vec,
+                                                              REGION = unique(station_cpue$REGION),
+                                                              DISTRICT = unique(station_cpue$DISTRICT),
+                                                              STRATUM = unique(station_cpue$STRATUM)),
+                                           by = c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', group_cols)) %>%
+                         dplyr::select(dplyr::all_of(c("YEAR", "REGION", "DISTRICT", "STRATUM",
+                                                       "TOTAL_AREA", "N_STATIONS", group_cols,
+                                                       "MEAN_CPUE", "N_CPUE", "VAR_CPUE", "SD_CPUE",
+                                                       "MEAN_CPUE_MT", "N_CPUE_MT", "VAR_CPUE_MT", "SD_CPUE_MT",
+                                                       "MEAN_CPUE_LBS", "N_CPUE_LBS", "VAR_CPUE_LBS", "SD_CPUE_LBS",
+                                                       "ABUNDANCE", "ABUNDANCE_CV", "ABUNDANCE_CI",
+                                                       "BIOMASS_MT", "BIOMASS_MT_CV", "BIOMASS_MT_CI",
+                                                       "BIOMASS_LBS", "BIOMASS_LBS_CV", "BIOMASS_LBS_CI"))) %>%
+                         distinct()
+  }
+
   if(spatial_level == "stratum"){
     # Format output dataframe
     stratum_out <- bio_abund_stratum %>%
-                   dplyr::mutate(SPECIES = species,
-                                 ABUNDANCE_CV = ifelse(ABUNDANCE == 0, 0, ABUNDANCE_CV),
-                                 BIOMASS_MT_CV = ifelse(BIOMASS_MT == 0, 0, BIOMASS_MT_CV),
-                                 BIOMASS_LBS_CV = ifelse(BIOMASS_LBS == 0, 0, BIOMASS_LBS_CV)) %>%
+                   dplyr::mutate(SPECIES = species) %>%
                    dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'DISTRICT',
                                                  'STRATUM', 'TOTAL_AREA', group_cols,
                                                  'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                  'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
-                                                 'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI')))
+                                                 'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI'))) %>%
+                   replace(is.na(.), 0)
 
     return(stratum_out)
   }
@@ -199,14 +246,12 @@ calc_bioabund <- function(crab_data = NULL,
   if(spatial_level == "district"){
     # Format output dataframe
     district_out <- bio_abund_district %>%
-                    dplyr::mutate(SPECIES = species,
-                                  ABUNDANCE_CV = ifelse(ABUNDANCE == 0, 0, ABUNDANCE_CV),
-                                  BIOMASS_MT_CV = ifelse(BIOMASS_MT == 0, 0, BIOMASS_MT_CV),
-                                  BIOMASS_LBS_CV = ifelse(BIOMASS_LBS == 0, 0, BIOMASS_LBS_CV)) %>%
+                    dplyr::mutate(SPECIES = species) %>%
                     dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'DISTRICT', 'TOTAL_AREA', group_cols,
                                                   'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                   'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
-                                                  'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI')))
+                                                  'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI'))) %>%
+                    replace(is.na(.), 0)
     return(district_out)
   }
 
@@ -242,14 +287,12 @@ calc_bioabund <- function(crab_data = NULL,
   if(spatial_level == "region"){
     # Format output dataframe
     region_out <- bio_abund_region %>%
-                  dplyr::mutate(SPECIES = species,
-                                ABUNDANCE_CV = ifelse(ABUNDANCE == 0, 0, ABUNDANCE_CV),
-                                BIOMASS_MT_CV = ifelse(BIOMASS_MT == 0, 0, BIOMASS_MT_CV),
-                                BIOMASS_LBS_CV = ifelse(BIOMASS_LBS == 0, 0, BIOMASS_LBS_CV)) %>%
+                  dplyr::mutate(SPECIES = species) %>%
                   dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'TOTAL_AREA', group_cols,
                                                 'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                 'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
-                                                'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI')))
+                                                'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI'))) %>%
+                  replace(is.na(.), 0)
     return(region_out)
   }
 
