@@ -131,15 +131,14 @@ calc_bioabund <- function(crab_data = NULL,
                   dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA', 'STATION_ID')))) %>%
                   dplyr::reframe(TOTAL_CPUE = sum(CPUE)) %>%
                   dplyr::mutate(REMOVE = dplyr::case_when((DISTRICT %in% c("NORTH", "UNSTRAT") & TOTAL_CPUE == 0) ~ "remove",
-                                                          TRUE ~ "keep")) %>%
-                  dplyr::select(-TOTAL_CPUE)
+                                                          TRUE ~ "keep"))
 
     station_cpue <- station_cpue %>%
                     dplyr::left_join(., zero_catch,
                                      by = c('YEAR', 'STATION_ID', 'REGION',
                                             'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
                     dplyr::filter(REMOVE == "keep") %>%
-                    dplyr::select(-REMOVE)
+                    dplyr::select(-c('REMOVE', 'TOTAL_CPUE'))
   }
 
 
@@ -185,9 +184,9 @@ calc_bioabund <- function(crab_data = NULL,
                                                               SIZE_1MM = bin_combos,
                                                               YEAR = year_vec,
                                                               REGION = unique(station_cpue$REGION),
-                                                              DISTRICT = unique(station_cpue$DISTRICT),
-                                                              STRATUM = unique(station_cpue$STRATUM)),
-                                           by = c('YEAR', 'REGION', 'DISTRICT', 'STRATUM', group_cols)) %>%
+                                                              DISTRICT = unique(station_cpue$DISTRICT)),
+                                           by = c('YEAR', 'REGION', 'DISTRICT', group_cols),
+                                           relationship = "many-to-many") %>%
                          dplyr::select(dplyr::all_of(c("YEAR", "REGION", "DISTRICT", "STRATUM",
                                                        "TOTAL_AREA", "N_STATIONS", group_cols,
                                                        "MEAN_CPUE", "N_CPUE", "VAR_CPUE", "SD_CPUE",
