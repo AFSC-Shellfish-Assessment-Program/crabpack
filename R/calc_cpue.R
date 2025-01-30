@@ -61,29 +61,51 @@ calc_cpue <- function(crab_data = NULL,
 
 
   ## ERROR: check that district(s) specified are correct for given species
-  if(TRUE %in% (species %in% c("RKC", "HAIR")) & TRUE %in% (!district %in% c("ALL", "BB", "PRIB", "NORTH"))){
-    stop(paste0("Valid `district` options for ", species, " are:",
+  if(TRUE %in% (species %in% c("RKC", "HAIR")) &
+     TRUE %in% (!district %in% c("ALL", "BB", "PRIB", "NORTH")) &
+     REGION == "EBS"){
+    stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL', 'BB', 'PRIB', 'NORTH').",
                 " Please set `district` to one or many of these options."))
   }
 
-  if(species == "BKC" & TRUE %in% (!district %in% c("ALL", "PRIB", "STMATT", "UNSTRAT"))){
-    stop(paste0("Valid `district` options for ", species, " are:",
+  if(species == "BKC" &
+     TRUE %in% (!district %in% c("ALL", "PRIB", "STMATT", "UNSTRAT")) &
+     REGION == "EBS"){
+    stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL', 'PRIB', 'STMATT', 'UNSTRAT').",
                 " Please set `district` to one or many of these options."))
   }
 
-  if(species == "TANNER" & TRUE %in% (!district %in% c("ALL", "E166", "W166", "166TO173"))){
-    stop(paste0("Valid `district` options for ", species, " are:",
+  if(species == "TANNER" & TRUE %in% (!district %in% c("ALL", "E166", "W166", "166TO173")) &
+     REGION == "EBS"){
+    stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL', 'E166', 'W166', '166TO173').",
                 " Please set `district` to one or many of these options."))
   }
 
-  if(species %in% c("SNOW", "HYBRID") & TRUE %in% (!district %in% c("ALL"))){
-    stop(paste0("Valid `district` options for ", species, " are:",
+  if(species %in% c("SNOW", "HYBRID") & TRUE %in% (!district %in% c("ALL")) &
+     REGION == "EBS"){
+    stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL'). Please set `district` to this option."))
   }
 
+
+  if(TRUE %in% (species %in% c("RKC")) &
+     TRUE %in% (!district %in% c("ALL", "NS")) &
+     REGION == "NBS"){
+    stop(paste0("Valid `district` options for NBS ", species, " are:",
+                " c('ALL', 'NS').",
+                " Please set `district` to one or many of these options."))
+  }
+
+  if(TRUE %in% (species %in% c("BKC", "TANNER", "SNOW", "HYBRID", "HAIR")) &
+     TRUE %in% (!district %in% c("ALL")) &
+     REGION == "NBS"){
+    stop(paste0("Valid `district` options for NBS ", species, " is:",
+                " c('ALL').",
+                " Please set `district` to this option."))
+  }
 
   ## If "ALL" is specified in `district`, just set district to all
   if("ALL" %in% district){
@@ -93,7 +115,7 @@ calc_cpue <- function(crab_data = NULL,
 
   ## ERROR: Can't calculate both W166 AND 166TO173 for Tanner, they overlap and things may be wonky. Do separately
   if("166TO173" %in% district & length(district > 1)){
-    stop(paste0("The 166TO173W district is a special case area for Tanner Crab, and",
+    stop(paste0("The 166TO173W district is a special case area for EBS Tanner Crab, and",
                 " should not be calculated in conjunction with any other districts due to",
                 " spatial overlap with W166. Please set `district` to just `166TO173`",
                 " if you wish to query that district. Data may also have to be pulled using",
