@@ -63,7 +63,7 @@ calc_cpue <- function(crab_data = NULL,
   ## ERROR: check that district(s) specified are correct for given species
   if(TRUE %in% (species %in% c("RKC", "HAIR")) &
      TRUE %in% (!district %in% c("ALL", "BB", "PRIB", "NORTH")) &
-     REGION == "EBS"){
+     region == "EBS"){
     stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL', 'BB', 'PRIB', 'NORTH').",
                 " Please set `district` to one or many of these options."))
@@ -71,21 +71,21 @@ calc_cpue <- function(crab_data = NULL,
 
   if(species == "BKC" &
      TRUE %in% (!district %in% c("ALL", "PRIB", "STMATT", "UNSTRAT")) &
-     REGION == "EBS"){
+     region == "EBS"){
     stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL', 'PRIB', 'STMATT', 'UNSTRAT').",
                 " Please set `district` to one or many of these options."))
   }
 
   if(species == "TANNER" & TRUE %in% (!district %in% c("ALL", "E166", "W166", "166TO173")) &
-     REGION == "EBS"){
+     region == "EBS"){
     stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL', 'E166', 'W166', '166TO173').",
                 " Please set `district` to one or many of these options."))
   }
 
   if(species %in% c("SNOW", "HYBRID") & TRUE %in% (!district %in% c("ALL")) &
-     REGION == "EBS"){
+     region == "EBS"){
     stop(paste0("Valid `district` options for EBS ", species, " are:",
                 " c('ALL'). Please set `district` to this option."))
   }
@@ -93,7 +93,7 @@ calc_cpue <- function(crab_data = NULL,
 
   if(TRUE %in% (species %in% c("RKC")) &
      TRUE %in% (!district %in% c("ALL", "NS")) &
-     REGION == "NBS"){
+     region == "NBS"){
     stop(paste0("Valid `district` options for NBS ", species, " are:",
                 " c('ALL', 'NS').",
                 " Please set `district` to one or many of these options."))
@@ -101,7 +101,7 @@ calc_cpue <- function(crab_data = NULL,
 
   if(TRUE %in% (species %in% c("BKC", "TANNER", "SNOW", "HYBRID", "HAIR")) &
      TRUE %in% (!district %in% c("ALL")) &
-     REGION == "NBS"){
+     region == "NBS"){
     stop(paste0("Valid `district` options for NBS ", species, " is:",
                 " c('ALL').",
                 " Please set `district` to this option."))
