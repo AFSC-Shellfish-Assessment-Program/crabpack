@@ -131,7 +131,7 @@ calc_cpue <- function(crab_data = NULL,
 
   ## WARNING: specifying 1mm bins across multiple categories may exceed memory limits
   if(!is.null(crab_category)){
-    if(bin_1mm == TRUE & length(crab_category) > 1 | "all_categories" %in% crab_category){
+    if(bin_1mm == TRUE & TRUE %in% c(length(crab_category) > 2 | "all_categories" %in% crab_category)){
 
       warning_yn = function(w) {
         cat("Warning message:", '\n', w, '\n')
