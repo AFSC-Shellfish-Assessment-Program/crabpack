@@ -23,10 +23,10 @@ Defaults to \code{"ALL"} districts within the selected region if not specified.}
 
 \item{years}{Numeric or integer vector of years. Default output is all available years in data.}
 
-\item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.
-Local AFSC Kodiak users can also set \code{channel = "KOD"} to access specimen data on the
-network drives (requires VPN connection). This is only available for the EBS right now,
-and will pull all available years and districts for the given species.}
+\item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{DBI::dbConnect()}.
+Local AFSC Kodiak users can also set \code{channel = "KOD"} to access data on the
+network drives (requires VPN connection). This will pull all available years and
+districts for the given species and region.}
 }
 \value{
 A named list containing specimen, haul, stratum, area, and size group

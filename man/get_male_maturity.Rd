@@ -20,7 +20,10 @@ get_male_maturity(
 \item{district}{Character string. One or many of \code{c("ALL", "E166", "W166")}. Defaults to
 \code{"ALL"}; \code{"E166"} and \code{"W166"} are used for Tanner Crab only.}
 
-\item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{RODBC::odbcConnect()}.}
+\item{channel}{Connection to Oracle created via \code{crabpack::get_connected()} or \code{DBI::dbConnect()}.
+Local AFSC Kodiak users can also set \code{channel = "KOD"} to access data on the
+network drives (requires VPN connection). This will pull all available years and
+districts for the given species and region.}
 }
 \value{
 A named list containing the proportion of male Chionoecetes spp. crab
