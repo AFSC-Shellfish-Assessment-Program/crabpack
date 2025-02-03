@@ -11,29 +11,7 @@ an issue if you come across a bug.*
 
 <!-- make package logo!! https://github.com/GuangchuangYu/hexSticker -->
 
-## Installation Instructions  
-In addition to the default packages in R (base, stats, utils), the
-functions in crabpack use functions from 8 additional packages:
-
--   odbc: Enables ODBC (Open Database Connectivity) interface the AKFIN
-    Oracle database where the survey data are housed
--   DBI: Enables ODBC (Open Database Connectivity) interface the AKFIN
-    Oracle database where the survey data are housed
--   getPass: Allows for masking of Oracle user credentials (usernames,
-    passwords) when accessing RODBC
--   keyring: Allows the option for users to store their passwords
--   lifecycle: Aids developers and users with shared conventions,
-    documentation badges, deprecation warnings as the package develops
-    over time
--   data.table: Speeds up data.frame manipulations like reading,
-    writing, aggregations, joins, ordering, sorting
--   tidyr: Aids in easy data manipulation
--   dplyr: Aids in easy data manipulation and allows for compact,
-    readable code
-
-Please make sure these 8 packages are installed before installing
-crabpack.
-
+## Installation 
 ```         
 devtools::install_github("AFSC-Shellfish-Assessment-Program/crabpack")
 ```
