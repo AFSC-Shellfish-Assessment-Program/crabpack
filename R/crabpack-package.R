@@ -11,6 +11,9 @@
 #' @importFrom stats aggregate
 #' @importFrom data.table data.table
 #' @importFrom odbc odbc
+#' @importFrom httr GET
+#' @importFrom httr content
+#' @importFrom jsonlite fromJSON
 #'
 ## usethis namespace: end
 NULL
