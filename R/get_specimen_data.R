@@ -5,10 +5,10 @@
 #'              CRABBASE schema in the AKFIN Oracle database.
 #'
 #' @inheritParams calc_bioabund
-#' @param channel Connection to Oracle created via `crabpack::get_connected()` or `RODBC::odbcConnect()`.
-#'                Local AFSC Kodiak users can also set `channel = "KOD"` to access specimen data on the
-#'                network drives (requires VPN connection). This is only available for the EBS right now,
-#'                and will pull all available years and districts for the given species.
+#' @param channel Connection to Oracle created via `crabpack::get_connected()` or `DBI::dbConnect()`.
+#'                Local AFSC Kodiak users can also set `channel = "KOD"` to access data on the
+#'                network drives (requires VPN connection). This will pull all available years and
+#'                districts for the given species and region.
 #'
 #' @return A named list containing specimen, haul, stratum, area, and size group
 #'         information for the region, districts, years, and species of interest.
@@ -37,13 +37,10 @@ get_specimen_data <- function(species = NULL,
 
   }
 
-  ## Issue a warning when choosing multiple species
+  ## Error when choosing multiple species
   if(length(x = species) > 1){
-    warning(paste("The crabpack package has only been tested when querying",
-                  "one species at a time. Use caution when querying",
-                  "multiple species until further testing has been done.",
-                  "If you come across an issue, please post it on",
-                  "github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues"))
+    stop(paste0("The crabpack package is designed to only query one species at",
+                " a time. Please limit your query to just one species."))
   }
 
   ## Issue a warning when not specifying a region.
@@ -105,15 +102,9 @@ get_specimen_data <- function(species = NULL,
 
 
 
-  # Set special local Kodiak connection option - just for EBS right now!!
+  # Set special local Kodiak connection option
   if(inherits(channel, "character")){
     if(channel == "KOD"){
-      if(region == "NBS"){
-        stop(paste0("Only EBS specimen data is available on the Kodiak Y: drive",
-                    " right now. Please reach out to Shannon if you need access",
-                    " to NBS data."))
-      }
-
       path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
       specimen_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_specimen_", region, ".rds"))),
                                error = function(cond) {
