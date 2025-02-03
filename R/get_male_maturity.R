@@ -9,7 +9,6 @@
 #' @param species Character string. One of `c("TANNER", "SNOW")`.
 #' @param district Character string. One or many of `c("ALL", "E166", "W166")`. Defaults to
 #'                 `"ALL"`; `"E166"` and `"W166"` are used for Tanner Crab only.
-#' @param channel Connection to Oracle created via `crabpack::get_connected()` or `RODBC::odbcConnect()`.
 #' @inheritParams get_specimen_data
 #'
 #' @return A named list containing the proportion of male Chionoecetes spp. crab
@@ -40,6 +39,11 @@ get_male_maturity <- function(species = NULL,
 
   }
 
+  ## Error when choosing multiple species
+  if(length(x = species) > 1){
+    stop(paste0("The crabpack package is designed to only query one species at",
+                " a time. Please limit your query to just one species."))
+  }
 
   ## Issue a warning when not specifying a region.
   if(missing(x = region)){
@@ -48,6 +52,10 @@ get_male_maturity <- function(species = NULL,
                   " Northern Bering Sea."))
   }
 
+  if(region == "NBS"){
+    stop(paste0("Chionoecetes male maturity data is only available for the EBS",
+                " right now. Please remove 'NBS' from the `region` argument."))
+  }
 
   ## Error Query: check that the districts E166 or W166 are only included for the correct species.
   if(!is.null(district)){
@@ -60,6 +68,21 @@ get_male_maturity <- function(species = NULL,
   # if(is.null(district)){
   #   district <- "ALL"
   # }
+
+
+  # Set special local Kodiak connection option
+  if(inherits(channel, "character")){
+    if(channel == "KOD"){
+      path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
+      maturity_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_matmale_", region, ".rds"))),
+                               error = function(cond) {
+                                 stop("Unable to connect. Please check that you are connected to the network (e.g., VPN) and re-try. \n\n")
+                                 return(invisible())})
+
+      return(maturity_rds)
+    }
+  }
+
 
   ## Concatenate years, region for use in a SQL query
   species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
