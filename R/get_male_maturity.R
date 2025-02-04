@@ -25,9 +25,9 @@ get_male_maturity <- function(species = NULL,
                               district = NULL,
                               channel = NULL){
 
-  ## Set up channel if channel = NULL
+  ## Set channel to default to API access if channel = NULL
   if(is.null(x = channel)){
-    channel <- crabpack::get_connected()
+    channel <- "API"
   }
 
 
@@ -36,14 +36,13 @@ get_male_maturity <- function(species = NULL,
     stop(paste0("Male chela-based maturity metrics are only available for Tanner",
                 " and Snow Crab. Argument `species` must contain one or more of these options",
                 " (case-sensitive): 'TANNER' or 'SNOW'."))
-
   }
 
-  ## Error when choosing multiple species
-  if(length(x = species) > 1){
-    stop(paste0("The crabpack package is designed to only query one species at",
-                " a time. Please limit your query to just one species."))
-  }
+  # ## Error when choosing multiple species
+  # if(length(x = species) > 1){
+  #   stop(paste0("The crabpack package is designed to only query one species at",
+  #               " a time. Please limit your query to just one species."))
+  # }
 
   ## Issue a warning when not specifying a region.
   if(missing(x = region)){
@@ -65,13 +64,10 @@ get_male_maturity <- function(species = NULL,
     }
   }
 
-  # if(is.null(district)){
-  #   district <- "ALL"
-  # }
 
 
-  # Set special local Kodiak connection option
   if(inherits(channel, "character")){
+    # Set special local Kodiak connection option
     if(channel == "KOD"){
       path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
       maturity_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_matmale_", region, ".rds"))),
@@ -81,53 +77,79 @@ get_male_maturity <- function(species = NULL,
 
       return(maturity_rds)
     }
+
+
+
+    # Set API connection option
+    if(channel == "API"){
+      api_url <- "https://apex.psmfc.org/akfin/data_marts/crabbase/"
+
+      ## Query the Chionoecetes male probability of maturity at size table. This table
+      ## contains the proportion mature male Chionoecetes spp. by 10 millimeter size bin
+      ## for the Eastern Bering Sea and Northern Bering Sea.
+      cat("Pulling Chionoecetes maturity ratio data...\n")
+      mat_ratio_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "chionoecetes_mat_ratio?"),
+                                                                 query = list(region = paste(region, collapse = ","),
+                                                                              species = paste(species, collapse = ","))),
+                                                       type = "text", encoding = "UTF-8")) %>%
+                      dplyr::bind_rows() %>%
+                      dplyr::arrange(SPECIES, REGION, DISTRICT, YEAR, SIZE_BIN)
+
+
+      ## Query the maturity model parameter table. This table contains the fitted model
+      ## parameters for Chionoecetes spp. male 50% probability of maturity at size.
+      cat("Pulling Chionoecetes model parameter data...\n")
+      params_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "chionoecetes_matmodel_params?"),
+                                                              query = list(region = paste(region, collapse = ","),
+                                                                           species = paste(species, collapse = ","))),
+                                                    type = "text", encoding = "UTF-8")) %>%
+                   dplyr::bind_rows() %>%
+                   dplyr::arrange(SPECIES, REGION, DISTRICT, YEAR)
+    }
   }
 
 
-  ## Concatenate years, region for use in a SQL query
-  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
-  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse = ", "), ")")
+
+  # Pull via Oracle database connection
+  if(inherits(channel, "Oracle")){
+    ## Concatenate years, region for use in a SQL query
+    species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
+    region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse = ", "), ")")
 
 
-
-  ## Query the Chionoecetes male probability of maturity at size table. This table
-  ## contains the proportion mature male Chionoecetes spp. by 10 millimeter size bin
-  ## for the Eastern Bering Sea and Northern Bering Sea.
-  cat("Pulling Chionoecetes maturity ratio data...\n")
-
-  mat_ratio_df <- data.table::data.table(
-                    suppressWarnings(
-                      DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                    statement = paste0("SELECT * FROM CRABBASE.CHIONOECETES_MAT_RATIO WHERE SPECIES IN ",
-                                                                       species_vec, " AND REGION IN ", region_vec)))),
-                    key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
+    ## Query the Chionoecetes male probability of maturity at size table. This table
+    ## contains the proportion mature male Chionoecetes spp. by 10 millimeter size bin
+    ## for the Eastern Bering Sea and Northern Bering Sea.
+    cat("Pulling Chionoecetes maturity ratio data...\n")
+    mat_ratio_df <- data.table::data.table(
+                      suppressWarnings(
+                        DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                      statement = paste0("SELECT * FROM CRABBASE.CHIONOECETES_MAT_RATIO WHERE SPECIES IN ",
+                                                                         species_vec, " AND REGION IN ", region_vec)))),
+                      key = c("SPECIES", "REGION", "DISTRICT", "YEAR", "SIZE_BIN")) # KEY = which columns to sort by
 
 
-  # further filter by district if specified
-  if(!is.null(district)){
-    mat_ratio_df <- mat_ratio_df %>%
-                    dplyr::filter(DISTRICT %in% district)
+    ## Query the maturity model parameter table. This table contains the fitted model
+    ## parameters for Chionoecetes spp. male 50% probability of maturity at size.
+    cat("Pulling Chionoecetes model parameter data...\n")
+    params_df <- data.table::data.table(
+                  suppressWarnings(
+                    DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                  statement = paste0("SELECT * FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS WHERE SPECIES IN ",
+                                                                     species_vec, " AND REGION IN ", region_vec)))),
+                  key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
   }
 
 
-
-  ## Query the maturity model parameter table. This table contains the fitted model
-  ## parameters for Chionoecetes spp. male 50% probability of maturity at size.
-  cat("Pulling Chionoecetes model parameter data...\n")
-
-  params_df <- data.table::data.table(
-                suppressWarnings(
-                  DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                statement = paste0("SELECT * FROM CRABBASE.CHIONOECETES_MATMODEL_PARAMS WHERE SPECIES IN ",
-                                                                   species_vec, " AND REGION IN ", region_vec)))),
-                key = c("SPECIES", "REGION", "DISTRICT", "YEAR")) # KEY = which columns to sort by
 
   # further filter by district if specified
   if(!is.null(district)){
     params_df <- params_df %>%
                  dplyr::filter(DISTRICT %in% district)
-  }
 
+    mat_ratio_df <- mat_ratio_df %>%
+                    dplyr::filter(DISTRICT %in% district)
+  }
 
 
   # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column - messes with joining
@@ -135,7 +157,6 @@ get_male_maturity <- function(species = NULL,
     mat_ratio_df <- mat_ratio_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
     params_df <- params_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
   }
-
 
 
   ## Collate data into a list and return
