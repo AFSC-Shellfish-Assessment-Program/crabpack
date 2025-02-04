@@ -23,9 +23,12 @@ knitr::opts_chunk$set(
 library(crabpack)
 ```
 
+<br>
+
 # Data connections
 
 ## Connect via API
+
 Public data access, no credentials needed.
 
 ```{r, eval = F}
@@ -34,6 +37,7 @@ Public data access, no credentials needed.
 ```
 
 ## Connect via Oracle database
+
 Username and password required.
 
 ```{r, eval = F}
@@ -45,6 +49,7 @@ Username and password required.
 ```
 
 ## Connect via Kodiak AFSC network drives
+
 VPN connection required.
 
 ```{r, eval = F}
@@ -52,8 +57,10 @@ VPN connection required.
   channel <- "KOD"
 ```
 
+<br>
 
 # Pull specimen data
+
 ```{r, eval = F}
 species <- "RKC"
 specimen_data <- crabpack::get_specimen_data(species = species,
