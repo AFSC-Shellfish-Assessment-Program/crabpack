@@ -83,24 +83,44 @@
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://afsc-shellfish-assessment-program.github.io/crabpack/">crabpack</a></span><span class="op">)</span></span></code></pre></div>
+<p><br></p>
 </div>
 <div class="section level2">
-<h2 id="connect-to-oracle">Connect to Oracle<a class="anchor" aria-label="anchor" href="#connect-to-oracle"></a>
+<h2 id="data-connections">Data connections<a class="anchor" aria-label="anchor" href="#data-connections"></a>
 </h2>
+<div class="section level3">
+<h3 id="connect-via-api">Connect via API<a class="anchor" aria-label="anchor" href="#connect-via-api"></a>
+</h3>
+<p>Public data access, no credentials needed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Specify AKFIN API </span></span>
+<span>  <span class="va">channel</span> <span class="op">&lt;-</span> <span class="st">"API"</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="connect-via-oracle-database">Connect via Oracle database<a class="anchor" aria-label="anchor" href="#connect-via-oracle-database"></a>
+</h3>
+<p>Username and password required.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Connect to Oracle via AKFIN database (default)</span></span>
 <span>  <span class="va">channel</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/get_connected.html">get_connected</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Connect to Oracle via AFSC database (NOAA AFSC users only)</span></span>
-<span>  <span class="va">channel</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/get_connected.html">get_connected</a></span><span class="op">(</span>db <span class="op">=</span> <span class="st">"AFSC"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Set local Kodiak server access (Kodiak Fisheries Research Center users only)</span></span>
+<span>  <span class="va">channel</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/get_connected.html">get_connected</a></span><span class="op">(</span>db <span class="op">=</span> <span class="st">"AFSC"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="connect-via-kodiak-afsc-network-drives">Connect via Kodiak AFSC network drives<a class="anchor" aria-label="anchor" href="#connect-via-kodiak-afsc-network-drives"></a>
+</h3>
+<p>VPN connection required.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Set local Kodiak server access (Kodiak Fisheries Research Center users only)</span></span>
 <span>  <span class="va">channel</span> <span class="op">&lt;-</span> <span class="st">"KOD"</span></span></code></pre></div>
+<p><br></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="pull-specimen-data">Pull specimen data<a class="anchor" aria-label="anchor" href="#pull-specimen-data"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="st">"RKC"</span></span>
 <span><span class="va">specimen_data</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/get_specimen_data.html">get_specimen_data</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">species</span>,</span>
 <span>                                             region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -116,7 +136,7 @@ arguments<br><em><strong>Note:</strong> for each example, please verify that you
 the appropriate species data loaded</em></p>
 <p><strong>Example 1:</strong> Mature female Bristol Bay Red King Crab
 using ADF&amp;G cutlines</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">matfem_bbrkc</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
 <span>                                        species <span class="op">=</span> <span class="st">"RKC"</span>,</span>
 <span>                                        region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -125,7 +145,7 @@ using ADF&amp;G cutlines</p>
 <span>                                        female_maturity <span class="op">=</span> <span class="st">"cutline"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Example 2:</strong> Male St. Matthew district Blue King Crab
 between 105 and 199mm</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">smbkc_105TO119</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
 <span>                                          species <span class="op">=</span> <span class="st">"BKC"</span>,</span>
 <span>                                          region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -135,7 +155,7 @@ between 105 and 199mm</p>
 <span>                                          size_max <span class="op">=</span> <span class="fl">119</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Example 3:</strong> Legal-sized male Tanner Crab for both the
 E166 and W166 districts</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">legal_tanner</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
 <span>                                        species <span class="op">=</span> <span class="st">"TANNER"</span>,</span>
 <span>                                        region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -143,7 +163,7 @@ E166 and W166 districts</p>
 <span>                                        crab_category <span class="op">=</span> <span class="st">"legal_male"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Example 4:</strong> Large, new hardshell male EBS Snow Crab
 by 1mm bins for 2000-2024</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lg_sc2_snow</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_bioabund.html">calc_bioabund</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
 <span>                                       species <span class="op">=</span> <span class="st">"SNOW"</span>,</span>
 <span>                                       region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -160,7 +180,7 @@ by 1mm bins for 2000-2024</p>
 <p>See <code><a href="../reference/calc_cpue.html">?crabpack::calc_cpue</a></code> for details on arguments</p>
 <p><strong>Example 1:</strong> 2024 EBS Red King Crab by
 size-sex-maturity category</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cpue</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_cpue.html">calc_cpue</a></span><span class="op">(</span>crab_data <span class="op">=</span> <span class="va">specimen_data</span>,</span>
 <span>                            species <span class="op">=</span> <span class="st">"RKC"</span>,</span>
 <span>                            region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
@@ -173,7 +193,7 @@ size-sex-maturity category</p>
 <h2 id="pull-data-on-chionoecetes-spp--male-morphometric-maturity-estimation">Pull data on <em>Chionoecetes</em> spp. male morphometric maturity
 estimation<a class="anchor" aria-label="anchor" href="#pull-data-on-chionoecetes-spp--male-morphometric-maturity-estimation"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">male_maturity_data</span> <span class="op">&lt;-</span> <span class="fu">crabpack</span><span class="fu">::</span><span class="fu"><a href="../reference/get_male_maturity.html">get_male_maturity</a></span><span class="op">(</span>species <span class="op">=</span> <span class="st">"TANNER"</span>,</span>
 <span>                                                  region <span class="op">=</span> <span class="st">"EBS"</span>,</span>
 <span>                                                  district <span class="op">=</span> <span class="st">"E166"</span>,</span>
