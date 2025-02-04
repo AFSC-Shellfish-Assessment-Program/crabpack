@@ -5,10 +5,13 @@
 #'              CRABBASE schema in the AKFIN Oracle database.
 #'
 #' @inheritParams calc_bioabund
-#' @param channel Connection to Oracle created via `crabpack::get_connected()` or `DBI::dbConnect()`.
-#'                Local AFSC Kodiak users can also set `channel = "KOD"` to access data on the
-#'                network drives (requires VPN connection). This will pull all available years and
-#'                districts for the given species and region.
+#' @param channel Character string or Oracle connection. Defaults to an API connection,
+#'                (`channel = "API"`), allowing for public data access. To use an
+#'                Oracle database connection, set `channel` to an object created
+#'                via `crabpack::get_connected()` or `DBI::dbConnect()`. Local AFSC
+#'                Kodiak users can also set `channel = "KOD"` to access data on the
+#'                network drives (requires VPN connection). This option will pull all
+#'                available years and districts for the given species and region.
 #'
 #' @return A named list containing specimen, haul, stratum, area, and size group
 #'         information for the region, districts, years, and species of interest.
@@ -24,9 +27,9 @@ get_specimen_data <- function(species = NULL,
                               channel = NULL){
 
 
-  ## Set up channel if channel = NULL
+  ## Set channel to default to API access if channel = NULL
   if(is.null(x = channel)){
-    channel <- crabpack::get_connected()
+    channel <- "API"
   }
 
 
@@ -101,9 +104,15 @@ get_specimen_data <- function(species = NULL,
   }
 
 
+  # define year if not specified
+  if(missing(years)){
+    years <- c(1975:2030) # put dummy end year to accommodate future years?
+  }
 
-  # Set special local Kodiak connection option
+
+
   if(inherits(channel, "character")){
+    # Set special local Kodiak connection option
     if(channel == "KOD"){
       path <- "Y:/KOD_Survey/EBS Shelf/Data_Processing/Outputs/"
       specimen_rds <- tryCatch(expr = suppressWarnings(readRDS(paste0(path, species, "_specimen_", region, ".rds"))),
@@ -113,97 +122,160 @@ get_specimen_data <- function(species = NULL,
 
       return(specimen_rds)
     }
+
+
+    # Set API connection option
+    if(channel == "API"){
+      api_url <- "https://apex.psmfc.org/akfin/data_marts/crabbase/"
+
+      # set years to filter by
+      start_year <- min(years)
+      end_year <- max(years)
+
+
+      ## Query the haul table. This table houses haul information for all hauls included
+      ## in the standard Eastern Bering Sea and Northern Bering Sea bottom trawl time series.
+      cat("Pulling haul data...\n")
+      haul_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "haul?"),
+                                                            query = list(region = paste(region, collapse = ","),
+                                                                         start_year = start_year,
+                                                                         end_year = end_year)),
+                                                  type = "text", encoding = "UTF-8")) %>%
+                 dplyr::bind_rows() %>%
+                 dplyr::arrange(REGION, YEAR, STATION_ID)
+
+      ## Query the specimen data. This table contains all specimen data, subsetted for
+      ## standard crab bottom trawl stations in the Eastern Bering Sea and Northern Bering Sea.
+      cat("Pulling specimen data...\n")
+      specimen_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "specimen?"),
+                                                                query = list(species = species)),
+                                                      type = "text", encoding = "UTF-8")) %>%
+                     dplyr::bind_rows() %>%
+                     dplyr::rename_with(toupper)
+
+
+      ## Pull relevant lookups/stratum tables
+      cat("Pulling district, stratum, and station data...\n")
+
+      ## Query the district and stratum data. This table reports which strata are contained
+      ## within a given management district or region.
+      district_stratum_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "district_stratum?"),
+                                                                        query = list(region = paste(region, collapse = ","),
+                                                                                     species = species)),
+                                                              type = "text", encoding = "UTF-8")) %>%
+                             dplyr::bind_rows()
+
+      ## Query the stratum design data. This table reports the survey years included
+      ## in each year block ID and the corresponding stratum design ID.
+      stratum_design_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "stratum_design?"),
+                                                                      query = list(region = paste(region, collapse = ","))),
+                                                            type = "text", encoding = "UTF-8")) %>%
+                           dplyr::bind_rows()
+
+      ## Query the stratum station data. This table reports the stations that make up
+      ## each stratum for each design ID.
+      stratum_stations_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "stratum_stations?"),
+                                                                        query = list(region = paste(region, collapse=","),
+                                                                                     species = species)),
+                                                              type = "text", encoding = "UTF-8")) %>%
+                             dplyr::bind_rows()
+
+      ## Query the stratum area data. This table reports stratum total areas for each
+      ## species across distinct year block IDs.
+      stratum_area_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "stratum_area?"),
+                                                                    query = list(region = paste(region, collapse = ","),
+                                                                                 species = species)),
+                                                          type = "text", encoding = "UTF-8")) %>%
+                         dplyr::bind_rows()
+
+      ## Query the size group table. This table reports size definitions for district-
+      ## and species-specific size-sex-maturity categories.
+      cat("Pulling crab size group data...\n")
+      sizegroups_df <- jsonlite::fromJSON(httr::content(httr::GET(url = paste0(api_url, "sizegroups?"),
+                                                                  query = list(region = paste(region, collapse = ","),
+                                                                               species = species)),
+                                                        type = "text", encoding = "UTF-8")) %>%
+                       dplyr::bind_rows()
+    }
   }
 
 
 
-  ## Concatenate species, years, region, district for use in a SQL query
-  species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
-
-  # define year if not specified
-  if(missing(years)){
-    years <- c(1975:2030) # put dummy end year to accommodate future years?
-  }
-
-  year_vec <- paste0("(", paste0(years, collapse = ", "), ")")
-
-  region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse = ", "), ")")
+  # Pull via Oracle database connection
+  if(inherits(channel, "Oracle")){
+    ## Concatenate species, years, region, district for use in a SQL query
+    species_vec <- paste0("(", paste0(sQuote(x = species, q = FALSE), collapse = ", "), ")")
+    year_vec <- paste0("(", paste0(years, collapse = ", "), ")")
+    region_vec <- paste0("(", paste0(sQuote(x = region, q = FALSE), collapse = ", "), ")")
 
 
+    ## Query the haul table. This table houses haul information for all hauls included
+    ## in the standard Eastern Bering Sea and Northern Bering Sea bottom trawl time series.
+    cat("Pulling haul data...\n")
+    haul_df <- data.table::data.table(
+                suppressWarnings(
+                  DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                statement = paste0("SELECT * FROM CRABBASE.HAUL WHERE YEAR IN ",
+                                                                   year_vec, " AND REGION IN ", region_vec)))),
+                key = c("REGION", "YEAR", "STATION_ID")) # KEY = which columns to sort by
 
-  ## Query the haul table. This table houses haul information for all hauls included
-  ## in the standard Eastern Bering Sea and Northern Bering Sea bottom trawl time series.
-  cat("Pulling haul data...\n")
+    ## Query the specimen data. This table contains all specimen data, subsetted for
+    ## standard crab bottom trawl stations in the Eastern Bering Sea and Northern Bering Sea.
+    cat("Pulling specimen data...\n")
+    specimen_df <- data.table::data.table(
+                    suppressWarnings(
+                      DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                    statement = paste0("SELECT * FROM CRABBASE.SPECIMEN WHERE SPECIES IN ",
+                                                                       species_vec)))))
 
-  haul_df <- data.table::data.table(
-              suppressWarnings(
-                DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                              statement = paste0("SELECT * FROM CRABBASE.HAUL WHERE YEAR IN ",
-                                                                 year_vec, " AND REGION IN ", region_vec)))),
-              key = c("YEAR", "STATION_ID")) # KEY = which columns to sort by
+    ## Pull relevant lookups/stratum tables
+    cat("Pulling district, stratum, and station data...\n")
 
+    ## Query the district and stratum data. This table reports which strata are contained
+    ## within a given management district or region.
+    district_stratum_df <- data.table::data.table(
+                            suppressWarnings(
+                              DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                            statement = paste0("SELECT * FROM CRABBASE.DISTRICT_STRATUM WHERE SPECIES IN ",
+                                                                               species_vec, " AND REGION IN ", region_vec)))))
 
-  # Remove HT 17 if not RKC
-  if(species != "RKC"){
-    haul_df <- haul_df %>%
-               dplyr::filter(!HAUL_TYPE == 17)
-  }
-
-
-
-  ## Query the specimen data. This table contains all specimen data, subsetted for
-  ## standard crab bottom trawl stations in the Eastern Bering Sea and Northern Bering Sea.
-  cat("Pulling specimen data...\n")
-
-  specimen_df <- data.table::data.table(
-                  suppressWarnings(
-                    DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                  statement = paste0("SELECT * FROM CRABBASE.SPECIMEN WHERE SPECIES IN ",
-                                                                     species_vec)))))
-
-
-
-  ## Pull relevant lookups/stratum tables
-  cat("Pulling district, stratum, and station data...\n")
-
-  ## Query the district and stratum data. This table reports which strata are contained
-  ## within a given management district or region.
-  district_stratum_df <- data.table::data.table(
+    ## Query the stratum design data. This table reports the survey years included
+    ## in each year block ID and the corresponding stratum design ID.
+    stratum_design_df <- data.table::data.table(
                           suppressWarnings(
                             DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                          statement = paste0("SELECT * FROM CRABBASE.DISTRICT_STRATUM WHERE SPECIES IN ",
-                                                                             species_vec, " AND REGION IN ", region_vec)))))
+                                                          statement = paste0("SELECT * FROM CRABBASE.STRATUM_DESIGN WHERE REGION IN ",
+                                                                             region_vec)))))
 
+    ## Query the stratum station data. This table reports the stations that make up
+    ## each stratum for each design ID.
+    stratum_stations_df <- data.table::data.table(
+                            suppressWarnings(
+                              DBI::dbFetch(DBI::dbSendQuery(conn = channel,
+                                                            statement = paste0("SELECT * FROM CRABBASE.STRATUM_STATIONS WHERE SPECIES IN ",
+                                                                               species_vec, " AND REGION IN ", region_vec)))))
 
-  ## Query the stratum design data. This table reports the survey years included
-  ## in each year block ID and the corresponding stratum design ID.
-  stratum_design_df <- data.table::data.table(
+    ## Query the stratum area data. This table reports stratum total areas for each
+    ## species across distinct year block IDs.
+    stratum_area_df <- data.table::data.table(
                         suppressWarnings(
                           DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                        statement = paste0("SELECT * FROM CRABBASE.STRATUM_DESIGN WHERE REGION IN ",
-                                                                           region_vec)))))
+                                                        statement = paste0("SELECT * FROM CRABBASE.STRATUM_AREA WHERE SPECIES IN ",
+                                                                           species_vec, " AND REGION IN ", region_vec)))))
 
-
-
-  ## Query the stratum station data. This table reports the stations that make up
-  ## each stratum for each design ID.
-  stratum_stations_df <- data.table::data.table(
-                          suppressWarnings(
-                            DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                          statement = paste0("SELECT * FROM CRABBASE.STRATUM_STATIONS WHERE SPECIES IN ",
-                                                                             species_vec, " AND REGION IN ", region_vec)))))
-
-
-  ## Query the stratum area data. This table reports stratum total areas for each
-  ## species across distinct year block IDs.
-  stratum_area_df <- data.table::data.table(
+    ## Query the size group table. This table reports size definitions for district-
+    ## and species-specific size-sex-maturity categories.
+    cat("Pulling crab size group data...\n")
+    sizegroups_df <- data.table::data.table(
                       suppressWarnings(
                         DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                      statement = paste0("SELECT * FROM CRABBASE.STRATUM_AREA WHERE SPECIES IN ",
+                                                      statement = paste0("SELECT * FROM CRABBASE.SIZEGROUPS WHERE SPECIES IN ",
                                                                          species_vec, " AND REGION IN ", region_vec)))))
+  }
 
 
-  # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column - messes with joining
+
+  # If pulling data from AKFIN/API, remove "AKFIN_LOAD_DATE" column - messes with joining
   if("AKFIN_LOAD_DATE" %in% names(haul_df)){
     haul_df <- haul_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
     specimen_df <- specimen_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
@@ -211,8 +283,15 @@ get_specimen_data <- function(species = NULL,
     stratum_stations_df <- stratum_stations_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
     stratum_design_df <- stratum_design_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
     stratum_area_df <- stratum_area_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
+    sizegroups_df <- sizegroups_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
   }
 
+
+  # Remove HT 17 if not RKC
+  if(species != "RKC"){
+    haul_df <- haul_df %>%
+               dplyr::filter(!HAUL_TYPE == 17)
+  }
 
 
   ## Define districts, stock stations, stratum areas
@@ -236,6 +315,7 @@ get_specimen_data <- function(species = NULL,
                             DISTRICT %in% district) %>%
               dplyr::pull(STRATUM)
   }
+
 
   # Pull stock stations using stock districts and haul info; assign stratum and area
   cat("Joining district, stratum, and area information to specimen data...\n")
@@ -337,22 +417,6 @@ get_specimen_data <- function(species = NULL,
                              REGION %in% region,
                              !SEX == 3,
                              STRATUM %in% strata)
-
-
-  ## Query the size group table. This table reports size definitions for district-
-  ## and species-specific size-sex-maturity categories.
-  cat("Pulling crab size group data...\n")
-
-  sizegroups_df <- data.table::data.table(
-                    suppressWarnings(
-                      DBI::dbFetch(DBI::dbSendQuery(conn = channel,
-                                                    statement = paste0("SELECT * FROM CRABBASE.SIZEGROUPS WHERE SPECIES IN ",
-                                                                       species_vec, " AND REGION IN ", region_vec)))))
-
-  # If pulling data from AKFIN, remove "AKFIN_LOAD_DATE" column
-  if("AKFIN_LOAD_DATE" %in% names(sizegroups_df)){
-    sizegroups_df <- sizegroups_df %>% dplyr::select(-"AKFIN_LOAD_DATE")
-  }
 
 
 
