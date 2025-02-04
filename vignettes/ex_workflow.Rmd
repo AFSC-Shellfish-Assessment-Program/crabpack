@@ -23,7 +23,18 @@ knitr::opts_chunk$set(
 library(crabpack)
 ```
 
-# Connect to Oracle
+# Data connections
+
+## Connect via API
+Public data access, no credentials needed.
+
+```{r, eval = F}
+# Specify AKFIN API 
+  channel <- "API"
+```
+
+## Connect via Oracle database
+Username and password required.
 
 ```{r, eval = F}
 # Connect to Oracle via AKFIN database (default)
@@ -31,13 +42,18 @@ library(crabpack)
 
 # Connect to Oracle via AFSC database (NOAA AFSC users only)
   channel <- crabpack::get_connected(db = "AFSC")
+```
 
+## Connect via Kodiak AFSC network drives
+VPN connection required.
+
+```{r, eval = F}
 # Set local Kodiak server access (Kodiak Fisheries Research Center users only)
   channel <- "KOD"
 ```
 
-# Pull specimen data
 
+# Pull specimen data
 ```{r, eval = F}
 species <- "RKC"
 specimen_data <- crabpack::get_specimen_data(species = species,
