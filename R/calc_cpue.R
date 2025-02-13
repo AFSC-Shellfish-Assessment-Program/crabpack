@@ -299,6 +299,10 @@ calc_cpue <- function(crab_data = NULL,
     group_cols <- append(group_cols, "SEX_TEXT")
   }
 
+  # remove `sex_combos` if `sex = NULL`
+  if(is.null(sex)){
+    sex_combos <- NA
+  }
 
   # REMOVE NONSENSICAL CRAB CATEGORY COMBOS REMNANT FROM EXPAND_GRID......
   # if we end up making egg_condition and clutch_size not dependent on female only,
@@ -312,11 +316,13 @@ calc_cpue <- function(crab_data = NULL,
 
 
   # Filter out STATION E-11 in year 2000 for BBRKC males because it wasn't sampled in leg 1
+  # Keep entry in with NA values
   if(species == "RKC" & region == "EBS" & TRUE %in% (district %in% c("ALL", "BB"))){
     station_cpue <- station_cpue %>%
-                    dplyr::filter(!(YEAR == 2000 &
-                                    STATION_ID == "E-11" &
-                                    SEX_TEXT == "male"))
+                    dplyr::mutate(COUNT = ifelse((YEAR == 2000 & STATION_ID == "E-11" & SEX_TEXT == "male"), NA, COUNT),
+                                  CPUE = ifelse((YEAR == 2000 & STATION_ID == "E-11" & SEX_TEXT == "male"), NA, CPUE),
+                                  CPUE_MT = ifelse((YEAR == 2000 & STATION_ID == "E-11" & SEX_TEXT == "male"), NA, CPUE_MT),
+                                  CPUE_LBS = ifelse((YEAR == 2000 & STATION_ID == "E-11" & SEX_TEXT == "male"), NA, CPUE_LBS))
   } else{
     station_cpue <- station_cpue
   }
@@ -338,13 +344,18 @@ calc_cpue <- function(crab_data = NULL,
                                                             (SEX_TEXT == 'male' & RETOW == "yes" & HT == 17) ~ "remove",
                                                             TRUE ~ "keep")) %>%
                     dplyr::filter(REMOVE == "keep") %>%
-                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, 'SEX_TEXT', # keeping HT in for output verification
+                    {if(is.null(sex)) dplyr::mutate(., HT = ifelse(HT == 17, 3, HT)) else .} %>% # change HT to 3 if 17 so male and female data group properly
+                    dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'STATION_ID', 'HT', group_cols, # can't have unique HT in if want total crab
                                                                   'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')))) %>%
                     dplyr::summarise(COUNT = sum(COUNT),
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
                                      CPUE_LBS = sum(CPUE_LBS)) %>%
-                    dplyr::ungroup()
+                    dplyr::ungroup() %>%
+                    dplyr::mutate(HT = ifelse((YEAR == 2000 & STATION_ID == "E-11"), 17, HT)) #%>% # change HT to 17 so there's a lat/lon joined down the line
+                    # {if("male" %in% sex_combos) dplyr::add_row(., YEAR = 2000, STATION_ID = "E-11", HT = 17, SEX_TEXT = "male", REGION = "EBS",
+                    #                                               DISTRICT = "BB", STRATUM = "BB", TOTAL_AREA = 54536,
+                    #                                               COUNT = NA, CPUE = NA, CPUE_MT = NA, CPUE_LBS = NA)} # if by sex, add NA row for special case missed tow
   } else{
     # remove all HT 17 data and re-summarise to ignore SEX
     station_cpue <- station_cpue %>%
@@ -354,8 +365,11 @@ calc_cpue <- function(crab_data = NULL,
                     dplyr::summarise(COUNT = sum(COUNT),
                                      CPUE = sum(CPUE),
                                      CPUE_MT = sum(CPUE_MT),
-                                     CPUE_LBS = sum(CPUE_LBS))%>%
-                    dplyr::ungroup()
+                                     CPUE_LBS = sum(CPUE_LBS)) %>%
+                    dplyr::ungroup() #%>%
+                    # dplyr::add_row(YEAR = 2000, STATION_ID = "E-11", HT = 17, REGION = "EBS", # add NA row for special case missed tow
+                    #                DISTRICT = "BB", STRATUM = "BB", TOTAL_AREA = 54536,
+                    #                COUNT = NA, CPUE = NA, CPUE_MT = NA, CPUE_LBS = NA) ## THESE MIGHT HAVE TO BE 0 instead!!!
   }
 
 
@@ -369,7 +383,8 @@ calc_cpue <- function(crab_data = NULL,
 
   # Format output df
   cpue_out <- station_cpue %>%
-              dplyr::left_join(., stock_stations, by = c('YEAR', 'STATION_ID', 'HT', 'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
+              dplyr::left_join(., stock_stations, by = c('YEAR', 'STATION_ID', 'HT', # note that even with BB retow, this will give lat/lon for the original haul
+                                                         'REGION', 'DISTRICT', 'STRATUM', 'TOTAL_AREA')) %>%
               dplyr::ungroup() %>%
               dplyr::mutate(SPECIES = species) %>%
               dplyr::select(dplyr::all_of(c('SPECIES', 'YEAR', 'REGION', 'STATION_ID', 'LATITUDE', 'LONGITUDE',
@@ -384,6 +399,10 @@ calc_cpue <- function(crab_data = NULL,
     }
 
     if(output == "bioabund"){
+      # remove station with NA (2000 E-11 BB males)
+      station_cpue <- station_cpue %>%
+                      filter(!is.na(COUNT))
+
       return(list(group_cols = groups_out,
                   cpue = station_cpue))
     }
