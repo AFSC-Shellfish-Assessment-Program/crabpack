@@ -294,6 +294,13 @@ get_specimen_data <- function(species = NULL,
   }
 
 
+  # Remove years prior to 1980 for Snow Crab and Hybrids
+  if(species %in% c("SNOW", "HYBRID")){
+    haul_df <- haul_df %>%
+               dplyr::filter(YEAR >= 1980)
+  }
+
+
   ## Define districts, stock stations, stratum areas
   # Filter to district, pull relevant strata
   if(is.null(district)){
