@@ -37,7 +37,7 @@ calc_cpue <- function(crab_data = NULL,
                       clutch_size = NULL,
                       bin_1mm = FALSE,
                       replace_retow = TRUE,
-                      rm_corners = FALSE,
+                      # rm_corners = FALSE,
                       output = c("cpue", "bioabund")[1]){
 
 
@@ -168,8 +168,10 @@ calc_cpue <- function(crab_data = NULL,
 
 
   # define year if not specified
+  current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
   if(is.null(years)){
-    years <- c(1975:2030) # put dummy end year to accommodate future years?
+    years <- c(1975:current_year)
   }
 
 
@@ -202,57 +204,57 @@ calc_cpue <- function(crab_data = NULL,
                                   LATITUDE, LONGITUDE, DISTRICT, STRATUM, TOTAL_AREA) %>%
                     dplyr::distinct()
 
-  # If want to remove MTCA corner stations, remove stations and change MTCA stratum to Single
-  if(rm_corners == TRUE){
-    # remove corners within MTCA strata
-    stock_stations <- stock_stations %>%
-                      dplyr::filter(!(STRATUM %in% c("PRIB_MTCA", "STMATT_MTCA", "STMATT_MTCA_E") & nchar(STATION_ID) == 6))
-
-    # integrate MTCA stratum into the encompassing stratum, based on species
-    if(species == "BKC"){
-      stock_stations <- stock_stations %>%
-                        dplyr::mutate(STRATUM = case_when(STRATUM == "PRIB_MTCA" ~ "PRIB",
-                                                          STRATUM == "STMATT_MTCA" ~ "STMATT",
-                                                          TRUE ~ STRATUM))
-    }
-
-    if(species %in% c("RKC", "HAIR")){
-      # STMATT_MTCA corners --> NORTH for these species, not sure how to remove them
-      # without removing other accidental corners in older part of ts. Could manually specify
-      # but not sure if anyone wants/needs these data.
-      stock_stations <- stock_stations %>%
-                        dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "PRIB",
-                                                                 TRUE ~ STRATUM))
-
-      warning(paste0("Corner stations within the St. Matthew district are considered",
-                     " part of the Northern district for this species and have not",
-                     " been removed. Please submit an issue at",
-                     " github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues",
-                     " if this data modification is needed."))
-
-    }
-
-    if(species == "TANNER"){
-      if(district == "166TO173"){
-        stock_stations <- stock_stations %>%
-                          dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "166TO173",
-                                                                   STRATUM == "STMATT_MTCA_E" ~ "166TO173",
-                                                                   TRUE ~ STRATUM))
-      } else{
-        stock_stations <- stock_stations %>%
-                          dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "W166",
-                                                                   STRATUM == "STMATT_MTCA" ~ "W166",
-                                                                   TRUE ~ STRATUM))
-      }
-    }
-
-    if(species %in% c("SNOW", "HYBRID")){
-      stock_stations <- stock_stations %>%
-                        dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "EBS_SINGLE",
-                                                                 STRATUM == "STMATT_MTCA" ~ "EBS_SINGLE",
-                                                                 TRUE ~ STRATUM))
-    }
-  }
+  # # If want to remove MTCA corner stations, remove stations and change MTCA stratum to Single
+  # if(rm_corners == TRUE){
+  #   # remove corners within MTCA strata
+  #   stock_stations <- stock_stations %>%
+  #                     dplyr::filter(!(STRATUM %in% c("PRIB_MTCA", "STMATT_MTCA", "STMATT_MTCA_E") & nchar(STATION_ID) == 6))
+  #
+  #   # integrate MTCA stratum into the encompassing stratum, based on species
+  #   if(species == "BKC"){
+  #     stock_stations <- stock_stations %>%
+  #                       dplyr::mutate(STRATUM = case_when(STRATUM == "PRIB_MTCA" ~ "PRIB",
+  #                                                         STRATUM == "STMATT_MTCA" ~ "STMATT",
+  #                                                         TRUE ~ STRATUM))
+  #   }
+  #
+  #   if(species %in% c("RKC", "HAIR")){
+  #     # STMATT_MTCA corners --> NORTH for these species, not sure how to remove them
+  #     # without removing other accidental corners in older part of ts. Could manually specify
+  #     # but not sure if anyone wants/needs these data.
+  #     stock_stations <- stock_stations %>%
+  #                       dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "PRIB",
+  #                                                                TRUE ~ STRATUM))
+  #
+  #     warning(paste0("Corner stations within the St. Matthew district are considered",
+  #                    " part of the Northern district for this species and have not",
+  #                    " been removed. Please submit an issue at",
+  #                    " github.com/AFSC-Shellfish-Assessment-Program/crabpack/issues",
+  #                    " if this data modification is needed."))
+  #
+  #   }
+  #
+  #   if(species == "TANNER"){
+  #     if(district == "166TO173"){
+  #       stock_stations <- stock_stations %>%
+  #                         dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "166TO173",
+  #                                                                  STRATUM == "STMATT_MTCA_E" ~ "166TO173",
+  #                                                                  TRUE ~ STRATUM))
+  #     } else{
+  #       stock_stations <- stock_stations %>%
+  #                         dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "W166",
+  #                                                                  STRATUM == "STMATT_MTCA" ~ "W166",
+  #                                                                  TRUE ~ STRATUM))
+  #     }
+  #   }
+  #
+  #   if(species %in% c("SNOW", "HYBRID")){
+  #     stock_stations <- stock_stations %>%
+  #                       dplyr::mutate(STRATUM = dplyr::case_when(STRATUM == "PRIB_MTCA" ~ "EBS_SINGLE",
+  #                                                                STRATUM == "STMATT_MTCA" ~ "EBS_SINGLE",
+  #                                                                TRUE ~ STRATUM))
+  #   }
+  # }
 
   ## Calculate CPUE by STATION, YEAR, and other biometrics ---------------------
   cpue <- specimen_dat %>%
@@ -262,8 +264,8 @@ calc_cpue <- function(crab_data = NULL,
           dplyr::filter(HAULJOIN %in% stock_stations$HAULJOIN) %>%
           dplyr::mutate(COUNT = SAMPLING_FACTOR,
                         CPUE = SAMPLING_FACTOR/AREA_SWEPT,
-                        CPUE_MT = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) / AREA_SWEPT / 1000 / 1000,
-                        CPUE_LBS = (SAMPLING_FACTOR * CALCULATED_WEIGHT_1MM) * 0.0022046226218488 / AREA_SWEPT) %>%
+                        CPUE_MT = (SAMPLING_FACTOR * CALCULATED_WEIGHT) / AREA_SWEPT / 1000 / 1000,
+                        CPUE_LBS = (SAMPLING_FACTOR * CALCULATED_WEIGHT) * 0.0022046226218488 / AREA_SWEPT) %>%
           dplyr::group_by(dplyr::across(dplyr::all_of(c('YEAR', 'HT', 'REGION', 'STATION_ID', 'SEX_TEXT', group_cols)))) %>%
           dplyr::summarise(COUNT = sum(COUNT),
                            CPUE = sum(CPUE),

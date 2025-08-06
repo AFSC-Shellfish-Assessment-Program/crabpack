@@ -56,10 +56,10 @@
 #'                      with resampled data (haul type = 17) in years when a Bristol Bay
 #'                      retow took place. Defaults to `TRUE`, please use care when interpreting
 #'                      BBRKC outputs if using `FALSE`.
-#' @param rm_corners Boolean T/F. If `TRUE`, remove corner stations from Pribilof and St. Matthew
-#'                   Districts and calculate CPUE, abundance, and biomass based on a single
-#'                   stratum within the surrounding district. Defaults to `FALSE`, this is to
-#'                   be used for design-based data exercises only.
+# @param rm_corners Boolean T/F. If `TRUE`, remove corner stations from Pribilof and St. Matthew
+#                   Districts and calculate CPUE, abundance, and biomass based on a single
+#                   stratum within the surrounding district. Defaults to `FALSE`, this is to
+#                   be used for design-based data exercises only.
 #'
 #' @eval c("@return", "A data frame with area swept-expanded estimates of stratum-, district-, or
 #'       region-level abundance, biomass (mt), and biomass (lbs) by year.",
@@ -88,9 +88,8 @@ calc_bioabund <- function(crab_data = NULL,
                           clutch_size = NULL,
                           bin_1mm = FALSE,
                           spatial_level = c("stratum", "district", "region")[2],
-                          #output = c("abundance", "biomass_mt", "biomass_lbs")[1],
-                          replace_retow = TRUE,
-                          rm_corners = FALSE){
+                          # rm_corners = FALSE,
+                          replace_retow = TRUE){
 
 
   ## ERROR: must specify just one output if length(output > 1)
@@ -115,6 +114,7 @@ calc_bioabund <- function(crab_data = NULL,
                               clutch_size = clutch_size,
                               bin_1mm = bin_1mm,
                               replace_retow = replace_retow,
+                              # rm_corners = rm_corners,
                               output = c("bioabund"))
 
   station_cpue <- cpue$cpue
