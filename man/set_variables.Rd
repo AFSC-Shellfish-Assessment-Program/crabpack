@@ -28,9 +28,9 @@ set_variables(
 specifying both \code{"male"} and \code{"female"} will provide estimates for
 each of the selected sexes.}
 
-\item{size_min}{Integer. Optional, desired lower range of crab size (inclusive).}
+\item{size_min}{Numeric. Optional, desired lower range of crab size (inclusive).}
 
-\item{size_max}{Integer. Optional, desired upper range of crab size (inclusive).}
+\item{size_max}{Numeric. Optional, desired upper range of crab size (inclusive).}
 
 \item{crab_category}{Character string. One or many of
 \code{c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")}.
