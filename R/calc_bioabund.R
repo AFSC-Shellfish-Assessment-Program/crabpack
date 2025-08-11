@@ -1,7 +1,7 @@
-#' Calculate index of station-, district-, or region-level abundance and biomass
+#' Calculate index of stratum-, district-, or region-level abundance and biomass
 #'
 #' @description This function calculates indices of abundance and biomass (mt and lbs)
-#'              at the station-, district-, or region-level for a given crab species.
+#'              at the stratum-, district-, or region-level for a given crab species.
 #'              Optional arguments also allow these indices to be calculated for subsets of
 #'              crab by biometric categories such as size, sex, maturity, and shell condition.
 #'
@@ -16,8 +16,8 @@
 #'            `"male"` or `"female"` only will provide estimates for the selected sex,
 #'            specifying both `"male"` and `"female"` will provide estimates for
 #'            each of the selected sexes.
-#' @param size_min Integer. Optional, desired lower range of crab size (inclusive).
-#' @param size_max Integer. Optional, desired upper range of crab size (inclusive).
+#' @param size_min Numeric. Optional, desired lower range of crab size (inclusive).
+#' @param size_max Numeric. Optional, desired upper range of crab size (inclusive).
 #' @param crab_category Character string. One or many of
 #'                      `c("mature_male", "large_male", "legal_male", "preferred_male", "immature_male", "small_male", "sublegal_male", "mature_female", "immature_female", "all_categories")`.
 #'                      Optional, specifying this parameter will provide estimates
