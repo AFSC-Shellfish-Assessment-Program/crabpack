@@ -174,7 +174,7 @@ set_variables <- function(crab_data = NULL,
   if(!is.null(size_min)){
     # filter minimum size
     data_crab <- data_crab %>%
-                 dplyr::filter(SIZE_1MM >= size_min)
+                 dplyr::filter(SIZE >= size_min)
 
   }
 
@@ -183,7 +183,7 @@ set_variables <- function(crab_data = NULL,
   if(!is.null(size_max)){
     # filter maximum size
     data_crab <- data_crab %>%
-                 dplyr::filter(SIZE_1MM <= size_max)
+                 dplyr::filter(SIZE <= size_max)
   }
 
 
@@ -302,14 +302,14 @@ set_variables <- function(crab_data = NULL,
     if(is.null(size_max)){
       bin_max <- max(data_crab$SIZE_1MM, na.rm = T)
     } else{
-      bin_max <- size_max
+      bin_max <- floor(size_max)
     }
 
     # set minimum size for 1mm bins to 1mm if no other minimum size is specified
     if(is.null(size_min)){
       bin_min <- 1
     } else{
-      bin_min <- size_min
+      bin_min <- floor(size_min)
     }
 
     # assign range of bin sizes to expand over
