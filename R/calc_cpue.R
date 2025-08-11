@@ -60,6 +60,19 @@ calc_cpue <- function(crab_data = NULL,
   }
 
 
+  ## Issue a warning when not specifying a region.
+  if(missing(x = region)){
+    message(paste0("The default survey region is the Eastern Bering Sea. Please include",
+                   " 'NBS' in the argument `region` if you would like data from the",
+                   " Northern Bering Sea."))
+  }
+
+  # # automatically detect region from crab_data input?
+  # if(is.null(region)){
+  #   region <- unique(crab_data$haul$REGION)
+  # }
+
+
   ## ERROR: check that district(s) specified are correct for given species
   if(TRUE %in% (species %in% c("RKC", "HAIR")) &
      TRUE %in% (!district %in% c("ALL", "BB", "PRIB", "NORTH")) &

@@ -98,6 +98,19 @@ calc_bioabund <- function(crab_data = NULL,
   }
 
 
+  ## Issue a warning when not specifying a region.
+  if(missing(x = region)){
+    message(paste0("The default survey region is the Eastern Bering Sea. Please include",
+                   " 'NBS' in the argument `region` if you would like data from the",
+                   " Northern Bering Sea."))
+  }
+
+  # # automatically detect region from crab_data input?
+  # if(is.null(region)){
+  #   region <- unique(crab_data$haul$REGION)
+  # }
+
+
   # call calc_cpue()
   cpue <- crabpack::calc_cpue(crab_data = crab_data,
                               species = species,
