@@ -208,7 +208,13 @@ calc_bioabund <- function(crab_data = NULL,
                                                        "ABUNDANCE", "ABUNDANCE_CV", "ABUNDANCE_CI",
                                                        "BIOMASS_MT", "BIOMASS_MT_CV", "BIOMASS_MT_CI",
                                                        "BIOMASS_LBS", "BIOMASS_LBS_CV", "BIOMASS_LBS_CI"))) %>%
-                         distinct()
+                         distinct() %>%
+                         dplyr::mutate(STRATUM = dplyr::case_when(DISTRICT == "UNSTRAT" ~ "UNSTRAT",
+                                                                  TRUE ~ STRATUM),
+                                       TOTAL_AREA = dplyr::case_when(STRATUM == "UNSTRAT" & is.na(TOTAL_AREA) ~ 0,
+                                                                     TRUE ~ TOTAL_AREA),
+                                       N_STATIONS = dplyr::case_when(STRATUM == "UNSTRAT" & is.na(N_STATIONS) ~ 0,
+                                                                     TRUE ~ N_STATIONS))
   }
 
   if(spatial_level == "stratum"){
@@ -220,7 +226,8 @@ calc_bioabund <- function(crab_data = NULL,
                                                  'ABUNDANCE', 'ABUNDANCE_CV', 'ABUNDANCE_CI',
                                                  'BIOMASS_MT', 'BIOMASS_MT_CV', 'BIOMASS_MT_CI',
                                                  'BIOMASS_LBS', 'BIOMASS_LBS_CV', 'BIOMASS_LBS_CI'))) %>%
-                   replace(is.na(.), 0)
+                   replace(is.na(.), 0) %>%
+                   dplyr::arrange(SPECIES, YEAR, REGION, DISTRICT, STRATUM)
 
     return(stratum_out)
   }
